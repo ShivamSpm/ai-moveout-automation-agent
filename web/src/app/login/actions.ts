@@ -9,7 +9,10 @@ function safeNext(next: FormDataEntryValue | null): string {
   if (typeof next !== "string" || !next.startsWith("/") || next.includes("\\")) return "/muse";
   try {
     const url = new URL(next, "http://local.invalid");
-    return url.origin === "http://local.invalid" ? `${url.pathname}${url.search}${url.hash}` : "/muse";
+    if (url.origin !== "http://local.invalid") return "/muse";
+    // Check the normalized result too: "/..//evil.example" normalizes to "//evil.example".
+    const out = `${url.pathname}${url.search}${url.hash}`;
+    return out.startsWith("/") && !out.startsWith("//") && !out.includes("\\") ? out : "/muse";
   } catch {
     return "/muse";
   }
