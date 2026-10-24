@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vacate": {
+      "type": "http",
+      "url": "${VACATE_MCP_URL:-https://ai-moveout-automation-agent-tau.vercel.app/api/mcp}"
+    }
+  }
+}

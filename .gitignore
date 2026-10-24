@@ -1,6 +1,7 @@
 # Credentials and machine-specific agent configuration
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 .mcp.json
@@ -36,3 +37,8 @@ __pycache__/
 .vercel
 .env*
 !.env.example
+
+# Publishable OAuth-only plugin config (contains no credentials)
+!plugins/moving-assistant/.mcp.json
+
+web/generated/

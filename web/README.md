@@ -62,6 +62,63 @@ Copy `.env.example` to `.env.local` and set `OPENROUTER_API_KEY` (and optionally
 
 `/api/chat` has no auth yet, so anyone with the URL can spend the key's credit. Put a credit limit on the OpenRouter key until Supabase Auth is in.
 
+## Cleaning simulator (backend)
+
+A simulated cleaning marketplace. **Every company is fictional and every result is simulated**: no real cleaner is contacted, nothing is reserved and no payment is taken. Responses carry `simulated: true`, quotes are labeled `estimate`, and confirmations use a `SIM-` code. No page calls these routes yet.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /api/cleaning/quotes` | `CleaningRequest` (`src/contracts/cleaning.ts`) | `{ catalogSource, matches, excluded: [{ provider, reasons[] }], warnings, reasons }` |
+| `POST /api/cleaning/bookings` | `{ quote, slotId }` (a quote issued to you) | `201 { proposal }` with `status: "pending_review"`, `payloadHash`, `idempotencyKey` |
+| `POST /api/cleaning/bookings/:id/approve` | `{ payloadHash, idempotencyKey }` from the user's approve action | `{ result }`: `simulated_confirmed` or `rejected` with a reason |
+
+```bash
+curl -s localhost:3000/api/cleaning/quotes -H 'content-type: application/json' -d '{
+  "requesterRole": "renter",
+  "serviceArea": { "kind": "zip", "zip": "94110" },
+  "bedrooms": 1, "bathrooms": 1,
+  "leaseRequirements": { "deepClean": true, "carpetCleaning": true, "clauseRefs": ["Lease 14.2"] },
+  "itemsRemaining": { "count": 0, "hasBulky": false },
+  "window": { "earliestStart": "2026-11-09T15:00:00Z", "latestFinish": "2026-11-14T02:00:00Z" },
+  "maxBudgetUsd": 350
+}'
+```
+
+Abridged response (clock 2026-11-02T17:00Z):
+
+```json
+{
+  "simulated": true,
+  "catalogSource": "fixture",
+  "matches": [
+    {
+      "providerId": "bluefinch-cleaning-collective",
+      "providerName": "Bluefinch Cleaning Collective (fictional)",
+      "simulated": true,
+      "source": { "kind": "simulated", "label": "Simulated cleaning marketplace: fictional companies, no real provider was contacted" },
+      "priceUsd": { "kind": "estimate", "totalUsd": 249, "lineItems": [
+        { "code": "base", "amountUsd": 146 }, { "code": "deep_clean", "amountUsd": 65 }, { "code": "carpet_cleaning", "amountUsd": 38 } ] },
+      "durationHours": 3,
+      "slots": [{ "slotId": "bluefinch-cleaning-collective:2026-11-09T17:00:00.000Z", "start": "2026-11-09T17:00:00.000Z", "end": "2026-11-09T20:00:00.000Z" }],
+      "quoteValidUntil": "2026-11-04T17:00:00.000Z"
+    }
+  ],
+  "excluded": [
+    { "provider": { "id": "otterbay-shine" }, "reasons": [{ "code": "carpet_not_offered", "detail": "does not offer carpet cleaning, which the lease requires" }] },
+    { "provider": { "id": "wrenmoor-move-out-crew" }, "reasons": [{ "code": "insufficient_notice", "detail": "needs 336 hours' notice, which ends after the window closes" }] }
+  ]
+}
+```
+
+How it works:
+
+- Companies come from `public.cleaning_providers` (migration in `../supabase/migrations/`, authored but not applied) through PostgREST with the publishable key, or from the identical fixture in `src/server/integrations/cleaning-catalog-fixture.ts` when `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are unset or `CLEANING_CATALOG_SOURCE=fixture`. `catalogSource` always says which one answered. If Supabase is configured but the table does not exist yet (PostgREST 404 / `PGRST205`), the fixture is used with `catalogSource: "fixture"` and a `catalogWarnings` entry; auth, server and network errors return 503. An invalid row is skipped and named in `catalogWarnings`.
+- Filters: ZIP in `service_zips`, carpet / inside-appliance / window / wall capability from the lease flags, pets, notice period, free slots inside the window and after item removal (SERV-06), and budget. Each excluded company lists every rule it failed.
+- Prices and slots are deterministic for the same request and clock (seeded per company and day). Times are San Francisco local hours, returned in UTC.
+- Approval binds the exact quote, slot and price through `payloadHash`. Repeating it with the same or a new key returns the first result, and a slot can be claimed only once.
+- State (issued quotes, proposals, slot claims, approvals) is in server memory: it resets on restart and is not shared between serverless instances. A Supabase repository replaces it later.
+- There is no auth yet: every caller is one demo renter (`resolveOwnerId` in `src/app/api/cleaning/_lib/http.ts`).
+
 ## Not wired up yet
 
 Nothing here talks to Supabase, Gmail or Bland yet, and no page calls `/api/chat`. The planned contract with the agent:

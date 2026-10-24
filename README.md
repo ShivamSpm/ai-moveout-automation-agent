@@ -25,6 +25,18 @@ Bland (voice), Vercel, Muse (vision), Supabase, OpenRouter (vision and negotiati
 |---|---|
 | `web/` | Next.js website: landing page, login, dashboard, items for sale |
 | `docs/user-workflow.md` | The user's step-by-step workflow, in order |
+| `plugins/moving-assistant/` | Claude Code plugin (MCP connector, skills, commands) |
+| `.claude-plugin/marketplace.json` | Plugin marketplace `vacate` |
+
+Use Vacate from Claude Code:
+
+```text
+/plugin marketplace add ShivamSpm/ai-moveout-automation-agent
+/plugin install moving-assistant@vacate
+```
+
+Claude.ai and Desktop: add a custom connector with `https://ai-moveout-automation-agent-tau.vercel.app/api/mcp`.
+See [docs/CONNECTORS.md](docs/CONNECTORS.md).
 
 ## Requirements and development handoff
 

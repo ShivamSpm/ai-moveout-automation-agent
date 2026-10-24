@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { authEnabled, supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 
 // Pages that need a signed-in user. Landing, login and item pages (buyers) stay public.
-const PROTECTED = ["/dashboard", "/start", "/muse"];
+const PROTECTED = ["/dashboard", "/muse"];
 
 export async function proxy(request: NextRequest) {
   if (!authEnabled) return NextResponse.next({ request });

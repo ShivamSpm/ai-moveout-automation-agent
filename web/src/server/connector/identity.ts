@@ -2,7 +2,7 @@ import "server-only";
 
 import { requireBearer } from "../auth";
 import { resolveConnector } from "../muse/bridge";
-import { env } from "../env";
+import { appLink } from "../links";
 import type { Caller } from "./mcp";
 
 // vac_ tokens are Muse executor credentials; anything else must be a valid
@@ -19,7 +19,7 @@ export function unauthorized(message: string) {
     status: 401,
     headers: {
       "content-type": "application/json",
-      "www-authenticate": `Bearer resource_metadata="${env.appUrl()}/.well-known/oauth-protected-resource"`,
+      "www-authenticate": `Bearer resource_metadata="${appLink("/.well-known/oauth-protected-resource")}"`,
     },
   });
 }
