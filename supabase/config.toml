@@ -422,10 +422,53 @@ enabled = true
 project_id = "sejfkcrmcbsiidftraek"
 
 [remotes.production.auth]
-site_url = "https://ai-moveout-automation-agent-tau.vercel.app"
+# Orchestrator pushes this only after the custom domain serves valid HTTPS.
+site_url = "https://vacate.dev"
 additional_redirect_urls = [
-  "https://ai-moveout-automation-agent-tau.vercel.app/**",
-  "http://localhost:3100/**",
+  "https://vacate.dev/auth/callback",
+  "https://vacate.dev/auth/callback?next=%2Fdashboard",
+  "https://vacate.dev/auth/callback?next=%2Fmuse",
+  "https://vacate.dev/auth/callback?next=%2Fstart%3Fresume%3D1",
+  "https://vacate.dev/auth/callback?next=%2Fplan",
+  "https://vacate.dev/auth/callback?next=%2Faccount",
+  "https://vacate.dev/auth/callback?next=%2Faccount%2Fdocuments",
+  "https://vacate.dev/auth/callback?next=%2Fitems",
+  "https://vacate.dev/auth/callback?next=%2Fsell",
+  "https://vacate.dev/auth/callback?next=%2Fcalls",
+  "https://vacate.dev/auth/callback?next=%2Fmove",
+  "https://www.vacate.dev/auth/callback",
+  "https://www.vacate.dev/auth/callback?next=%2Fdashboard",
+  "https://www.vacate.dev/auth/callback?next=%2Fmuse",
+  "https://www.vacate.dev/auth/callback?next=%2Fstart%3Fresume%3D1",
+  "https://www.vacate.dev/auth/callback?next=%2Fplan",
+  "https://www.vacate.dev/auth/callback?next=%2Faccount",
+  "https://www.vacate.dev/auth/callback?next=%2Faccount%2Fdocuments",
+  "https://www.vacate.dev/auth/callback?next=%2Fitems",
+  "https://www.vacate.dev/auth/callback?next=%2Fsell",
+  "https://www.vacate.dev/auth/callback?next=%2Fcalls",
+  "https://www.vacate.dev/auth/callback?next=%2Fmove",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fdashboard",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fmuse",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fstart%3Fresume%3D1",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fplan",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Faccount",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Faccount%2Fdocuments",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fitems",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fsell",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fcalls",
+  "https://ai-moveout-automation-agent-tau.vercel.app/auth/callback?next=%2Fmove",
+  "http://localhost:3100/auth/callback",
+  "http://localhost:3100/auth/callback?next=%2Fdashboard",
+  "http://localhost:3100/auth/callback?next=%2Fmuse",
+  "http://localhost:3100/auth/callback?next=%2Fstart%3Fresume%3D1",
+  "http://localhost:3100/auth/callback?next=%2Fplan",
+  "http://localhost:3100/auth/callback?next=%2Faccount",
+  "http://localhost:3100/auth/callback?next=%2Faccount%2Fdocuments",
+  "http://localhost:3100/auth/callback?next=%2Fitems",
+  "http://localhost:3100/auth/callback?next=%2Fsell",
+  "http://localhost:3100/auth/callback?next=%2Fcalls",
+  "http://localhost:3100/auth/callback?next=%2Fmove",
 ]
 # Keep the hosted project's stricter defaults instead of the local-dev values above.
 

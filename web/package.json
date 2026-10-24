@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "domain:check": "node scripts/domain-check.mjs",
     "muse:check": "node scripts/muse-check.mjs",
     "oauth:check": "node scripts/oauth-mcp-check.mjs",
     "prebuild": "node scripts/build-progress.mjs",
