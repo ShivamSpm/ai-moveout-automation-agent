@@ -13,8 +13,6 @@ export const env = {
   supabasePublishableKey: () => required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
   supabaseSecretKey: () => required("SUPABASE_SECRET_KEY"),
   appUrl: () => read("APP_URL") ?? "http://localhost:3000",
-  openRouterKey: () => read("OPENROUTER_API_KEY"),
-  openRouterModel: () => read("OPENROUTER_MODEL") ?? "anthropic/claude-sonnet-5.5",
   googleClientId: () => read("GOOGLE_CLIENT_ID"),
   googleClientSecret: () => read("GOOGLE_CLIENT_SECRET"),
 };
@@ -27,7 +25,6 @@ function required(name: string): string {
 
 export function providerStatus() {
   return {
-    model: env.openRouterKey() ? "configured" : "not_configured",
     google: env.googleClientId() && env.googleClientSecret() ? "configured" : "not_configured",
   } as const;
 }
