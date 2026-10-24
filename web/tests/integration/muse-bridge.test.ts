@@ -169,6 +169,29 @@ describe("Muse bridge", () => {
   });
 });
 
+describe("manual Muse relay", () => {
+  it("records a renter-relayed Muse result once, for the approved version only", async () => {
+    const { action, listing } = await approvedListing(a, "Floor lamp");
+    const url = "https://www.facebook.com/marketplace/item/1000000000000777/";
+    await expect(
+      market.recordRelayedResult(a, { actionId: action.id, payloadHash: "e".repeat(64), status: "succeeded", externalUrl: url }),
+    ).rejects.toThrow();
+    await expect(
+      market.recordRelayedResult(b, { actionId: action.id, payloadHash: action.payload_hash, status: "succeeded", externalUrl: url }),
+    ).rejects.toThrow();
+    await expect(
+      market.recordRelayedResult(a, { actionId: action.id, payloadHash: action.payload_hash, status: "succeeded", externalUrl: "https://example.com/x" }),
+    ).rejects.toThrow(/Marketplace URL/);
+    const ok = await market.recordRelayedResult(a, { actionId: action.id, payloadHash: action.payload_hash, status: "succeeded", externalUrl: url });
+    expect(ok.status).toBe("succeeded");
+    await expect(
+      market.recordRelayedResult(a, { actionId: action.id, payloadHash: action.payload_hash, status: "succeeded", externalUrl: url }),
+    ).rejects.toThrow(/cannot take a new result/);
+    const { data } = await a.db.from("listings").select("status, external_url, mode").eq("id", listing.id).single();
+    expect(data).toMatchObject({ status: "published", external_url: url, mode: "delegated" });
+  });
+});
+
 describe("A2A 1.0 wire", () => {
   const send = (ownerId: string, data: unknown, taskId?: string) =>
     a2aTransport().handle(

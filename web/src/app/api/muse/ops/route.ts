@@ -15,6 +15,7 @@ const Op = z.discriminatedUnion("op", [
   z.object({ op: z.literal("cancel"), actionId: z.uuid() }),
   market.DraftReplyInput.extend({ op: z.literal("draft_reply") }),
   market.ProposePickupInput.extend({ op: z.literal("propose_pickup") }),
+  market.RelayResultInput.extend({ op: z.literal("record_relay") }),
   z.object({ op: z.literal("create_token"), label: z.string().max(60).optional() }),
   z.object({ op: z.literal("revoke_token"), tokenId: z.uuid() }),
 ]);
@@ -42,6 +43,8 @@ export async function POST(request: Request) {
         return Response.json(await market.draftBuyerReply(ctx, input));
       case "propose_pickup":
         return Response.json(await market.proposePickup(ctx, input));
+      case "record_relay":
+        return Response.json(await market.recordRelayedResult(ctx, input));
       case "create_token":
         return Response.json(await createConnectorToken(ctx.db, input.label));
       case "revoke_token": {

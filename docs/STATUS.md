@@ -27,6 +27,16 @@ Verified:
   Official A2A client discovered the card and listed/claimed/reported over HTTP; the
   report used a **simulated** Marketplace URL. Nothing was posted to Facebook.
 
+Added 12:55 PM:
+- Merged main (PR #4 `/api/chat`) and the teammate Google-login commit from `website`
+  (not yet on main): `/login` offers Google and email; site-wide proxy protects `/muse`;
+  one safe-redirect helper for both auth paths. 31 tests, lint, typecheck, build pass.
+- **Manual Muse relay** for local use: an approved listing shows the exact text to give
+  Muse; the renter records the Marketplace URL Muse returns (same claim/hash checks,
+  `external_ref = relayed-by-renter`). Needed because cloud Muse cannot reach localhost.
+- The deployed app (ai-moveout-automation-agent.vercel.app) serves main without the
+  bridge; this Mac's Vercel login (CTFBio team) has no access to that project.
+
 Not yet verified (blockers for the live demo):
 - `muse` host not installed / not signed in (`npm run muse:check` reports it).
 - Consumer Muse custom connector: whether it accepts MCP, A2A or an API key is

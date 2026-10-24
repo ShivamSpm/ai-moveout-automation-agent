@@ -289,3 +289,36 @@ export async function marketplaceState(ctx: ToolContext) {
     connectorTokens: tokens.data ?? [],
   };
 }
+
+export const RelayResultInput = z.object({
+  actionId: z.uuid(),
+  payloadHash: z.string().regex(/^[0-9a-f]{64}$/),
+  status: z.enum(["succeeded", "failed", "unknown"]),
+  externalUrl: z.url().max(500).optional(),
+  note: z.string().max(1000).optional(),
+});
+
+// Manual relay: the renter handed the approved package to their Muse
+// themselves (no network path between Muse and this app) and reports what Muse
+// did. Same exactly-once claim and payload-hash checks as the connector path;
+// the owner is the signed-in renter, never a supplied id.
+export async function recordRelayedResult(ctx: ToolContext, input: z.infer<typeof RelayResultInput>) {
+  const { claimTask, reportResult } = await import("./muse/bridge");
+  const owner = { ownerId: ctx.user.id };
+  const { data: action } = await ctx.db.from("actions").select("status").eq("id", input.actionId).maybeSingle();
+  if (!action) fail(null, 404);
+  if (action.status === "approved") {
+    const claimed = await claimTask(owner, { taskId: input.actionId, payloadHash: input.payloadHash });
+    if (!claimed.claimed) throw new MarketplaceError(claimed.reason, 409);
+  } else if (action.status !== "executing" && action.status !== "unknown") {
+    throw new MarketplaceError(`This action is ${action.status} and cannot take a new result`, 409);
+  }
+  return reportResult(owner, {
+    taskId: input.actionId,
+    payloadHash: input.payloadHash,
+    status: input.status,
+    externalUrl: input.externalUrl,
+    externalRef: "relayed-by-renter",
+    note: input.note,
+  });
+}

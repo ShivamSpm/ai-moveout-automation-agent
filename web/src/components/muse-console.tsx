@@ -186,6 +186,9 @@ export function MuseConsole({
                         </a>
                       )}
                       {action.error && <p className="mt-2 text-sm text-stamp">{action.error}</p>}
+                      {(action.status === "approved" || action.status === "executing" || action.status === "unknown") && (
+                        <RelayPanel action={action} listing={listing} busy={busy} op={op} />
+                      )}
                       {action.status === "pending_review" && (
                         <div className="mt-3 flex gap-2">
                           <button
@@ -339,5 +342,80 @@ function Conversations({
         })}
       </ul>
     </section>
+  );
+}
+
+// Hand-off when Muse cannot reach this app (local development): copy the exact
+// approved listing into Muse, let Muse post it, then record what Muse did.
+function RelayPanel({
+  action,
+  listing,
+  busy,
+  op,
+}: {
+  action: Row<"actions">;
+  listing: Row<"listings">;
+  busy: boolean;
+  op: (body: Record<string, unknown>) => Promise<unknown>;
+}) {
+  const [copied, setCopied] = useState(false);
+  const prompt = [
+    "Please post this on Facebook Marketplace from my account.",
+    "Use exactly this title, price and description. Don't add my address, phone number or any other details, and ask me before you publish.",
+    "",
+    `Title: ${listing.title}`,
+    `Price: ${listing.price_cents === 0 ? "Free" : `$${(listing.price_cents / 100).toFixed(0)}`}`,
+    listing.area_label ? `Location: ${listing.area_label}` : null,
+    "Description:",
+    listing.body,
+    "",
+    "I'll attach the photos. When it's live, send me the listing link.",
+  ]
+    .filter((l) => l !== null)
+    .join("\n");
+
+  return (
+    <div className="mt-3 rounded-xl bg-card p-3 ring-1 ring-line">
+      <p className="text-sm font-semibold">Send it to your Muse</p>
+      <p className="mt-1 text-xs text-muted">
+        Manual relay: Muse can&rsquo;t reach this local app, so paste this into the Muse app yourself, add photos, and
+        approve Muse&rsquo;s publish prompt. Then record the link Muse gives you.
+      </p>
+      <textarea readOnly value={prompt} rows={8} className={`${input} mt-2 font-mono text-xs`} />
+      <button
+        type="button"
+        onClick={() => navigator.clipboard.writeText(prompt).then(() => setCopied(true))}
+        className={`${ghost} mt-2`}
+      >
+        {copied ? "Copied" : "Copy for Muse"}
+      </button>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const f = new FormData(e.currentTarget);
+          void op({
+            op: "record_relay",
+            actionId: action.id,
+            payloadHash: action.payload_hash,
+            status: "succeeded",
+            externalUrl: String(f.get("url") ?? "").trim(),
+          });
+        }}
+        className="mt-3 flex flex-wrap gap-2"
+      >
+        <input name="url" required type="url" placeholder="https://www.facebook.com/marketplace/item/…" className={`${input} min-w-0 flex-1`} />
+        <button disabled={busy} className={btn}>Muse posted it</button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            op({ op: "record_relay", actionId: action.id, payloadHash: action.payload_hash, status: "failed", note: "Muse did not post it" })
+          }
+          className={ghost}
+        >
+          Muse couldn&rsquo;t post it
+        </button>
+      </form>
+    </div>
   );
 }
