@@ -3,8 +3,17 @@
 import { redirect } from "next/navigation";
 import { userClient } from "@/server/supabase";
 
-const safeNext = (next: FormDataEntryValue | null) =>
-  typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/muse";
+// Same-origin paths only. Parsing (rather than prefix checks) also rejects
+// "/\\evil.example", which browsers treat as a protocol-relative URL.
+function safeNext(next: FormDataEntryValue | null): string {
+  if (typeof next !== "string" || !next.startsWith("/") || next.includes("\\")) return "/muse";
+  try {
+    const url = new URL(next, "http://local.invalid");
+    return url.origin === "http://local.invalid" ? `${url.pathname}${url.search}${url.hash}` : "/muse";
+  } catch {
+    return "/muse";
+  }
+}
 
 export async function signIn(form: FormData) {
   const db = await userClient();
