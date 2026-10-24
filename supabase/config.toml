@@ -413,3 +413,34 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Hosted project for the hackathon (org ai-moveout-automation-agent). Applied with
+# `supabase link --project-ref sejfkcrmcbsiidftraek && supabase config push`.
+# Only keys declared here differ from the local settings above.
+[remotes.production]
+project_id = "sejfkcrmcbsiidftraek"
+
+[remotes.production.auth]
+site_url = "https://ai-moveout-automation-agent-tau.vercel.app"
+additional_redirect_urls = [
+  "https://ai-moveout-automation-agent-tau.vercel.app/**",
+  "https://ai-moveout-automation-agent-*-ai-moveout-automation-agent.vercel.app/**",
+  "http://localhost:3100/**",
+]
+# Keep the hosted project's stricter defaults instead of the local-dev values above.
+
+[remotes.production.auth.email]
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8
+
+[remotes.production.auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[remotes.production.db.pooler]
+default_pool_size = 15
+max_client_conn = 200
+
+[remotes.production.storage.vector]
+enabled = false
