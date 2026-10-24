@@ -16,4 +16,12 @@ describe("saved move summary", () => {
     expect(context).toContain('"page":2'); expect(context).toContain("Return keys.");
     expect(context).not.toContain("PRIVATE ADDRESS"); expect(context).not.toContain("private@example.test");
   });
+  it("bounds large contexts without emitting truncated JSON", () => {
+    const large = { ...view, tasks: Array.from({ length: 30 }, (_, i) => ({ id: String(i), title: "t".repeat(1000), source: "s".repeat(1000), status: "todo", due_date: null, page: 2 })), findings: Array.from({ length: 20 }, () => ({ ...view.findings[0], quote: "q".repeat(4000) })) } as unknown as MoveView;
+    const context = renterContext(large);
+    expect(context.length).toBeLessThanOrEqual(18000);
+    expect(() => JSON.parse(context)).not.toThrow();
+    expect(JSON.parse(context).findings[0].page).toBe(2);
+  });
+
 });
