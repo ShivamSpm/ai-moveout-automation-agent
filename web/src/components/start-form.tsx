@@ -2,22 +2,58 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { saveStart } from "@/app/start/actions";
+import { quickStart, saveStart } from "@/app/start/actions";
+import { maskPhone } from "@/lib/phone";
 import { startDraftSchema, type StartDraft, type StartState } from "@/lib/start-schema";
 import { uploadLease } from "@/lib/upload-lease";
 import Link from "next/link";
-import { OAuthButton } from "./google-sign-in";
 
 const draftKey = "vacate.start.v1";
 const emptyDraft: StartDraft = { email: "", address: "", moveOutDate: "", deposit: "", landlordName: "", landlordEmail: "" };
 const steps = ["Your account is ready", "Your move details are saved", "Opening your dashboard…"];
 const field = "mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 text-ink placeholder:text-muted/70 focus:border-edge focus:outline-none focus:ring-4 focus:ring-tape/50";
 
-export function StartForm({ signedInEmail, initial, providers, resume }: {
-  signedInEmail?: string; initial?: StartDraft; providers: { google: boolean; azure: boolean }; resume: boolean;
+export function StartForm(props: {
+  signedIn: boolean; signedInEmail?: string; initial?: StartDraft; providers: { google: boolean; azure: boolean }; resume: boolean;
+}) {
+  // No account needed: a name starts a private guest session, then the full form appears.
+  return props.signedIn ? <MoveForm {...props} /> : <QuickStart />;
+}
+
+function QuickStart() {
+  const router = useRouter();
+  const [state, action, pending] = useActionState<StartState, FormData>(quickStart, { status: "idle" });
+  useEffect(() => { if (state.status === "started") router.refresh(); }, [state, router]);
+  return (
+    <div className="box-label rise rounded-3xl p-6 sm:p-8" style={{ animationDelay: "120ms" }}>
+      <form action={action} className="grid gap-5">
+        <h2 className="font-display text-3xl">Let&rsquo;s start with your name</h2>
+        <p className="text-sm text-muted">No account or password needed. Your move stays private to this browser.</p>
+        <label><span className="text-sm font-medium">Your full name</span>
+          <input name="renterName" autoComplete="name" required maxLength={100} placeholder="Ana Rivera" autoFocus
+            className={field} aria-invalid={Boolean(state.fieldErrors?.renterName?.length)} aria-describedby="renterName-error" />
+          <span id="renterName-error" className="mt-1 block text-sm text-stamp">{state.fieldErrors?.renterName?.join(" ")}</span>
+        </label>
+        {state.message && <p role="alert" className="text-sm text-stamp">{state.message}</p>}
+        <button disabled={pending || state.status === "started"} type="submit" className="tape rounded-xl px-6 py-4 font-semibold transition hover:brightness-110 disabled:opacity-60">
+          {pending || state.status === "started" ? "Starting your move…" : "Start my move-out"}
+        </button>
+        <p className="text-center text-sm text-muted">Already have an account? <Link href="/login?next=/start" className="underline">Log in</Link></p>
+      </form>
+    </div>
+  );
+}
+
+function MoveForm({ signedInEmail, initial, resume }: {
+  signedIn: boolean; signedInEmail?: string; initial?: StartDraft; providers: { google: boolean; azure: boolean }; resume: boolean;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<StartDraft>(initial ?? emptyDraft);
+  const leaseRef = useRef<File | null>(null);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [step, setStep] = useState<number | null>(null);
+  const [storageError, setStorageError] = useState(false);
   const [state, action, pending] = useActionState<StartState, FormData>(async (previous, form) => {
     const lease = leaseRef.current;
     const result = await saveStart(previous, form);
@@ -25,27 +61,13 @@ export function StartForm({ signedInEmail, initial, providers, resume }: {
       try { setUploadMessage("Uploading and reading your lease…"); const read = await uploadLease(lease); setUploadMessage(read.message); }
       catch { setUploadMessage(""); return { status: "error", message: "Your move details were saved, but lease upload or reading did not finish. Retry here or open Documents to check the saved file and re-read it." }; }
     }
-    if (result.status === "confirm_email") storeDraft();
-    if (result.status === "existing_account") setSignIn(true);
-    if (passwordRef.current) passwordRef.current.value = "";
     if (result.status === "success") {
       try { sessionStorage.removeItem(draftKey); } catch { /* Storage may be unavailable. */ }
       setStep(0);
     }
     return result;
   }, { status: "idle" });
-  const [signIn, setSignIn] = useState(false);
-  const leaseRef = useRef<File | null>(null);
-  const [uploadMessage, setUploadMessage] = useState("");
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [step, setStep] = useState<number | null>(null);
-  const [storageError, setStorageError] = useState(false);
-  const passwordRef = useRef<HTMLInputElement>(null);
 
-  function storeDraft() {
-    try { sessionStorage.setItem(draftKey, JSON.stringify(startDraftSchema.parse(values))); }
-    catch { setStorageError(true); }
-  }
 
   useEffect(() => {
     if (!resume || !signedInEmail) return;
@@ -90,27 +112,11 @@ export function StartForm({ signedInEmail, initial, providers, resume }: {
 
   return (
     <div className="box-label rise rounded-3xl p-6 sm:p-8" style={{ animationDelay: "120ms" }}>
-      {signedInEmail && <div className="mb-5 flex flex-wrap gap-2"><span>Signed in as {signedInEmail}</span>
+      {<div className="mb-5 flex flex-wrap gap-2"><span>{signedInEmail ? `Signed in as ${signedInEmail}` : "You're using a guest session on this browser."}</span>
         <form action="/auth/signout" method="post"><button className="underline">Sign out</button></form>
       </div>}
       <form action={(form) => { form.delete("lease"); action(form); }} className="grid gap-5">
         <fieldset disabled={pending} className="contents">
-          {!signedInEmail && <section className="grid gap-4" aria-label="You">
-            <h2 className="font-display text-2xl">You</h2>
-            {(providers.google || providers.azure) && <>
-              {providers.google && <OAuthButton provider="google" nextPath="/start?resume=1" beforeRedirect={storeDraft} />}
-              {providers.azure && <OAuthButton provider="azure" nextPath="/start?resume=1" beforeRedirect={storeDraft} />}
-              <p className="text-center text-sm text-muted">or use your email</p>
-            </>}
-            <input type="hidden" name="intent" value={signIn ? "signin" : "signup"} />
-            <label><span className="text-sm font-medium">Your email</span>
-              <input {...input("email")} type="email" autoComplete="email" required className={field} />{errors("email")}
-            </label>
-            <label><span className="text-sm font-medium">{signIn ? "Your password" : "Create a password"}</span>
-              <input ref={passwordRef} name="password" type="password" minLength={8} autoComplete={signIn ? "current-password" : "new-password"} required className={field} aria-invalid={Boolean(state.fieldErrors?.password?.length)} aria-describedby="password-error" />{errors("password")}
-            </label>
-            <button type="button" className="text-left text-sm underline" onClick={() => setSignIn(!signIn)}>{signIn ? "Create an account instead" : "Sign in instead"}</button>
-          </section>}
           {resume && signedInEmail && <p role="status">Re-attach your lease PDF</p>}
           {state.status === "confirm_email" && <p role="status">Check {state.email} to confirm your account, then come back here; {storageError ? "your browser could not save your details. Keep this tab open." : "your details are saved in this browser."}</p>}
           {storageError && <p role="alert">Browser storage is unavailable. You may need to re-enter your details after signing in.</p>}
@@ -134,7 +140,7 @@ export function StartForm({ signedInEmail, initial, providers, resume }: {
             <label><span className="text-sm font-medium">Their email</span><input {...input("landlordEmail")} required type="email" placeholder="landlord@example.test" className={field} />{errors("landlordEmail")}</label>
           </div>
           <label><span className="text-sm font-medium">Property management company (optional)</span><input {...input("propertyManagementCompany")} maxLength={160} className={field} />{errors("propertyManagementCompany")}</label>
-          <label><span className="text-sm font-medium">Property manager phone (optional; needed for calls)</span><input {...input("landlordPhone")} type="tel" maxLength={20} className={field} />{errors("landlordPhone")}</label>
+          <label><span className="text-sm font-medium">Property manager phone (optional; needed for calls)</span><input {...input("landlordPhone")} onChange={(e) => setValues((old) => ({ ...old, landlordPhone: maskPhone(e.target.value) }))} type="tel" inputMode="tel" autoComplete="off" maxLength={14} placeholder="(415) 555-0134" className={field} />{errors("landlordPhone")}</label>
           <fieldset className="grid gap-5 sm:grid-cols-3"><legend className="mb-2 text-sm font-medium">Apartment size (optional, for service quotes)</legend>
             {([['bedrooms', 'Bedrooms (0 for studio)', '1'], ['bathrooms', 'Bathrooms', '0.5'], ['sqft', 'Square feet', '1']] as const).map(([name, label, step]) => <label key={name}><span className="text-sm">{label}</span><input {...input(name)} type="number" step={step} min={name === 'bedrooms' ? 0 : name === 'bathrooms' ? 0.5 : 100} className={field} />{errors(name)}</label>)}
           </fieldset>
@@ -148,7 +154,7 @@ export function StartForm({ signedInEmail, initial, providers, resume }: {
           <p className="text-sm text-muted">Your original PDF uploads after your move is saved. We extract a checklist with page references for you to review. PDF, up to 20 MB.</p>
         </fieldset>
         <button disabled={pending} type="submit" className="tape mt-2 rounded-xl px-6 py-4 font-semibold transition hover:brightness-110 disabled:opacity-60">
-          {pending ? uploadMessage || "Saving your move…" : signIn && !signedInEmail ? "Sign in and save move" : initial ? "Save move details" : "Start my move-out"}
+          {pending ? uploadMessage || "Saving your move…" : initial ? "Save move details" : "Start my move-out"}
         </button>
         {state.status === "error" && <Link className="underline" href="/account/documents">Check your documents</Link>}
         <p className="text-center text-xs text-muted">You&rsquo;ll review the first email to your landlord before it goes out.</p>

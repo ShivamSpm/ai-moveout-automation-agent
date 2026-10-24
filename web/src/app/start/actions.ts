@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { fullAddress } from "@/lib/move-fields";
 import { z } from "zod";
-import { startSchema, type StartState } from "@/lib/start-schema";
+import { quickStartSchema, startSchema, type StartState } from "@/lib/start-schema";
 import { safeNextPath } from "@/lib/safe-next";
 import { requireUser } from "@/server/auth";
 import { env } from "@/server/env";
@@ -46,5 +46,35 @@ export async function saveStart(_previous: StartState, form: FormData): Promise<
     return { status: "success" };
   } catch {
     return { status: "error", message: "Your move could not be saved. Please try again; if your account was created, sign in instead." };
+  }
+}
+
+// Start with just a name: a Supabase anonymous (guest) session owns the move,
+// so RLS keeps it private. The rest of the details are filled in next.
+export async function quickStart(_previous: StartState, form: FormData): Promise<StartState> {
+  const parsed = quickStartSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return { status: "error", fieldErrors: z.flattenError(parsed.error).fieldErrors };
+  const { renterName } = parsed.data;
+  try {
+    const db = await userClient();
+    const { data: identity } = await db.auth.getUser();
+    if (!identity.user) {
+      const { error } = await db.auth.signInAnonymously({ options: { data: { full_name: renterName } } });
+      if (error) {
+        console.error(error);
+        return {
+          status: "error",
+          message: /anonymous/i.test(error.message)
+            ? "Starting without an account isn't turned on yet. Log in instead."
+            : "We couldn't start your move. Please try again.",
+        };
+      }
+    }
+    await updateMove(await requireUser(), { renterName });
+    revalidatePath("/start"); revalidatePath("/move"); revalidatePath("/dashboard");
+    return { status: "started" };
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "We couldn't start your move. Please try again." };
   }
 }

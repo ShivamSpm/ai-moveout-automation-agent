@@ -1,4 +1,5 @@
 import { addressFields } from "@/lib/move-fields";
+import { maskPhone } from "@/lib/phone";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -18,9 +19,9 @@ async function Intake({ searchParams }: PageProps<"/start">) {
   if (ctx) {
     const { data: move, error } = await ctx.db.from("moves").select("*").eq("owner_id", ctx.user.id).order("created_at").limit(1).maybeSingle();
     if (error) throw error;
-    if (move) initial = { email: ctx.user.email ?? "", ...addressFields(move), renterName: move.renter_name ?? "", landlordPhone: move.landlord_phone ?? "", bedrooms: move.bedrooms == null ? "" : String(move.bedrooms), bathrooms: move.bathrooms == null ? "" : String(move.bathrooms), sqft: move.sqft == null ? "" : String(move.sqft), moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), propertyManagementCompany: move.property_management_company ?? "", landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
+    if (move) initial = { email: ctx.user.email ?? "", ...addressFields(move), renterName: move.renter_name ?? "", landlordPhone: maskPhone(move.landlord_phone ?? ""), bedrooms: move.bedrooms == null ? "" : String(move.bedrooms), bathrooms: move.bathrooms == null ? "" : String(move.bathrooms), sqft: move.sqft == null ? "" : String(move.sqft), moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), propertyManagementCompany: move.property_management_company ?? "", landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
   }
-  return <StartForm signedInEmail={ctx?.user.email} initial={initial} providers={providers} resume={resume === "1"} />;
+  return <StartForm signedIn={Boolean(ctx)} signedInEmail={ctx?.user.email} initial={initial} providers={providers} resume={resume === "1"} />;
 }
 
 export default function Start(props: PageProps<"/start">) {

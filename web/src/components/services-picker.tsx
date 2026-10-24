@@ -13,7 +13,6 @@ const TITLE: Record<ServiceKind, string> = { cleaning: "Cleaning company", movin
 const SHOWN = 3;
 
 export function ServicesPicker({
-  moveOutDate,
   sections,
   saved,
 }: {
@@ -27,7 +26,6 @@ export function ServicesPicker({
         <Section
           key={section.kind}
           section={section}
-          moveOutDate={moveOutDate}
           initial={saved.find((s) => s.kind === section.kind) ?? null}
         />
       ))}
@@ -35,7 +33,7 @@ export function ServicesPicker({
   );
 }
 
-function Section({ section, initial }: { section: ServiceSection; moveOutDate: string | null; initial: SavedSelection | null }) {
+function Section({ section, initial }: { section: ServiceSection; initial: SavedSelection | null }) {
   const [selection, setSelection] = useState<SavedSelection | null>(initial);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState<string | null>(null);
