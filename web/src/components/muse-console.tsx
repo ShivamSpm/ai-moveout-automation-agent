@@ -136,8 +136,6 @@ export function MuseConsole({
             {state.items.length === 0 && <li className="py-4 text-sm text-muted">No items yet.</li>}
             {state.items.map((item) => {
               const listing = listingFor(item.id);
-              const action = listing ? actionForListing(listing.id) : undefined;
-              const label = action ? actionLabel(action) : null;
               const confirmed = item.disposition_confirmed ? item.disposition : null;
               return (
                 <li key={item.id} className="grid gap-3 py-4">
@@ -170,41 +168,47 @@ export function MuseConsole({
                     </button>
                   )}
 
-                  {listing && action && label && (
-                    <div className="rounded-2xl bg-paper p-4 ring-1 ring-line">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="font-semibold">{listing.title}</p>
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${label.tone}`}>{label.text}</span>
-                      </div>
-                      <p className="mt-2 whitespace-pre-line text-sm text-ink/80">{listing.body}</p>
-                      <p className="mt-2 font-mono text-xs text-muted">
-                        {usd(listing.price_cents)} · Facebook Marketplace via Muse · version {action.payload_hash.slice(0, 8)}
-                      </p>
-                      {listing.external_url && (
-                        <a href={listing.external_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm underline">
-                          Listing on Facebook (reported by Muse)
-                        </a>
-                      )}
-                      {action.error && <p className="mt-2 text-sm text-stamp">{action.error}</p>}
-                      {(action.status === "approved" || action.status === "executing" || action.status === "unknown") && (
-                        <RelayPanel action={action} listing={listing} busy={busy} op={op} />
-                      )}
-                      {action.status === "pending_review" && (
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            disabled={busy}
-                            onClick={() => op({ op: "approve", actionId: action.id, payloadHash: action.payload_hash })}
-                            className={btn}
-                          >
-                            Approve this exact listing
-                          </button>
-                          <button disabled={busy} onClick={() => op({ op: "cancel", actionId: action.id })} className={ghost}>
-                            Discard
-                          </button>
+                  {state.listings.filter((l) => l.item_id === item.id).map((listing) => {
+                    const action = actionForListing(listing.id);
+                    const label = action ? actionLabel(action) : null;
+                    if (!action || !label) return null;
+                    return (
+                      <div key={listing.id} id={`listing-${listing.id}`} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
+                        <div id={`action-${action.id}`} />
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-semibold">{listing.title}</p>
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${label.tone}`}>{label.text}</span>
                         </div>
-                      )}
-                    </div>
-                  )}
+                        <p className="mt-2 whitespace-pre-line text-sm text-ink/80">{listing.body}</p>
+                        <p className="mt-2 font-mono text-xs text-muted">
+                          {usd(listing.price_cents)} · Facebook Marketplace via Muse · version {action.payload_hash.slice(0, 8)}
+                        </p>
+                        {listing.external_url && (
+                          <a href={listing.external_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm underline">
+                            Listing on Facebook (reported by Muse)
+                          </a>
+                        )}
+                        {action.error && <p className="mt-2 text-sm text-stamp">{action.error}</p>}
+                        {(action.status === "approved" || action.status === "executing" || action.status === "unknown") && (
+                          <RelayPanel action={action} listing={listing} busy={busy} op={op} />
+                        )}
+                        {action.status === "pending_review" && (
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              disabled={busy}
+                              onClick={() => op({ op: "approve", actionId: action.id, payloadHash: action.payload_hash })}
+                              className={btn}
+                            >
+                              Approve this exact listing
+                            </button>
+                            <button disabled={busy} onClick={() => op({ op: "cancel", actionId: action.id })} className={ghost}>
+                              Discard
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </li>
               );
             })}
@@ -292,7 +296,7 @@ function Conversations({
           );
           const hold = state.reservations.find((r) => r.conversation_id === c.id && (r.status === "held" || r.status === "confirmed"));
           return (
-            <li key={c.id} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <li key={c.id} id={`conversation-${c.id}`} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">{c.buyer_label}</p>
                 <span className="font-mono text-[11px] text-muted">via {c.source === "muse" ? "Muse · Facebook" : c.source}{hold ? ` · item ${hold.status}` : ""}</span>
@@ -310,7 +314,7 @@ function Conversations({
                 const label = actionLabel(a);
                 const p = a.payload as { body?: string; message?: string; disclosesExactAddress?: boolean };
                 return (
-                  <div key={a.id} className="mt-3 rounded-xl bg-card p-3 text-sm ring-1 ring-line">
+                  <div key={a.id} id={`action-${a.id}`} className="mt-3 rounded-xl bg-card p-3 text-sm ring-1 ring-line">
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium">{a.title}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${label.tone}`}>{label.text}</span>
