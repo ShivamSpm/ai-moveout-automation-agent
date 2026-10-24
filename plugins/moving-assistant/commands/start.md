@@ -8,6 +8,6 @@ Help a new renter start with Vacate, even when no Vacate tools are authenticated
 2. Once authenticated, call get_move_status. This may initialize an empty move; it does not create an authentication account. Summarize missing information rather than inventing a move or lease findings.
 3. Ask for the renter's name and move-out date, then collect only the details needed for their next step. Save supplied supported fields with update_move. Clearly distinguish public areaLabel from addressPrivate. Never invent dates, contacts or authorizations.
 4. Guide lease upload using the returned documents link. Use list_documents and get_lease_findings only after upload to review actual sources; use get_checklist for saved tasks. Do not claim a chat attachment is saved in Vacate unless a tool confirms it.
-5. Offer belongings inventory and Muse setup using the sell-with-muse skill or `/moving-assistant:muse`. Keep the requester informed of missing capabilities, manual steps, and simulated outputs. Review exact sends/posts/calls/bookings before approval.
+5. Offer belongings inventory, `/moving-assistant:telegram` for direct reviewed Telegram selling, and Muse setup using the sell-with-muse skill or `/moving-assistant:muse`. Keep the requester informed of missing capabilities, manual steps, and simulated outputs. Review exact sends/posts/calls/bookings before approval.
 
 Use tools only when available and authenticated. Do not fabricate account creation, authentication, tool results, or live provider execution.

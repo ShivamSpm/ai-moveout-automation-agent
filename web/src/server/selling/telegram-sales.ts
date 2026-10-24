@@ -30,6 +30,7 @@ import { serviceClient } from "@/server/supabase";
 import { photoProblem } from "@/server/tools/identify-items";
 import { proposeTurn } from "./negotiator";
 import { checkTurn, pickupCutoff, scheduledPrice, usd } from "./policy";
+import { requiresTelegramReview } from "./claude-sales";
 
 // Telegram selling lane. The renter approves each listing and each final deal
 // in the web app; the agent handles buyer chats in between, within the
@@ -151,6 +152,11 @@ export async function createSaleItem(ctx: ToolContext, photo: { bytes: Uint8Arra
 /** Approves the exact listing version the renter saw and posts it to the channel. */
 export async function publishListing(ctx: ToolContext, input: { actionId: string; payloadHash: string }) {
   const config = readTelegramConfig();
+  const review = await ctx.db.from("actions").select("payload").eq("id", input.actionId).maybeSingle();
+  if (review.error) throw new MarketplaceError(review.error.message, 500);
+  if ((review.data?.payload as { telegram?: { reviewEachAction?: boolean } } | null)?.telegram?.reviewEachAction) {
+    throw new MarketplaceError("Review and execute this listing through Claude's Telegram tools", 409);
+  }
   await approveAction(ctx, input);
   const claimed = await ctx.db.rpc("claim_action", { p_action_id: input.actionId });
   if (claimed.error || !claimed.data?.id) throw new MarketplaceError("This listing is already being posted", 409);
@@ -270,6 +276,9 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
     return { handled: saved.data ? "group_linked" : "group_link_invalid" };
   }
   if (event.kind === "unsupported") {
+    const recent = await db.from("conversations").select("listing_id").eq("source", "telegram").eq("external_thread_ref", event.chatId).order("last_active_at", { ascending: false }).limit(1).maybeSingle();
+    if (recent.error) throw new MarketplaceError(recent.error.message, 500);
+    if (recent.data && await requiresTelegramReview(db, recent.data.listing_id)) return { handled: "unsupported_awaiting_review" };
     await sendMessage(config, event.chatId, "Sorry, I can only read text messages.");
     return { handled: "unsupported" };
   }
@@ -277,6 +286,7 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
 
   if (event.kind === "start") {
     const found = event.listingId ? await listingContext(db, event.listingId) : null;
+    if (found && found.listing.status !== "published" && await requiresTelegramReview(db, found.listing.id)) return { handled: "unavailable_awaiting_review" };
     if (!found || found.listing.status !== "published") {
       await sendMessage(config, event.chatId, found ? "Sorry, that item isn't available anymore." : hint);
       return { handled: "start_unknown" };
@@ -295,6 +305,10 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
       conv = created.data;
     } else {
       await db.from("conversations").update({ last_active_at: now.toISOString() }).eq("id", conv.id);
+    }
+    if (await requiresTelegramReview(db, listing.id)) {
+      await db.from("messages").insert({ conversation_id: conv.id, owner_id: conv.owner_id, direction: "inbound", body: "Buyer opened the listing conversation.", source: "telegram" });
+      return { handled: "awaiting_review", conversationId: conv.id };
     }
     const text =
       item.status === "listed"
@@ -318,6 +332,8 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
     return { handled: "no_conversation" };
   }
   await db.from("messages").insert({ conversation_id: conv.id, owner_id: conv.owner_id, direction: "inbound", body: event.text, source: "telegram" });
+
+  if (await requiresTelegramReview(db, conv.listing_id)) return { handled: "awaiting_review", conversationId: conv.id };
 
   const found = await listingContext(db, conv.listing_id);
   if (!found) return { handled: "listing_gone" };
@@ -440,6 +456,9 @@ export async function confirmDeal(ctx: ToolContext, input: z.infer<typeof Confir
   const config = readTelegramConfig();
   const { data: action } = await ctx.db.from("actions").select("*").eq("id", input.actionId).eq("kind", "pickup.confirm").maybeSingle();
   if (!action) throw new MarketplaceError("Deal not found", 404);
+  if ((action.payload as { telegram?: { reviewEachAction?: boolean } })?.telegram?.reviewEachAction) {
+    throw new MarketplaceError("Review and execute this pickup through Claude's Telegram tools", 409);
+  }
   if (action.status !== "pending_review") throw new MarketplaceError(`This deal is ${action.status}`, 409);
   const deal = ActionPayloads["pickup.confirm"].parse(action.payload);
   const { data: conv } = await ctx.db.from("conversations").select("*").eq("id", deal.conversationId).single();
@@ -548,6 +567,7 @@ export async function applyPriceDrops(now = new Date()) {
     const { items, ...listing } = row as typeof row & {
       items: { ask_cents: number | null; floor_cents: number | null; status: string; moves: { move_out_date: string | null; timezone: string } };
     };
+    if (await requiresTelegramReview(db, listing.id)) continue;
     if (items.status !== "listed" || !items.moves.move_out_date || !listing.published_at) continue;
     const cutoff = pickupCutoff(items.moves.move_out_date, items.moves.timezone);
     const price = scheduledPrice({
@@ -578,7 +598,7 @@ export async function sellingState(ctx: ToolContext, now = new Date()) {
     ctx.db.from("listings").select("*, items!inner(id, name, ask_cents, floor_cents, status)").eq("channel", "telegram").order("created_at", { ascending: false }),
     ctx.db.from("conversations").select("*").eq("source", "telegram").order("last_active_at", { ascending: false }),
     ctx.db.from("messages").select("conversation_id, direction, body, source, created_at").order("created_at"),
-    ctx.db.from("actions").select("*").eq("move_id", move.id).in("kind", ["listing.publish", "pickup.confirm"]).order("created_at", { ascending: false }),
+    ctx.db.from("actions").select("*").eq("move_id", move.id).in("kind", ["listing.publish", "buyer.reply", "pickup.confirm"]).order("created_at", { ascending: false }),
     ctx.db.from("telegram_targets").select("chat_title").maybeSingle(),
   ]);
   const cutoff = move.move_out_date ? pickupCutoff(move.move_out_date, move.timezone) : null;
