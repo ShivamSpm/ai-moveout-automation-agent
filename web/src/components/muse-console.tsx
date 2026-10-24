@@ -20,6 +20,13 @@ export interface MuseState {
 const usd = (cents: number | null | undefined) =>
   cents === null || cents === undefined ? "—" : cents === 0 ? "Free" : `$${(cents / 100).toFixed(0)}`;
 
+// Photos bound into the reviewed version; older drafts send every item photo.
+function photoLabel(payload: unknown) {
+  const photos = (payload as { photos?: unknown[] } | null)?.photos;
+  if (!Array.isArray(photos)) return "all item photos";
+  return photos.length === 1 ? "1 photo" : `${photos.length} photos`;
+}
+
 // Plain-language status, keeping "reported by Muse" distinct from verified.
 function actionLabel(a: Row<"actions">): { text: string; tone: string } {
   switch (a.status) {
@@ -181,7 +188,7 @@ export function MuseConsole({
                         </div>
                         <p className="mt-2 whitespace-pre-line text-sm text-ink/80">{listing.body}</p>
                         <p className="mt-2 font-mono text-xs text-muted">
-                          {usd(listing.price_cents)} · Facebook Marketplace via Muse · version {action.payload_hash.slice(0, 8)}
+                          {usd(listing.price_cents)} · Facebook Marketplace via Muse · {photoLabel(action.payload)} · version {action.payload_hash.slice(0, 8)}
                         </p>
                         {listing.external_url && (
                           <a href={listing.external_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm underline">
