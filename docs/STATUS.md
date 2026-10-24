@@ -1,5 +1,20 @@
 # Vacate status — October 24, 2026
 
+## Claude-first public onboarding
+
+- Public home page links to `/claude` before any Vacate login. The guide explains
+  plugin installation, signup from connector sign-in, email confirmation, consent,
+  first-move setup, and the difference from browser-local guest sessions.
+- Plugin/catalog version 0.4.0 adds `start` and `muse` commands. Muse coordination
+  uses existing reviewed tools; optional Claude Code Chrome guidance is unverified
+  end to end. No personal Muse conversation API or general Facebook post adapter
+  is implemented. Required Muse sign-in/connection/publish prompts stay with user.
+- Verification: lint, TypeScript/production build and both plugin manifest
+  validations pass. Directory submission still has the pre-existing missing
+  license/icon/privacy metadata; no directory submission is claimed.
+- No migrations or authentication changes. No accounts created, tokens issued,
+  messages sent, or Facebook posts published during this change.
+
 ## Dashboard assistant setup
 
 Added Dashboard buttons for `/muse` and `/claude`, each with a brief capability

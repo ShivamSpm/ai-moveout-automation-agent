@@ -110,6 +110,10 @@ export default function Home() {
                 Get started
               </button>
             </form>
+            <div className="mt-5">
+              <Link href="/claude" className="inline-flex min-h-11 items-center rounded-xl border border-white/40 px-5 py-3 font-semibold text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-4">Start with Claude</Link>
+              <p className="mt-2 text-sm text-white/80">Use Claude chat or Claude Code. Install the plugin first; create your Vacate account when you connect.</p>
+            </div>
             <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
               {["You approve every message", "Cites California tenant law", "Free during beta"].map((t) => (
                 <li key={t} className="flex items-center gap-2">
