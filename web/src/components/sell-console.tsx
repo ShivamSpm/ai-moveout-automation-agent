@@ -10,7 +10,7 @@ export interface SellState {
   move: { moveOutDate: string | null; timezone: string; areaLabel: string | null };
   cutoff: string | null;
   pastCutoff: boolean;
-  telegram: { configured: boolean; group: { title: string } | null; addToGroupUrl: string | null };
+  telegram: { configured: boolean; group: { title: string } | null; addToGroupUrl: string | null; connectIdentityUrl: string | null };
   listings: ListingRow[];
   conversations: Row<"conversations">[];
   messages: Pick<Row<"messages">, "conversation_id" | "direction" | "body" | "source" | "created_at">[];
@@ -148,6 +148,11 @@ export function SellConsole({ initial }: { initial: SellState }) {
             )}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
+            {state.telegram.connectIdentityUrl && (
+              <a href={state.telegram.connectIdentityUrl} target="_blank" rel="noreferrer" className={btn}>
+                Connect your Telegram account
+              </a>
+            )}
             {state.telegram.addToGroupUrl && (
               <a href={state.telegram.addToGroupUrl} target="_blank" rel="noreferrer" className={btn}>
                 {state.telegram.group ? "Switch to another group" : "Add the bot to a Telegram group"}
@@ -159,7 +164,7 @@ export function SellConsole({ initial }: { initial: SellState }) {
               </button>
             )}
           </div>
-          <p className="mt-2 text-xs text-muted">Telegram asks which group to add it to. This page updates within a few seconds once it&apos;s added.</p>
+          <p className="mt-2 text-xs text-muted">First open the private bot chat and press Start, then return here to add the bot to a group using the same Telegram account. Links expire after 15 minutes and work once. This page updates automatically.</p>
         </section>
       )}
 
