@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ListingPublishPayload } from "@/contracts";
 import { strictJsonSchema } from "@/contracts/json-schema";
-import { ItemAnalysisSchema, PROMPT } from "@/server/tools/analyze-item";
+import { boundAnalysis, ItemAnalysisSchema, PROMPT } from "@/server/tools/analyze-item";
 import { sniffPhotoMime } from "@/server/tools/identify-items";
 
 const analysis = {
@@ -23,6 +23,16 @@ describe("item analysis contract", () => {
     expect(() => ItemAnalysisSchema.parse({ ...analysis, priceSuggestionUsd: { low: 60, high: 50, basis: "x" } })).toThrow();
     expect(() => ItemAnalysisSchema.parse({ ...analysis, verified: true })).toThrow();
     expect(() => ItemAnalysisSchema.parse({ ...analysis, brand: { ...analysis.brand, confidence: "certain" } })).toThrow();
+  });
+
+  it("accepts long model text and trims it to listing and display limits", () => {
+    const long = ItemAnalysisSchema.parse({ ...analysis, visibleCondition: "x".repeat(900), title: "t".repeat(140), questionsForRenter: Array(9).fill("q") });
+    const bounded = boundAnalysis(long);
+    expect(bounded.visibleCondition).toHaveLength(500);
+    expect(bounded.title).toHaveLength(100);
+    expect(bounded.title.endsWith("…")).toBe(true);
+    expect(bounded.questionsForRenter).toHaveLength(6);
+    expect(boundAnalysis(analysis as never)).toEqual(analysis);
   });
 
   it("produces a closed strict JSON schema for structured output", () => {
