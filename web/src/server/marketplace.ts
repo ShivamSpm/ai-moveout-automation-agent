@@ -41,16 +41,19 @@ export const UpdateMoveInput = z.object({
   areaLabel: z.string().max(100).nullish(),
   addressPrivate: z.string().max(200).nullish(),
   moveOutDate: z.iso.date().nullish(),
+  depositCents: z.number().int().min(0).max(2147483647).nullish(),
   landlordName: z.string().max(100).nullish(),
   landlordEmail: z.email().nullish(),
 });
 
 export async function updateMove(ctx: ToolContext, input: z.infer<typeof UpdateMoveInput>) {
+  input = UpdateMoveInput.parse(input);
   const move = await currentMove(ctx);
   const patch = {
     area_label: input.areaLabel,
     address_private: input.addressPrivate,
     move_out_date: input.moveOutDate,
+    deposit_cents: input.depositCents,
     landlord_name: input.landlordName,
     landlord_email: input.landlordEmail,
   };

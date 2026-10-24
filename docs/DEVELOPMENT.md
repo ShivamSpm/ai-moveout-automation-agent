@@ -89,3 +89,45 @@ supabase config diff                       # hosted auth settings live in [remot
 
 Never put `SUPABASE_SECRET_KEY` in a `NEXT_PUBLIC_` variable. New migrations go through
 the local stack and tests first.
+
+## Enable Google or Microsoft sign-in
+
+In the Supabase dashboard, select hosted project `sejfkcrmcbsiidftraek`, then open
+**Authentication → Providers**. Enable Google and/or Azure (Microsoft), enter the
+provider's client ID and client secret, and save. Never put client secrets in the browser.
+The `/start` page checks public Auth settings on the server and hides disabled
+providers; allow up to two minutes for its short cache to expire.
+
+- **Google:** In Google Cloud, configure the OAuth consent screen and a web OAuth
+  client. Add the callback below as an authorized redirect URI, then copy the client
+  credentials into Supabase's Google provider settings. Add test users if the
+  consent screen is in testing mode.
+- **Microsoft:** In Microsoft Entra, register an application with accounts in any
+  organizational directory **and personal Microsoft accounts**. Add a Web redirect
+  URI using the callback below. Create a client secret and copy its **value**, plus
+  the Application (client) ID, into Supabase's Azure provider settings. Use tenant
+  URL `https://login.microsoftonline.com/common` for personal and work accounts.
+  Vacate requests the required `email` scope when starting Azure OAuth.
+
+Register this exact callback with both Google Cloud and Microsoft Entra:
+
+```text
+https://sejfkcrmcbsiidftraek.supabase.co/auth/v1/callback
+```
+
+In Supabase **Authentication → URL Configuration**, allow the application's
+`/auth/callback` URL for production and approved development origins; the app
+returns renters to `/start?resume=1`. Set `APP_URL` to the app's origin for email
+confirmation redirects (for this worktree's local server, `http://localhost:3101`).
+Non-secret move details survive redirects in sessionStorage in the same browser
+tab; passwords and lease files are never stored there. Re-attach the PDF on return.
+
+Hosted email confirmation uses Supabase's built-in mailer, which only delivers to
+members of the Supabase organization until custom SMTP is configured. Configure
+custom SMTP before inviting external renters to sign up. The local stack has
+email confirmation disabled, so local signup immediately saves the move.
+
+References: [Google setup](https://supabase.com/docs/guides/auth/social-sign-in/auth-google),
+[Azure setup and email scope](https://supabase.com/docs/guides/auth/social-sign-in/auth-azure),
+[public Auth settings](https://github.com/supabase/auth/blob/master/internal/api/settings.go),
+[SMTP restrictions](https://supabase.com/docs/guides/auth/auth-smtp).
