@@ -69,8 +69,8 @@ export function MoveDetailsForm({ initial, canSave }: { initial: MoveDetailsInit
         </p>
         <div className="flex gap-2">
           {state.status === "saved" && (
-            <Link href="/dashboard" className="rounded-xl border border-line px-5 py-3 font-semibold transition hover:bg-paper">
-              Go to dashboard
+            <Link href="/calls" className="rounded-xl border border-line px-5 py-3 font-semibold transition hover:bg-paper">
+              Next: call your landlord
             </Link>
           )}
           <button

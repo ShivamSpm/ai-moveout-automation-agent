@@ -264,6 +264,25 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"landlord_calls": {
+                  Row: {
+                    "completed_at": string | null,"checklist": Json,"created_at": string,"error": string | null,"id": string,"move_id": string,"owner_id": string,"price_usd": number | null,"provider_call_id": string | null,"script": string,"status": string,"summary": string | null,"to_phone": string,"transcript": string | null
+                  }
+                  Insert: {
+                    "completed_at"?: string | null,"checklist"?: Json,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id": string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script": string,"status"?: string,"summary"?: string | null,"to_phone": string,"transcript"?: string | null
+                  }
+                  Update: {
+                    "completed_at"?: string | null,"checklist"?: Json,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id"?: string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script"?: string,"status"?: string,"summary"?: string | null,"to_phone"?: string,"transcript"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "landlord_calls_move_id_owner_id_fkey"
+      columns: ["move_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "moves"
+      referencedColumns: ["id","owner_id"]
+    }
+                  ]
                 },"listings": {
                   Row: {
                     "area_label": string | null,"body": string,"channel": string,"created_at": string,"delegate": string | null,"external_ref": string | null,"external_url": string | null,"id": string,"item_id": string,"mode": string,"owner_id": string,"price_cents": number,"published_at": string | null,"status": string,"title": string
