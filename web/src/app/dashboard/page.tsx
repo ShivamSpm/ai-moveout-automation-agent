@@ -58,4 +58,15 @@ async function Dashboard() {
     </div>
   </>;
 }
-export default function DashboardPage() { return <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><Suspense fallback={<p>Loading your saved move…</p>}><Dashboard /></Suspense></div>; }
+export default function DashboardPage() { return <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+  <nav aria-label="Assistant setup" className="mb-8 grid gap-6 sm:grid-cols-2">
+    <div>
+      <Link href="/muse" aria-describedby="muse-setup-description" className="tape inline-flex min-h-11 w-full items-center justify-center rounded-xl px-5 py-3 text-center font-semibold focus-visible:outline-2 focus-visible:outline-offset-4">Set up Muse</Link>
+      <p id="muse-setup-description" className="mt-3 text-sm text-muted">Use your own Muse agent to post approved Facebook Marketplace listings and coordinate buyer replies and pickups. You review each action first.</p>
+    </div>
+    <div>
+      <Link href="/claude" aria-describedby="claude-setup-description" className="box-label inline-flex min-h-11 w-full items-center justify-center rounded-xl px-5 py-3 text-center font-semibold hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-4">Set up Claude marketplace &amp; plugin</Link>
+      <p id="claude-setup-description" className="mt-3 text-sm text-muted">Work with your saved move in Claude: review lease findings, manage your checklist, draft property manager messages, and prepare items to sell.</p>
+    </div>
+  </nav>
+  <Suspense fallback={<p>Loading your saved move…</p>}><Dashboard /></Suspense></div>; }
