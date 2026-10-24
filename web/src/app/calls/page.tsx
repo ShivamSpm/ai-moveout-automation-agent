@@ -57,8 +57,8 @@ export default function CallsPage() {
         <p className="text-sm font-semibold uppercase tracking-wider text-tape">Landlord</p>
         <h1 className="mt-3 font-display text-5xl leading-tight sm:text-6xl">Get the move-out checklist.</h1>
         <p className="mt-5 max-w-md leading-relaxed text-muted">
-          The agent calls your landlord, confirms your move-out day, and asks what you need to do before handing back
-          the keys. What they say becomes your checklist.
+          The Vacate Corp assistant calls your landlord, confirms your move-out day, and asks for the three most
+          important things to do before handing back the keys. Those become your checklist.
         </p>
         <ul className="mt-8 space-y-3 text-sm text-muted">
           <li>✓ Nothing happens until you tap Approve &amp; call</li>

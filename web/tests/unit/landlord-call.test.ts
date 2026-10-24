@@ -15,13 +15,14 @@ describe("toE164", () => {
 describe("buildCallScript", () => {
   const script = buildCallScript({ renterName: "Ana", landlordName: "Dana", address: "100 Example St", moveOutDate: "2026-11-30" });
 
-  it("discloses the AI assistant and transcription in the first sentence", () => {
-    expect(script.firstSentence).toMatch(/AI assistant/);
+  it("introduces the Vacate Corp assistant and discloses the AI and transcription", () => {
+    expect(script.firstSentence).toMatch(/I'm the Vacate Corp assistant, an AI/);
     expect(script.firstSentence).toMatch(/transcribed/);
   });
 
-  it("states the move-out date and forbids agreeing on the tenant's behalf", () => {
+  it("states the move-out date, asks for three items and forbids agreeing on the tenant's behalf", () => {
     expect(script.task).toContain("Monday, November 30, 2026");
+    expect(script.task).toMatch(/three most important things/);
     expect(script.task).toMatch(/Never agree to anything for the tenant/);
   });
 });
@@ -51,6 +52,11 @@ describe("parseChecklist", () => {
       { title: "Professionally clean the carpets", detail: "Keep the receipt", lane: "cleaning", due_date: null },
       { title: "Return keys and fobs", detail: null, lane: "landlord", due_date: null },
     ]);
+  });
+
+  it("keeps only the first three items", () => {
+    const items = Array.from({ length: 5 }, (_, i) => ({ title: `Task ${i + 1}`, lane: "landlord", due_date: null }));
+    expect(parseChecklist(JSON.stringify({ date_confirmed: null, items })).items.map((i) => i.title)).toEqual(["Task 1", "Task 2", "Task 3"]);
   });
 
   it("returns nothing for non-JSON replies", () => {

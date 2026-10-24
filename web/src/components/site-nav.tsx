@@ -21,6 +21,7 @@ const links = [
   { href: "/move", label: "My move" },
   { href: "/account/documents", label: "Documents" },
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/services", label: "Services" },
   { href: "/items", label: "Selling" },
   { href: "/sell", label: "Sell on Telegram" },
 ];
@@ -34,7 +35,7 @@ export function SiteNav() {
             <Link href="/" aria-label="Vacate home">
               <Logo />
             </Link>
-            <div className="hidden items-center gap-5 whitespace-nowrap text-sm lg:flex">
+            <div className="hidden items-center gap-5 whitespace-nowrap text-sm xl:flex">
               {links.map((link) => (
                 <Link key={link.href} href={link.href} className="text-ink/80 transition hover:text-ink">
                   {link.label}
