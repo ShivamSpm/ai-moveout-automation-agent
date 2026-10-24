@@ -149,4 +149,23 @@ describe.sequential("Claude sales with real local RLS and mocked Telegram", () =
     await expect(sales.museHandoff(b, args(fb.action))).rejects.toThrow(/No approved task/);
     await expect(sales.museHandoff(a, { ...args(fb.action), payloadHash: "0".repeat(64) })).rejects.toThrow(/changed/);
   });
+  it("validates whole Muse batches and never restarts claimed tasks", async () => {
+    const first = await draft(), second = await draft();
+    const f1 = await market.prepareFacebookListing(a, { itemId: first.listing.item_id });
+    const f2 = await market.prepareFacebookListing(a, { itemId: second.listing.item_id });
+    await market.approveAction(a, args(f1.action)); await market.approveAction(a, args(f2.action));
+    const actions = [args(f1.action), args(f2.action)];
+    expect((await sales.museBatchHandoff(a, { actions })).readyCount).toBe(2);
+    await expect(sales.museBatchHandoff(a, { actions: [actions[0], actions[0]] })).rejects.toThrow(/Duplicate/);
+    await expect(sales.museBatchHandoff(b, { actions })).rejects.toThrow(/No approved task/);
+    await expect(sales.museBatchHandoff(a, { actions: [actions[0], { ...actions[1], payloadHash: "0".repeat(64) }] })).rejects.toThrow(/changed/);
+    const bridge = await import("@/server/muse/bridge");
+    await bridge.claimTask({ ownerId: a.user.id }, { taskId: f1.action.id, payloadHash: f1.action.payload_hash });
+    const batch = await sales.museBatchHandoff(a, { actions });
+    expect(batch.readyCount).toBe(1); expect(batch.blockedCount).toBe(1);
+    expect(batch.tasks[0]).toMatchObject({ canStart: false, prompt: null, status: "claimed" });
+    expect(batch.tasks[1].prompt).toContain(f2.action.id);
+    expect(telegram.sendPhoto).not.toHaveBeenCalled();
+  });
+
 });

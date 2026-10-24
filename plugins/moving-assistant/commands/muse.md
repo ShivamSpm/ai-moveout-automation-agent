@@ -2,7 +2,7 @@
 description: Guide Muse connection and coordinate reviewed Marketplace work, with browser assistance where available
 ---
 
-Use the sell-with-muse skill. Start by checking whether Vacate tools are authenticated; otherwise follow `/moving-assistant:start`.
+Use the muse-browser skill for browser coordination and the sell-with-muse skill for item preparation. For multiple approved items, call prepare_muse_batch_handoff with their exact action IDs and hashes; submit each ready prompt separately, refresh activity between tasks, and never restart claimed or unknown work. Start by checking whether Vacate tools are authenticated; otherwise follow `/moving-assistant:start`.
 
 Call get_move_status to inspect this renter's connector token metadata and existing actions. A token's existence means setup was started; last_used_at means a request used the token at that time. Neither proves Muse is currently connected or Facebook posting works. Never display token secrets or invent a live connection status.
 

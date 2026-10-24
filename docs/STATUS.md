@@ -2,7 +2,13 @@
 
 ## Claude sales tools — October 24, 2026
 
-- Plugin 0.5.0 adds `/moving-assistant:telegram`. Renter-only MCP tools read sales
+- Version 0.6.0 adds the discoverable muse-browser skill and owner/version-checked
+  batch handoffs for up to 20 tasks. It uses logged-in desktop Chrome, keeps item
+  and buyer threads separate, and blocks restarting claimed/unknown tasks.
+  Price edits, withdrawal/deletion, handover and general feed publishing remain
+  explicit adapter gaps; browser guidance does not claim live verification.
+
+- Plugin 0.6.0 adds `/moving-assistant:telegram`. Renter-only MCP tools read sales
   and prepare connection links, draft Telegram listings/replies/pickups, and execute
   separately approved exact versions. Uses existing items/photos, no prompt copying.
 - New Claude-prepared listings bind the destination, bot username, caption and photo

@@ -128,6 +128,10 @@ export function buildMcpServer(caller: Caller) {
       title: "Prepare an approved Muse task handoff", description: "Get a task-specific prompt and Muse URL for a browser-enabled Claude to use without manual copy/paste. Requires an already approved exact version. Does not call Muse, post or claim the task. No API invocation is available; Muse's approval still belongs to the renter.",
       inputSchema: sales.HandoffInput.shape, annotations: READ,
     }, input => result(() => sales.museHandoff(ctx, input), "Muse browser handoff; check canStart before submitting. No Muse API call was made."));
+    server.registerTool("prepare_muse_batch_handoff", {
+      title: "Prepare multiple approved Muse task handoffs", description: "Validate up to 20 exact approved task versions for this renter and return separate browser prompts and readiness states. Rejects duplicate IDs and any missing or changed version. Claimed/unknown tasks cannot start. Does not approve, claim, invoke Muse or publish anything; preserve required Muse approvals.",
+      inputSchema: sales.BatchHandoffInput.shape, annotations: READ,
+    }, input => result(() => sales.museBatchHandoff(ctx, input), "Separate browser handoffs; submit only tasks with canStart true and refresh activity between them."));
     server.registerTool("get_app_links", {
       title: "Open Vacate", description: "Get app links and optional action/listing/conversation anchors. IDs do not grant access; the web app requires sign-in.",
       inputSchema: { actionId: z.uuid().optional(), listingId: z.uuid().optional(), conversationId: z.uuid().optional() }, outputSchema: { ...common, app_links: renter.LinksSchema }, annotations: READ,

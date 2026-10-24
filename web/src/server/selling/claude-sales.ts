@@ -9,7 +9,7 @@ import { itemPhotoRefs } from "../item-photos";
 import { MarketplaceError, ApproveInput, ProposePickupInput } from "../marketplace";
 import { readTelegramConfig, sendPhoto, sendMessage, startLink, postRef, postUrl } from "../integrations/telegram";
 import { pickupCutoff, usd } from "./policy";
-import { getTask } from "../muse/bridge";
+import { getTask, listTasks } from "../muse/bridge";
 import { appLink } from "../links";
 
 const Delivery = z.object({
@@ -23,6 +23,7 @@ export const PreparePickupInput = ProposePickupInput;
 export const PrepareTelegramInput = z.object({ itemId: z.uuid(), photoDocumentId: z.uuid(), title: z.string().trim().min(1).max(80), body: z.string().trim().min(1).max(700) });
 export const PrepareReplyInput = z.object({ conversationId: z.uuid(), body: z.string().trim().min(1).max(2000) });
 export const HandoffInput = ApproveInput;
+export const BatchHandoffInput = z.object({ actions: z.array(HandoffInput).min(1).max(20).refine(actions => new Set(actions.map(a => a.actionId)).size === actions.length, "Duplicate action IDs are not allowed") });
 
 async function ownMove(ctx: ToolContext, moveId: string) {
   const { data, error } = await ctx.db.from("moves").select("*").eq("id", moveId).eq("owner_id", ctx.user.id).maybeSingle();
@@ -209,9 +210,30 @@ export async function museHandoff(ctx: ToolContext, raw: z.infer<typeof HandoffI
   const input = HandoffInput.parse(raw);
   const task = await getTask({ ownerId: ctx.user.id }, input.actionId);
   if (task.payloadHash !== input.payloadHash) throw new MarketplaceError("The approved version changed", 409);
+  return handoffForTask(task);
+}
+
+function handoffForTask(task: Awaited<ReturnType<typeof getTask>>) {
   const ready = task.state === "ready" && !("missingPhotos" in task && task.missingPhotos);
   return { status: ready ? "ready_for_browser_handoff" : task.state, canStart: Boolean(ready), taskId: task.taskId, payloadHash: task.payloadHash,
     museUrl: "https://muse.ai", reviewUrl: appLink(`/muse#action-${task.taskId}`),
     prompt: ready ? `Check Vacate for approved task ${task.taskId} only, version ${task.payloadHash}. Use the exact approved payload and photos from the connector. Follow your own approval prompt. Report the outcome to Vacate; do not act on other tasks or retry an unknown outcome.` : null,
     automaticApiInvocation: false, userApprovalInMuseRequired: true };
+}
+
+
+export async function museBatchHandoff(ctx: ToolContext, raw: z.infer<typeof BatchHandoffInput>) {
+  const input = BatchHandoffInput.parse(raw);
+  const queue = await listTasks({ ownerId: ctx.user.id });
+  // Validate the whole batch before returning any prompts. Never expand its scope.
+  const tasks = input.actions.map(action => {
+    const task = queue.find(t => t.taskId === action.actionId);
+    if (!task) throw new MarketplaceError("No approved task with that id for this renter", 404);
+    if (task.payloadHash !== action.payloadHash) throw new MarketplaceError("The approved version changed", 409);
+    return handoffForTask(task);
+  });
+  return { tasks, readyCount: tasks.filter(t => t.canStart).length,
+    blockedCount: tasks.filter(t => !t.canStart).length,
+    automaticApiInvocation: false, userApprovalInMuseRequired: true,
+    instructions: "Submit ready tasks individually in the matching Muse conversation. Do not submit claimed or unknown tasks. Refresh activity between tasks; preserve each task ID and version. Muse must claim and report each task independently." };
 }

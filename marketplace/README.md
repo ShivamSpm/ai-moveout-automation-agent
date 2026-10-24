@@ -66,3 +66,9 @@ Do not create it as part of this work. When publication is separately authorized
 - [Plugin manifest, commands and MCP configuration](https://code.claude.com/docs/en/plugins-reference)
 - [Install and manage plugins](https://code.claude.com/docs/en/discover-plugins)
 - [MCP environment substitution and OAuth](https://code.claude.com/docs/en/mcp)
+
+Version 0.6.0 includes the muse-browser skill for logged-in desktop Chrome and
+prepare_muse_batch_handoff for up to 20 separately approved exact tasks. Claude
+can enter ready prompts in Muse without manual copying when browser tools are
+available. Required Muse approvals stay with the renter. Listing edits/deletion,
+marking sold and general Facebook feed publishing remain unsupported adapters.
