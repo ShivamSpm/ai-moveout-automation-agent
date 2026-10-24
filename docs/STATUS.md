@@ -1,5 +1,11 @@
 # Vacate status — October 24, 2026
 
+## Dashboard assistant setup
+
+Added Dashboard buttons for `/muse` and `/claude`, each with a brief capability
+description. The new Claude guide covers marketplace/plugin installation and renter
+authentication. This change adds no migrations.
+
 ## Live application and database
 
 Canonical app: https://ai-moveout-automation-agent-tau.vercel.app, shared Vercel
