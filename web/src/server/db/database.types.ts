@@ -114,13 +114,13 @@ isOneToOne: false
                   ]
                 },"conversations": {
                   Row: {
-                    "buyer_label": string,"created_at": string,"external_thread_ref": string | null,"id": string,"listing_id": string,"owner_id": string,"source": string
+                    "buyer_label": string,"created_at": string,"deal_status": string,"external_thread_ref": string | null,"id": string,"last_active_at": string,"listing_id": string,"offer_cents": number | null,"owner_id": string,"source": string
                   }
                   Insert: {
-                    "buyer_label": string,"created_at"?: string,"external_thread_ref"?: string | null,"id"?: string,"listing_id": string,"owner_id"?: string,"source": string
+                    "buyer_label": string,"created_at"?: string,"deal_status"?: string,"external_thread_ref"?: string | null,"id"?: string,"last_active_at"?: string,"listing_id": string,"offer_cents"?: number | null,"owner_id"?: string,"source": string
                   }
                   Update: {
-                    "buyer_label"?: string,"created_at"?: string,"external_thread_ref"?: string | null,"id"?: string,"listing_id"?: string,"owner_id"?: string,"source"?: string
+                    "buyer_label"?: string,"created_at"?: string,"deal_status"?: string,"external_thread_ref"?: string | null,"id"?: string,"last_active_at"?: string,"listing_id"?: string,"offer_cents"?: number | null,"owner_id"?: string,"source"?: string
                   }
                   Relationships: [
                     {
@@ -313,6 +313,19 @@ isOneToOne: false
       referencedRelation: "moves"
       referencedColumns: ["id","owner_id"]
     }
+                  ]
+                },"telegram_updates": {
+                  Row: {
+                    "received_at": string,"update_id": number
+                  }
+                  Insert: {
+                    "received_at"?: string,"update_id": number
+                  }
+                  Update: {
+                    "received_at"?: string,"update_id"?: number
+                  }
+                  Relationships: [
+
                   ]
                 }
           }

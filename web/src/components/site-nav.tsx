@@ -20,6 +20,7 @@ const links = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/items", label: "Selling" },
+  { href: "/sell", label: "Sell on Telegram" },
 ];
 
 export function SiteNav() {
