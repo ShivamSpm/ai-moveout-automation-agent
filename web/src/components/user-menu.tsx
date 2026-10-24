@@ -65,7 +65,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
   return (
     <>
       {/* Wide screens */}
-      <div className="hidden items-center gap-1 whitespace-nowrap lg:flex">
+      <div className="hidden items-center gap-1 whitespace-nowrap xl:flex">
         {authEnabled &&
           (account ? (
             <form action="/auth/signout" method="post" className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
       </div>
 
       {/* Phones */}
-      <div className="flex items-center gap-1.5 lg:hidden">
+      <div className="flex items-center gap-1.5 xl:hidden">
         <Link href="/start" className="tape rounded-xl px-4 py-2.5 text-sm font-semibold">
           Start
         </Link>
@@ -106,7 +106,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
       {open && (
         <div
           id="mobile-menu"
-          className="absolute inset-x-0 top-full mt-2 rounded-2xl border border-line bg-card p-2 shadow-[0_20px_40px_-20px_rgba(16,24,27,0.45)] lg:hidden"
+          className="absolute inset-x-0 top-full mt-2 rounded-2xl border border-line bg-card p-2 shadow-[0_20px_40px_-20px_rgba(16,24,27,0.45)] xl:hidden"
         >
           <nav aria-label="Main">
             <ul>

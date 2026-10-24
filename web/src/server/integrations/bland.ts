@@ -41,11 +41,13 @@ export async function placeCall(input: PlaceCallInput): Promise<string> {
       phone_number: input.phoneNumber,
       task: input.task,
       first_sentence: input.firstSentence,
+      // Young American female voice ("Young American Female" in Bland's voice list); override with BLAND_VOICE.
+      voice: process.env.BLAND_VOICE?.trim() || "jessica",
       summary_prompt: input.summaryPrompt,
       metadata: input.metadata,
       wait_for_greeting: true,
       record: false, // two-party consent state: transcribe (disclosed), don't record audio
-      max_duration: 5, // minutes; cost cap
+      max_duration: 3, // minutes; short call and cost cap
       temperature: 0.3,
     }),
     signal: AbortSignal.timeout(20_000),

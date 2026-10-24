@@ -88,9 +88,9 @@ export function LandlordCallPanel({
             <p className="mt-4 text-sm text-muted">The agent opens with:</p>
             <blockquote className="mt-2 rounded-2xl bg-paper p-4 leading-relaxed">&ldquo;{firstSentence}&rdquo;</blockquote>
             <p className="mt-4 text-sm text-muted">
-              It confirms your move-out day, asks for the move-out checklist and how to book the inspection, and never
-              agrees to fees, dates or repairs for you. Calls are capped at 5 minutes and aren&rsquo;t recorded; the
-              transcript is saved here.
+              It confirms your move-out day, asks for the three most important things to do before you leave, and
+              never agrees to fees, dates or repairs for you. Calls are capped at 3 minutes and aren&rsquo;t recorded;
+              the transcript is saved here.
             </p>
             <button type="button" onClick={() => setShowScript((s) => !s)} className="mt-3 py-2 text-sm text-tape underline">
               {showScript ? "Hide" : "Show"} the full instructions
@@ -133,7 +133,7 @@ export function LandlordCallPanel({
 
           {shown.checklist.length > 0 && (
             <>
-              <h3 className="mt-6 font-display text-2xl">Move-out checklist from your landlord</h3>
+              <h3 className="mt-6 font-display text-2xl">Your landlord&rsquo;s top 3 before move-out</h3>
               <ul className="mt-3 divide-y divide-line rounded-2xl border border-line bg-card">
                 {shown.checklist.map((item, i) => (
                   <li key={i} className="flex items-start gap-3 p-4">
