@@ -50,7 +50,7 @@ export async function resolveConnector(authorization: string | null): Promise<Br
 
 const INSTRUCTIONS = {
   "listing.publish":
-    "Publish this exact listing on Facebook Marketplace from the renter's own account. Use the title, description and price as given; do not add an exact address, phone number or other personal details. Follow Muse's own approval prompt before publishing. Then report the result (MCP muse_report_result, or A2A op 'report') with the listing URL, or status 'failed' with the reason. If you cannot tell whether it was published, report 'unknown'; do not publish twice.",
+    "Publish this exact listing on Facebook Marketplace from the renter's own account. Use the title, description and price as given, and attach exactly the photos in photoUrls (signed links that expire in 15 minutes; call list_tasks again for fresh ones). If missingPhotos is above 0, do not publish; tell the renter an approved photo is unavailable. Do not add other photos, an exact address, phone number or other personal details. Follow Muse's own approval prompt before publishing. Then report the result (MCP muse_report_result, or A2A op 'report') with the listing URL, or status 'failed' with the reason. If you cannot tell whether it was published, report 'unknown'; do not publish twice.",
   "buyer.reply":
     "Send this exact message to the named buyer in the Marketplace conversation for this listing. Do not change wording, add commitments or share an address the message does not contain. Follow Muse's approval prompt, then report the result.",
   "pickup.confirm":
@@ -76,21 +76,52 @@ async function signedPhotos(ownerId: string, paths: string[]) {
   return (data ?? []).flatMap((d) => (d.signedUrl ? [d.signedUrl] : []));
 }
 
+type PhotoRef = { documentId: string; sha256: string };
+
+// The photos bound into an approved listing payload: only this owner's
+// documents whose stored hash still matches what the renter approved.
+async function approvedPhotos(ownerId: string, refs: PhotoRef[]) {
+  if (!refs.length) return [];
+  const { data } = await serviceClient()
+    .from("documents")
+    .select("id, storage_path, sha256")
+    .eq("owner_id", ownerId)
+    .in("id", refs.map((r) => r.documentId));
+  return Promise.all(
+    refs.map(async (ref) => {
+      const doc = data?.find((d) => d.id === ref.documentId && d.sha256 === ref.sha256);
+      const [url] = doc ? await signedPhotos(ownerId, [doc.storage_path]) : [];
+      return { ...ref, url: url ?? null };
+    }),
+  );
+}
+
+function payloadPhotos(payload: unknown): PhotoRef[] | null {
+  const photos = (payload as { photos?: unknown } | null)?.photos;
+  return Array.isArray(photos) ? (photos as PhotoRef[]) : null;
+}
+
 export async function listTasks({ ownerId }: BridgeOwner) {
   const { data, error } = await serviceClient().rpc("muse_queue", { p_owner_id: ownerId });
   if (error) throw new BridgeError(error.message, 500);
   return Promise.all(
-    (data as QueueRow[]).map(async (row) => ({
-      taskId: row.action_id,
-      kind: row.kind,
-      title: row.title,
-      state: row.status === "approved" ? "ready" : row.status === "executing" ? "claimed" : "outcome_unknown",
-      payload: row.payload,
-      payloadHash: row.payload_hash,
-      approvedAt: row.approved_at,
-      photoUrls: await signedPhotos(ownerId, row.photo_paths),
-      instructions: INSTRUCTIONS[row.kind as keyof typeof INSTRUCTIONS],
-    })),
+    (data as QueueRow[]).map(async (row) => {
+      const refs = payloadPhotos(row.payload);
+      // Newer listing payloads name their approved photos; older ones get all item photos.
+      const photos = refs ? await approvedPhotos(ownerId, refs) : null;
+      return {
+        taskId: row.action_id,
+        kind: row.kind,
+        title: row.title,
+        state: row.status === "approved" ? "ready" : row.status === "executing" ? "claimed" : "outcome_unknown",
+        payload: row.payload,
+        payloadHash: row.payload_hash,
+        approvedAt: row.approved_at,
+        photoUrls: photos ? photos.flatMap((p) => (p.url ? [p.url] : [])) : await signedPhotos(ownerId, row.photo_paths),
+        ...(photos ? { photos, missingPhotos: photos.filter((p) => !p.url).length } : {}),
+        instructions: INSTRUCTIONS[row.kind as keyof typeof INSTRUCTIONS],
+      };
+    }),
   );
 }
 

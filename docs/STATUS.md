@@ -1,5 +1,24 @@
 # Session handoff
 
+## Connector item photos and vision suggestions — October 24, 2026, Claude Code
+
+Branch `feat/connector-item-photos`. No schema migration. Plugin and MCP server 0.3.0.
+
+- New renter connector tools: `create_item_photo_upload` (single-use signed PUT URL to
+  private `move-files`, two hours, at most 20 MB), `attach_item_photo` (type sniffed from bytes,
+  server-computed SHA-256, optional client hash match, safe retry, rejected uploads removed),
+  `list_item_photos`, `analyze_item_photos` (OpenRouter vision model under the shared spend cap:
+  item type, brand/model with evidence and confidence, visible condition, draft text, used-price
+  range, questions; labeled `suggestion_unconfirmed`, nothing saved) and `update_item`.
+- `listing.publish` payloads now bind `photos: [{documentId, sha256}]`, so approval covers the
+  exact files. The Muse bridge signs only those photos and reports `missingPhotos` when a stored
+  hash no longer matches; older payloads keep the previous all-item-photos behavior.
+  The `/muse` review card shows the bound photo count.
+- `sell-with-muse` skill documents the upload, attach, analyze and confirm steps.
+- Validation: TypeScript, lint, 329 tests (new local-Supabase integration test covers upload,
+  hash mismatch, non-image rejection, cross-renter isolation and photo binding) and build.
+  The production vision call is verified only after deploy; see the PR.
+
 ## Account workflow repair — October 24, 2026, Codex
 
 PR #24 merged as `cbd8898`; production deployment is READY at the canonical

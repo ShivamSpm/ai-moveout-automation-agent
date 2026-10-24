@@ -5,6 +5,7 @@ import { ActionPayloads, type ActionKind } from "@/contracts";
 import type { ToolContext } from "./auth";
 import { disclosesAddress, draftListing } from "./domain/drafts";
 import { assertInScope } from "./domain/scope";
+import { itemPhotoRefs } from "./item-photos";
 
 // Renter-side marketplace operations. Always run with the renter's own
 // user-scoped client, so RLS decides what exists. Shared by the web app and
@@ -113,6 +114,37 @@ export async function addItem(ctx: ToolContext, input: z.infer<typeof AddItemInp
   return data;
 }
 
+export const UpdateItemInput = z.object({
+  itemId: z.uuid(),
+  name: z.string().min(1).max(120).optional(),
+  condition: z.string().max(120).nullish(),
+  description: z.string().max(2000).nullish(),
+  askUsd: z.number().min(0).max(100_000).nullish(),
+  floorUsd: z.number().min(0).max(100_000).nullish(),
+});
+
+// Corrects the renter's own item details. Existing listing drafts keep the
+// version they were reviewed with; prepare a new draft to use these values.
+export async function updateItem(ctx: ToolContext, input: z.infer<typeof UpdateItemInput>) {
+  input = UpdateItemInput.parse(input);
+  assertInScope(input.name, input.description);
+  const cents = (usd: number | null | undefined) => (usd === undefined ? undefined : usd === null ? null : Math.round(usd * 100));
+  const patch = {
+    name: input.name,
+    condition: input.condition,
+    description: input.description,
+    ask_cents: cents(input.askUsd),
+    floor_cents: cents(input.floorUsd),
+  };
+  for (const key of Object.keys(patch) as (keyof typeof patch)[]) {
+    if (patch[key] === undefined) delete patch[key];
+  }
+  const { data, error } = await ctx.db.from("items").update(patch).eq("id", input.itemId).select("*").maybeSingle();
+  if (error) fail(error);
+  if (!data) fail(null, 404);
+  return data;
+}
+
 export const SetDispositionInput = z.object({
   itemId: z.uuid(),
   disposition: z.enum(["keep", "sell", "donate"]),
@@ -153,6 +185,8 @@ export const PrepareListingInput = z.object({
   title: z.string().min(1).max(100).optional(),
   body: z.string().min(1).max(5000).optional(),
   priceUsd: z.number().min(0).max(100_000).optional(),
+  // Which attached photos to publish. Omitted means all of the item's photos.
+  photoDocumentIds: z.array(z.uuid()).max(10).optional(),
 });
 
 // Draft a Facebook Marketplace listing and its review card. Nothing is posted
@@ -182,6 +216,8 @@ export async function prepareFacebookListing(ctx: ToolContext, input: z.infer<ty
     throw new MarketplaceError("Listings must not include your exact address; use the general area");
   }
   const priceCents = input.priceUsd === undefined ? draft.priceCents : Math.round(input.priceUsd * 100);
+  // Approval binds these exact photo hashes; Muse receives only these files.
+  const photos = await itemPhotoRefs(ctx, item.id, input.photoDocumentIds);
   const listing = await ctx.db
     .from("listings")
     .insert({
@@ -204,8 +240,14 @@ export async function prepareFacebookListing(ctx: ToolContext, input: z.infer<ty
     body,
     priceCents,
     areaLabel: listing.data.area_label,
+    photos,
   });
-  return { listing: listing.data, action };
+  return {
+    listing: listing.data,
+    action,
+    photos,
+    ...(photos.length ? {} : { photo_note: "No photos are attached to this item, so Muse will receive none. Attach photos first and prepare a new draft to include them." }),
+  };
 }
 
 export const DraftReplyInput = z.object({
