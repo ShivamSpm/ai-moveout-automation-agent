@@ -103,7 +103,7 @@ export default function Home() {
                   name="moveOut"
                   type="date"
                   defaultValue="2026-11-30"
-                  className="bg-transparent text-[#1d2b31] focus:outline-none"
+                  className="min-h-8 w-full bg-transparent text-[#1d2b31] focus:outline-none"
                 />
               </label>
               <button type="submit" className="rounded-xl bg-[#0b7a79] px-5 py-3 font-semibold text-white transition hover:brightness-110">

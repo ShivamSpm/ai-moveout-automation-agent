@@ -93,7 +93,7 @@ export function MoveBoard({
               <button
                 key={row.id}
                 onClick={() => toggle(row.id)}
-                className={`rounded-full border-2 px-3 py-1 transition ${
+                className={`rounded-full border-2 px-3 py-1.5 transition ${
                   done.has(row.id)
                     ? "border-leaf bg-leaf text-white"
                     : "border-edge bg-card hover:bg-paper"
