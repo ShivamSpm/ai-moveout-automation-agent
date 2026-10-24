@@ -1,0 +1,11 @@
+{
+  "name": "agent-worker",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --watch src/server.ts",
+    "test": "node --test \"src/**/*.test.ts\""
+  }
+}
