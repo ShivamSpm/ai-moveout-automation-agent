@@ -126,13 +126,14 @@ The renter adds one photo per item; the agent suggests a short title and descrip
 - Code checks every reply before it is sent (`policy.ts`): never below the minimum, never revealing it or the exact address, and pickups only up to 23:59 on the day before move-out.
 - When a buyer agrees to a price and a pickup time, the agent creates a `pickup.confirm` action and tells the buyer it is checking with the seller. A higher offer from another buyer replaces a waiting one.
 - On `/sell` the renter clicks **Approve** and types the meetup address: the item is held (one active reservation per item), the bot sends that buyer the confirmation and address, and the other buyers are told it sold. **Decline** cancels the deal; nothing is sent, and the agent resumes on the buyer's next message.
-- A daily Vercel Cron (`vercel.json`, `/api/cron/price-drops`) steps the advertised price down toward the minimum and edits the channel post. Payment is in person at pickup.
+- A daily Vercel Cron (`vercel.json`, `/api/cron/price-drops`) steps the advertised price down toward the minimum and edits the post. Payment is in person at pickup.
+- **Posting to a seller's own group:** one shared bot serves every seller. On `/sell`, **Add the bot to a Telegram group** opens Telegram's group picker with a link code signed by `TELEGRAM_WEBHOOK_SECRET`. When the bot is added, Telegram sends `/start@<bot> <code>` in the group, the webhook verifies it and records the group in `telegram_targets`, and that seller's approved listings post there. Without a linked group they go to the default channel. Groups that only let admins add members need an admin to add the bot.
 
-Setup (one Telegram account for the seller):
+Setup (done once by the team, for all sellers):
 
 1. In Telegram, message **@BotFather** → `/newbot`. Note the bot's username and token.
-2. Create a public channel (e.g. `@vacate_sale`) and add the bot as an admin that can post and edit messages.
-3. Apply `supabase/migrations/20261024211500_telegram_selling.sql` to the Supabase project.
+2. Create the default public channel (e.g. `@vacate_sale`) and add the bot as an admin that can post and edit messages.
+3. Apply `supabase/migrations/20261024211500_telegram_selling.sql` and `20261024220000_telegram_groups.sql` to the Supabase project.
 4. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_CHANNEL_ID`, `TELEGRAM_WEBHOOK_SECRET` (any long random string), `CRON_SECRET`, `SUPABASE_SECRET_KEY` and `OPENROUTER_API_KEY` in Vercel, then redeploy.
 5. Point the bot at the deployment (run once, with your own token and secret):
 
@@ -140,7 +141,7 @@ Setup (one Telegram account for the seller):
 curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" -d url=https://<your-domain>/api/telegram/webhook -d secret_token=$TELEGRAM_WEBHOOK_SECRET -d allowed_updates='["message"]'
 ```
 
-Buyers must open the chat from the channel button: a bot can't message someone first. Buyer chats need the deployed URL; they don't reach `localhost`.
+Buyers must open the chat from a listing's **Message seller** button: a bot can't message someone first. Buyer chats need the deployed URL; they don't reach `localhost`.
 
 ## Not wired up yet
 

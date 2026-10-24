@@ -10,7 +10,7 @@ export interface SellState {
   move: { moveOutDate: string | null; timezone: string; areaLabel: string | null };
   cutoff: string | null;
   pastCutoff: boolean;
-  telegram: { configured: boolean };
+  telegram: { configured: boolean; group: { title: string } | null; addToGroupUrl: string | null };
   listings: ListingRow[];
   conversations: Row<"conversations">[];
   messages: Pick<Row<"messages">, "conversation_id" | "direction" | "body" | "source" | "created_at">[];
@@ -135,6 +135,34 @@ export function SellConsole({ initial }: { initial: SellState }) {
         </p>
       )}
 
+      {state.telegram.configured && (
+        <section className={card}>
+          <h2 className="font-display text-3xl">Where listings are posted</h2>
+          <p className="mt-1 text-sm">
+            {state.telegram.group ? (
+              <>
+                Posting to <span className="font-semibold">{state.telegram.group.title}</span> (your Telegram group).
+              </>
+            ) : (
+              "Posting to the Vacate sale channel. Add the bot to a Telegram group you're in to post there instead."
+            )}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {state.telegram.addToGroupUrl && (
+              <a href={state.telegram.addToGroupUrl} target="_blank" rel="noreferrer" className={btn}>
+                {state.telegram.group ? "Switch to another group" : "Add the bot to a Telegram group"}
+              </a>
+            )}
+            {state.telegram.group && (
+              <button disabled={busy} className={ghost} onClick={() => void run(() => post("/api/sell/ops", JSON.stringify({ op: "unlink_group" })))}>
+                Use the Vacate channel instead
+              </button>
+            )}
+          </div>
+          <p className="mt-2 text-xs text-muted">Telegram asks which group to add it to. This page updates within a few seconds once it&apos;s added.</p>
+        </section>
+      )}
+
       {deals.length > 0 && (
         <section className={`${card} ring-2 ring-sun`}>
           <h2 className="font-display text-3xl">Deals waiting for you</h2>
@@ -229,7 +257,7 @@ export function SellConsole({ initial }: { initial: SellState }) {
                 <p className="mt-2 whitespace-pre-line text-sm text-ink/80">{listing.body}</p>
                 {listing.external_url && (
                   <a href={listing.external_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm underline">
-                    View the channel post
+                    View the post on Telegram
                   </a>
                 )}
                 {action?.error && <p className="mt-2 text-sm text-stamp">{action.error}</p>}

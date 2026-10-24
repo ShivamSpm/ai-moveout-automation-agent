@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   channelPostUrl,
+  groupLinkCode,
+  groupLinkUrl,
+  ownerFromGroupLinkCode,
+  parsePostRef,
+  postRef,
+  postUrl,
   readTelegramConfig,
   sendMessage,
   startLink,
@@ -32,7 +38,7 @@ describe("Telegram config", () => {
     const config = readTelegramConfig(env);
     expect(startLink(config, LISTING)).toBe(`https://t.me/VacateSaleBot?start=${LISTING}`);
     expect(channelPostUrl(config, 7)).toBe("https://t.me/vacate_sale/7");
-    expect(channelPostUrl({ channelId: "-1001234" }, 7)).toBeNull();
+    expect(channelPostUrl({ channelId: "-1001234" }, 7)).toBe("https://t.me/c/1234/7");
   });
 
   it("checks the webhook secret header exactly", () => {
@@ -56,6 +62,49 @@ describe("toBuyerEvent", () => {
     expect(toBuyerEvent(update("Is it available?"))).toMatchObject({ kind: "text", text: "Is it available?" });
     expect(toBuyerEvent(update("hi", "group"))).toEqual({ kind: "ignored" });
     expect(toBuyerEvent(update(undefined))).toEqual({ kind: "unsupported", chatId: "42" });
+  });
+});
+
+describe("group linking", () => {
+  const config = readTelegramConfig(env);
+  const owner = "0b1e7f52-4a59-4c3e-9d0e-6a3f5b2c1d00";
+
+  it("round-trips the seller id through a signed code within Telegram's payload limits", () => {
+    const code = groupLinkCode(owner, config);
+    expect(code).toMatch(/^[A-Za-z0-9_-]{1,64}$/);
+    expect(ownerFromGroupLinkCode(code, config)).toBe(owner);
+    expect(groupLinkUrl(config, owner)).toBe(`https://t.me/VacateSaleBot?startgroup=${code}`);
+  });
+
+  it("rejects a code signed with another secret or for another seller", () => {
+    const forged = groupLinkCode(owner, { webhookSecret: "other" });
+    expect(ownerFromGroupLinkCode(forged, config)).toBeNull();
+    const swapped = `${"f".repeat(32)}-${groupLinkCode(owner, config).split("-").slice(1).join("-")}`;
+    expect(ownerFromGroupLinkCode(swapped, config)).toBeNull();
+    expect(ownerFromGroupLinkCode("hello", config)).toBeNull();
+  });
+
+  it("reads the add-to-group command in a group and ignores other group messages", () => {
+    const group = (text: string): TelegramUpdate => ({
+      update_id: 2,
+      message: { message_id: 1, date: 0, chat: { id: -100555, type: "supergroup", title: "SF Moving Sales" }, from: { id: 7, is_bot: false }, text },
+    });
+    expect(toBuyerEvent(group("/start@VacateSaleBot abc-123"))).toEqual({
+      kind: "group_link",
+      chatId: "-100555",
+      title: "SF Moving Sales",
+      username: null,
+      code: "abc-123",
+    });
+    expect(toBuyerEvent(group("anyone selling a desk?"))).toEqual({ kind: "ignored" });
+  });
+
+  it("stores and links posts in groups and in the default channel", () => {
+    expect(parsePostRef(postRef("-100555", 12), "@vacate_sale")).toEqual({ chatId: "-100555", messageId: 12 });
+    expect(parsePostRef("12", "@vacate_sale")).toEqual({ chatId: "@vacate_sale", messageId: 12 });
+    expect(postUrl({ chatId: "-100555" }, 12)).toBe("https://t.me/c/555/12");
+    expect(postUrl({ chatId: "-100555", username: "sf_moving" }, 12)).toBe("https://t.me/sf_moving/12");
+    expect(postUrl({ chatId: "-555" }, 12)).toBeNull();
   });
 });
 

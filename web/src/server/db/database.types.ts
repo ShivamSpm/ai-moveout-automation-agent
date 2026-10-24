@@ -371,6 +371,19 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"telegram_targets": {
+                  Row: {
+                    "chat_id": string,"chat_title": string | null,"chat_username": string | null,"linked_at": string,"owner_id": string
+                  }
+                  Insert: {
+                    "chat_id": string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id": string
+                  }
+                  Update: {
+                    "chat_id"?: string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id"?: string
+                  }
+                  Relationships: [
+
+                  ]
                 },"telegram_updates": {
                   Row: {
                     "received_at": string,"update_id": number

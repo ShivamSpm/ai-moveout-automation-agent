@@ -12,6 +12,7 @@ const Op = z.discriminatedUnion("op", [
   z.object({ op: z.literal("discard_listing"), actionId: z.uuid() }),
   sales.ConfirmDealInput.extend({ op: z.literal("confirm_deal") }),
   z.object({ op: z.literal("decline_deal"), actionId: z.uuid() }),
+  z.object({ op: z.literal("unlink_group") }),
 ]);
 
 export const maxDuration = 60;
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
         return Response.json(await sales.confirmDeal(ctx, input));
       case "decline_deal":
         return Response.json(await sales.declineDeal(ctx, input.actionId));
+      case "unlink_group":
+        return Response.json(await sales.unlinkGroup(ctx));
     }
   } catch (e) {
     const status =

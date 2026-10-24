@@ -8,8 +8,12 @@ import { disclosesAddress } from "@/server/domain/drafts";
 import { assertInScope } from "@/server/domain/scope";
 import { isConfigured as openRouterConfigured } from "@/server/integrations/openrouter";
 import {
-  channelPostUrl,
   editCaption,
+  groupLinkUrl,
+  ownerFromGroupLinkCode,
+  parsePostRef,
+  postRef,
+  postUrl,
   readTelegramConfig,
   sendMessage,
   sendPhoto,
@@ -179,13 +183,17 @@ export async function publishListing(ctx: ToolContext, input: { actionId: string
     await ctx.db.from("listings").update({ status: "failed" }).eq("id", payload.listingId);
     throw new MarketplaceError("The item photo could not be read", 500);
   }
+  // The seller's linked group, or the app's default sale channel.
+  const { data: group } = await ctx.db.from("telegram_targets").select("chat_id, chat_username").maybeSingle();
+  const target = group ? { chatId: group.chat_id, username: group.chat_username } : { chatId: config.channelId };
   try {
-    const sent = await sendPhoto(config, config.channelId, signed.data.signedUrl, caption(listing!, cutoff, move.timezone), button(config, listing!.id));
-    const url = channelPostUrl(config, sent.message_id);
-    await record("succeeded", String(sent.message_id), url);
+    const sent = await sendPhoto(config, target.chatId, signed.data.signedUrl, caption(listing!, cutoff, move.timezone), button(config, listing!.id));
+    const url = postUrl(target, sent.message_id);
+    const ref = postRef(target.chatId, sent.message_id);
+    await record("succeeded", ref, url);
     await ctx.db
       .from("listings")
-      .update({ status: "published", external_ref: String(sent.message_id), external_url: url, published_at: new Date().toISOString() })
+      .update({ status: "published", external_ref: ref, external_url: url, published_at: new Date().toISOString() })
       .eq("id", listing!.id);
     await ctx.db.from("items").update({ status: "listed" }).eq("id", listing!.item_id).eq("status", "inventory");
     return { posted: true, url };
@@ -237,11 +245,22 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
 
   const event = toBuyerEvent(update);
   if (event.kind === "ignored") return { handled: "ignored" };
+  if (event.kind === "group_link") {
+    const ownerId = ownerFromGroupLinkCode(event.code, config);
+    if (!ownerId) return { handled: "group_link_invalid" };
+    const saved = await db.from("telegram_targets").upsert(
+      { owner_id: ownerId, chat_id: event.chatId, chat_title: event.title, chat_username: event.username, linked_at: now.toISOString() },
+      { onConflict: "owner_id" },
+    );
+    if (saved.error) throw new Error(saved.error.message);
+    await sendMessage(config, event.chatId, "Vacate is set up here. Approved listings will be posted in this group. Tap \"Message seller\" on a listing to chat privately about it.");
+    return { handled: "group_linked" };
+  }
   if (event.kind === "unsupported") {
     await sendMessage(config, event.chatId, "Sorry, I can only read text messages.");
     return { handled: "unsupported" };
   }
-  const hint = "Hi! Tap \"Message seller\" under an item in the sale channel to ask about it.";
+  const hint = "Hi! Tap \"Message seller\" under a listing to ask about that item.";
 
   if (event.kind === "start") {
     const found = event.listingId ? await listingContext(db, event.listingId) : null;
@@ -474,8 +493,9 @@ export async function confirmDeal(ctx: ToolContext, input: z.infer<typeof Confir
   }
   if (listing!.external_ref && move.move_out_date) {
     const cutoff = pickupCutoff(move.move_out_date, move.timezone);
-    await editCaption(config, config.channelId, Number(listing!.external_ref), caption(listing!, cutoff, move.timezone, true)).catch((e) =>
-      console.error("could not mark the channel post sold", e),
+    const post = parsePostRef(listing!.external_ref, config.channelId);
+    await editCaption(config, post.chatId, post.messageId, caption(listing!, cutoff, move.timezone, true)).catch((e) =>
+      console.error("could not mark the post sold", e),
     );
   }
   return { confirmed: true };
@@ -490,6 +510,13 @@ export async function declineDeal(ctx: ToolContext, actionId: string) {
   const deal = ActionPayloads["pickup.confirm"].parse(action.payload);
   await ctx.db.from("conversations").update({ deal_status: "negotiating" }).eq("id", deal.conversationId).eq("deal_status", "awaiting_seller");
   return { declined: true };
+}
+
+/** Goes back to posting in the app's default sale channel. The bot stays in the group until someone removes it. */
+export async function unlinkGroup(ctx: ToolContext) {
+  const { error } = await ctx.db.from("telegram_targets").delete().eq("owner_id", ctx.user.id);
+  if (error) throw new MarketplaceError(error.message, 500);
+  return { unlinked: true };
 }
 
 // ---------------------------------------------------------------- price drops
@@ -520,8 +547,9 @@ export async function applyPriceDrops(now = new Date()) {
     if (price >= listing.price_cents) continue;
     await db.from("listings").update({ price_cents: price }).eq("id", listing.id);
     if (listing.external_ref) {
-      await editCaption(config, config.channelId, Number(listing.external_ref), caption({ ...listing, price_cents: price }, cutoff, items.moves.timezone), button(config, listing.id)).catch(
-        (e) => console.error("could not update the channel post price", e),
+      const post = parsePostRef(listing.external_ref, config.channelId);
+      await editCaption(config, post.chatId, post.messageId, caption({ ...listing, price_cents: price }, cutoff, items.moves.timezone), button(config, listing.id)).catch(
+        (e) => console.error("could not update the post price", e),
       );
     }
     changed.push({ listingId: listing.id, from: listing.price_cents, to: price });
@@ -533,18 +561,25 @@ export async function applyPriceDrops(now = new Date()) {
 
 export async function sellingState(ctx: ToolContext, now = new Date()) {
   const move = await currentMove(ctx);
-  const [listings, conversations, messages, actions] = await Promise.all([
+  const [listings, conversations, messages, actions, group] = await Promise.all([
     ctx.db.from("listings").select("*, items!inner(id, name, ask_cents, floor_cents, status)").eq("channel", "telegram").order("created_at", { ascending: false }),
     ctx.db.from("conversations").select("*").eq("source", "telegram").order("last_active_at", { ascending: false }),
     ctx.db.from("messages").select("conversation_id, direction, body, source, created_at").order("created_at"),
     ctx.db.from("actions").select("*").eq("move_id", move.id).in("kind", ["listing.publish", "pickup.confirm"]).order("created_at", { ascending: false }),
+    ctx.db.from("telegram_targets").select("chat_title").maybeSingle(),
   ]);
   const cutoff = move.move_out_date ? pickupCutoff(move.move_out_date, move.timezone) : null;
+  const configured = telegramConfigured();
   return {
     move: { moveOutDate: move.move_out_date, timezone: move.timezone, areaLabel: move.area_label },
     cutoff: cutoff?.toISOString() ?? null,
     pastCutoff: cutoff ? now.getTime() > cutoff.getTime() : false,
-    telegram: { configured: telegramConfigured() },
+    telegram: {
+      configured,
+      // Null: listings go to the app's default sale channel.
+      group: group.data ? { title: group.data.chat_title ?? "your Telegram group" } : null,
+      addToGroupUrl: configured ? groupLinkUrl(readTelegramConfig(), ctx.user.id) : null,
+    },
     listings: listings.data ?? [],
     conversations: conversations.data ?? [],
     messages: messages.data ?? [],
