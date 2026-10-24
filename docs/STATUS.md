@@ -39,7 +39,7 @@ payload-hash match, idempotency key, durable claim, provider call, reconcile),
 
 ## First implementation steps (in order, owners proposed)
 
-1. Merge PR #1 to main (owner/approver), rebase this planning branch, open its PR.
+1. Done 11:57 AM: PR #1 merged to main (9ed9c93); this branch rebased onto it.
 2. Create dedicated hackathon Supabase + Vercel projects (root dir `web`); see blockers.
 3. Migration 0001 at root `supabase/migrations`: `moves`, `documents`, `obligations`,
    `items`, `item_photos`, `actions` (payload hash, idempotency key, state), `listings`,
@@ -56,7 +56,7 @@ payload-hash match, idempotency key, durable claim, provider call, reconcile),
 
 | Service | Observed | Needed to unblock |
 | --- | --- | --- |
-| GitHub | `jg-ctfbio` has write, not admin; PR #1 open | Merge PR #1; agree branch flow |
+| GitHub | `jg-ctfbio` has write, not admin; PR #1 merged | Agree branch flow; repo is public |
 | Vercel | CLI 58.8 logged in as `jg-ctfbio` (CTFBio account) | Which team/account hosts this; GitHub app on `ShivamSpm` repo needs owner, or deploy via CLI |
 | Supabase | CLI 2.118; no project chosen | Dedicated project/org (not CTFBio); URL + keys into Vercel env |
 | OpenRouter | No key in environment | Key with spend cap (Q23); confirm Claude model id available |

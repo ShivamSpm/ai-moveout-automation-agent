@@ -15,5 +15,7 @@ development-framework change; no app, migration or live provider integration is
 implemented or deployed. A shareable whiteboard JPEG is included at the user's
 explicit request; the original HEIC and private renter inputs are excluded.
 
-The branch is based on the teammate main README. Preserve the existing website
-branch under web/ (PR #1); it stays at web/, no apps/web migration during the hackathon.
+Based on main after the teammate website merge (PR #1). The app stays at web/ with
+npm for the hackathon; the monorepo docs are updated accordingly instead of moving it
+to apps/web. Image metadata (camera, timestamp, GPS) was stripped losslessly before
+publication.

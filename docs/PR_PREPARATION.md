@@ -20,7 +20,7 @@ gh pr create --repo ShivamSpm/ai-moveout-automation-agent --base main --head cod
 If main advances, integrate its changes before publishing. Never force-push main
 or overwrite teammate history. `origin/website` contains a Next.js app under `web/`
 (commit `88fc962` at inspection); this planning branch does not merge or relocate it.
-Decision: the app stays at `web/`; merge PR #1 first, then rebase this branch.
+Decision: the app stays at `web/`; PR #1 is merged and this branch is rebased onto it.
 
 The user-approved whiteboard JPEG is included under docs/brainstorming/pictures;
 the original HEIC, private PNG and real renter data remain excluded. The PR description
