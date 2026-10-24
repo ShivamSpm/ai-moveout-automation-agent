@@ -7,6 +7,12 @@ const blankToUndefined = (value: unknown) => (typeof value === "string" && value
 
 export const PHONE_PATTERN = /^\+?[0-9 ().-]{7,20}$/;
 
+export const landlordPhoneSchema = z
+  .string()
+  .trim()
+  .regex(PHONE_PATTERN, "Enter a phone number, such as (415) 555-0134")
+  .refine((v) => v.replace(/\D/g, "").length >= 7, "Enter a phone number, such as (415) 555-0134");
+
 export const moveDetailsSchema = z.object({
   renterName: z.string().trim().min(1, "Enter your name").max(100),
   moveOutDate: z.iso.date("Pick your move-out day on the calendar"),
@@ -16,11 +22,7 @@ export const moveDetailsSchema = z.object({
   bathrooms: z.coerce.number().min(0.5).max(10).multipleOf(0.5, "Use whole or half baths, such as 1 or 1.5"),
   sqft: z.preprocess(blankToUndefined, z.coerce.number().int().min(100, "At least 100 sq ft").max(20000).optional()),
   landlordName: z.string().trim().min(1, "Enter the landlord or manager's name").max(100),
-  landlordPhone: z
-    .string()
-    .trim()
-    .regex(PHONE_PATTERN, "Enter a phone number, such as (415) 555-0134")
-    .refine((v) => v.replace(/\D/g, "").length >= 7, "Enter a phone number, such as (415) 555-0134"),
+  landlordPhone: landlordPhoneSchema,
   landlordEmail: z.preprocess(blankToUndefined, z.email("Enter a valid email or leave it blank").optional()),
 });
 

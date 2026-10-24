@@ -7,7 +7,7 @@ import { startDraftSchema, type StartDraft, type StartState } from "@/lib/start-
 import { OAuthButton } from "./google-sign-in";
 
 const draftKey = "vacate.start.v1";
-const emptyDraft: StartDraft = { email: "", address: "", moveOutDate: "", deposit: "", landlordName: "", landlordEmail: "" };
+const emptyDraft: StartDraft = { email: "", address: "", moveOutDate: "", deposit: "", landlordName: "", landlordPhone: "", landlordEmail: "" };
 const steps = ["Your account is ready", "Your move details are saved", "Lease review comes in a later step", "Opening your dashboard…"];
 const field = "mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 text-ink placeholder:text-muted/70 focus:border-edge focus:outline-none focus:ring-4 focus:ring-tape/50";
 
@@ -113,8 +113,10 @@ export function StartForm({ signedInEmail, initial, providers, resume }: {
             <label><span className="text-sm font-medium">Move-out date</span><input {...input("moveOutDate")} required type="date" className={field} />{errors("moveOutDate")}</label>
             <label><span className="text-sm font-medium">Security deposit</span><input {...input("deposit")} required inputMode="decimal" placeholder="$3,950" className={field} />{errors("deposit")}</label>
           </div>
+          <label className="block"><span className="text-sm font-medium">Landlord or manager</span><input {...input("landlordName")} required maxLength={100} placeholder="Landlord or manager name" className={field} />{errors("landlordName")}</label>
           <div className="grid gap-5 sm:grid-cols-2">
-            <label><span className="text-sm font-medium">Landlord or manager</span><input {...input("landlordName")} required maxLength={100} placeholder="Landlord or manager name" className={field} />{errors("landlordName")}</label>
+            <label><span className="text-sm font-medium">Their phone</span><input {...input("landlordPhone")} required type="tel" inputMode="tel" autoComplete="off" maxLength={20} placeholder="(415) 555-0134" className={field} />{errors("landlordPhone")}
+              <span className="mt-1 block text-xs text-muted">The agent calls this number for your move-out checklist, only after you approve.</span></label>
             <label><span className="text-sm font-medium">Their email</span><input {...input("landlordEmail")} required type="email" placeholder="landlord@example.test" className={field} />{errors("landlordEmail")}</label>
           </div>
           <label className="block cursor-pointer"><span className="text-sm font-medium">Your lease (PDF)</span>
