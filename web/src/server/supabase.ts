@@ -33,10 +33,11 @@ export function tokenClient(accessToken: string): Db {
   });
 }
 
-// Secret-key client. Only for the private credential schema, after the caller
-// has established the user's identity from their own session. Never pass a
-// model- or client-supplied user id here.
-export function credentialStore() {
+// Secret-key client. Used only to call owner-scoped database functions
+// (credentials, Muse bridge) with an owner id the server resolved itself from
+// a verified session or connector token. Never pass a model- or
+// client-supplied user id here.
+export function serviceClient() {
   return createClient<Database>(env.supabaseUrl(), env.supabaseSecretKey(), {
     auth: { persistSession: false, autoRefreshToken: false },
   });

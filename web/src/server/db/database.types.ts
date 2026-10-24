@@ -23,7 +23,26 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "action_events": {
+            "a2a_tasks": {
+                  Row: {
+                    "action_id": string | null,"id": string,"owner_id": string,"task": NonNullable<Json>,"updated_at": string
+                  }
+                  Insert: {
+                    "action_id"?: string | null,"id": string,"owner_id": string,"task": NonNullable<Json>,"updated_at"?: string
+                  }
+                  Update: {
+                    "action_id"?: string | null,"id"?: string,"owner_id"?: string,"task"?: NonNullable<Json>,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "a2a_tasks_action_id_fkey"
+      columns: ["action_id"]
+isOneToOne: false
+      referencedRelation: "actions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"action_events": {
                   Row: {
                     "action_id": string,"at": string,"detail": Json | null,"event": string,"id": number,"owner_id": string
                   }
@@ -80,15 +99,28 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
-                },"conversations": {
+                },"connector_tokens": {
                   Row: {
-                    "buyer_label": string,"created_at": string,"id": string,"listing_id": string,"owner_id": string,"source": string
+                    "created_at": string,"id": string,"label": string,"last_used_at": string | null,"owner_id": string,"revoked_at": string | null,"token_hash": string,"token_hint": string
                   }
                   Insert: {
-                    "buyer_label": string,"created_at"?: string,"id"?: string,"listing_id": string,"owner_id"?: string,"source": string
+                    "created_at"?: string,"id"?: string,"label"?: string,"last_used_at"?: string | null,"owner_id"?: string,"revoked_at"?: string | null,"token_hash": string,"token_hint": string
                   }
                   Update: {
-                    "buyer_label"?: string,"created_at"?: string,"id"?: string,"listing_id"?: string,"owner_id"?: string,"source"?: string
+                    "created_at"?: string,"id"?: string,"label"?: string,"last_used_at"?: string | null,"owner_id"?: string,"revoked_at"?: string | null,"token_hash"?: string,"token_hint"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"conversations": {
+                  Row: {
+                    "buyer_label": string,"created_at": string,"external_thread_ref": string | null,"id": string,"listing_id": string,"owner_id": string,"source": string
+                  }
+                  Insert: {
+                    "buyer_label": string,"created_at"?: string,"external_thread_ref"?: string | null,"id"?: string,"listing_id": string,"owner_id"?: string,"source": string
+                  }
+                  Update: {
+                    "buyer_label"?: string,"created_at"?: string,"external_thread_ref"?: string | null,"id"?: string,"listing_id"?: string,"owner_id"?: string,"source"?: string
                   }
                   Relationships: [
                     {
@@ -189,13 +221,13 @@ isOneToOne: false
                   ]
                 },"listings": {
                   Row: {
-                    "area_label": string | null,"body": string,"channel": string,"created_at": string,"external_ref": string | null,"external_url": string | null,"id": string,"item_id": string,"mode": string,"owner_id": string,"price_cents": number,"published_at": string | null,"status": string,"title": string
+                    "area_label": string | null,"body": string,"channel": string,"created_at": string,"delegate": string | null,"external_ref": string | null,"external_url": string | null,"id": string,"item_id": string,"mode": string,"owner_id": string,"price_cents": number,"published_at": string | null,"status": string,"title": string
                   }
                   Insert: {
-                    "area_label"?: string | null,"body": string,"channel": string,"created_at"?: string,"external_ref"?: string | null,"external_url"?: string | null,"id"?: string,"item_id": string,"mode": string,"owner_id"?: string,"price_cents": number,"published_at"?: string | null,"status"?: string,"title": string
+                    "area_label"?: string | null,"body": string,"channel": string,"created_at"?: string,"delegate"?: string | null,"external_ref"?: string | null,"external_url"?: string | null,"id"?: string,"item_id": string,"mode": string,"owner_id"?: string,"price_cents": number,"published_at"?: string | null,"status"?: string,"title": string
                   }
                   Update: {
-                    "area_label"?: string | null,"body"?: string,"channel"?: string,"created_at"?: string,"external_ref"?: string | null,"external_url"?: string | null,"id"?: string,"item_id"?: string,"mode"?: string,"owner_id"?: string,"price_cents"?: number,"published_at"?: string | null,"status"?: string,"title"?: string
+                    "area_label"?: string | null,"body"?: string,"channel"?: string,"created_at"?: string,"delegate"?: string | null,"external_ref"?: string | null,"external_url"?: string | null,"id"?: string,"item_id"?: string,"mode"?: string,"owner_id"?: string,"price_cents"?: number,"published_at"?: string | null,"status"?: string,"title"?: string
                   }
                   Relationships: [
                     {
@@ -288,7 +320,13 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "approve_action":
+            "a2a_task_load":
+{ Args: { "p_id": string,"p_owner_id": string }; Returns: Json
+                           },
+"a2a_task_save":
+{ Args: { "p_action_id": string,"p_id": string,"p_owner_id": string,"p_task": Json }; Returns: undefined
+                           },
+"approve_action":
 { Args: { "p_action_id": string,"p_payload_hash": string }; Returns: {
               "approved_at": string | null,
 "approved_hash": string | null,
@@ -382,6 +420,75 @@ isOneToOne: false
               "connected": boolean,"google_email": string,"scopes": (string)[]
             }[]
                            },
+"muse_buyer_message":
+{ Args: { "p_body": string,"p_buyer_label": string,"p_listing_id": string,"p_owner_id": string,"p_thread_ref": string }; Returns: string
+                           },
+"muse_claim":
+{ Args: { "p_action_id": string,"p_owner_id": string,"p_payload_hash": string }; Returns: {
+              "approved_at": string | null,
+"approved_hash": string | null,
+"attempts": number,
+"created_at": string,
+"error": string | null,
+"executed_at": string | null,
+"execution_mode": string | null,
+"id": string,
+"idempotency_key": string,
+"kind": string,
+"move_id": string,
+"owner_id": string,
+"payload": NonNullable<Json>,
+"payload_hash": string,
+"provider_ref": string | null,
+"provider_url": string | null,
+"status": string,
+"title": string,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "actions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"muse_listings":
+{ Args: { "p_owner_id": string }; Returns: {
+              "external_url": string,"item_status": string,"listing_id": string,"status": string,"title": string
+            }[]
+                           },
+"muse_queue":
+{ Args: { "p_owner_id": string }; Returns: {
+              "action_id": string,"approved_at": string,"attempts": number,"kind": string,"payload": Json,"payload_hash": string,"photo_paths": (string)[],"status": string,"title": string
+            }[]
+                           },
+"muse_report":
+{ Args: { "p_action_id": string,"p_external_ref"?: string,"p_external_url"?: string,"p_note"?: string,"p_owner_id": string,"p_payload_hash": string,"p_status": string }; Returns: {
+              "approved_at": string | null,
+"approved_hash": string | null,
+"attempts": number,
+"created_at": string,
+"error": string | null,
+"executed_at": string | null,
+"execution_mode": string | null,
+"id": string,
+"idempotency_key": string,
+"kind": string,
+"move_id": string,
+"owner_id": string,
+"payload": NonNullable<Json>,
+"payload_hash": string,
+"provider_ref": string | null,
+"provider_url": string | null,
+"status": string,
+"title": string,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "actions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "record_action_result":
 { Args: { "p_action_id": string,"p_error"?: string,"p_mode": string,"p_provider_ref"?: string,"p_provider_url"?: string,"p_status": string }; Returns: {
               "approved_at": string | null,
@@ -438,6 +545,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"resolve_connector_token":
+{ Args: { "p_token_hash": string }; Returns: string
+                           },
 "save_google_credentials":
 { Args: { "p_access_token": string,"p_email": string,"p_expires_at": string,"p_owner_id": string,"p_refresh_token": string,"p_scopes": (string)[] }; Returns: undefined
                            }
