@@ -21,6 +21,7 @@ const links = [
   { href: "/move", label: "My move" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/items", label: "Selling" },
+  { href: "/sell", label: "Sell on Telegram" },
 ];
 
 export function SiteNav() {

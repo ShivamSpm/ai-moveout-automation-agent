@@ -43,7 +43,7 @@ export const CalendarCreatePayload = z.object({
 
 export const ListingPublishPayload = z.object({
   listingId: uuid,
-  channel: z.enum(["facebook_marketplace", "craigslist", "buy_nothing", "vinted", "in_app"]),
+  channel: z.enum(["facebook_marketplace", "craigslist", "buy_nothing", "vinted", "in_app", "telegram"]),
   title: z.string().min(1).max(100),
   body: z.string().min(1).max(5_000),
   priceCents: z.int().min(0),
