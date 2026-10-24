@@ -5,10 +5,11 @@ import { badRequest, cleaningContext, errorResponse, readJson, simulatedJson } f
 // POST /api/cleaning/quotes  CleaningRequest -> simulated quotes from the cleaning provider catalog.
 // The tool validates the body with CleaningRequestSchema; nothing is reserved or booked.
 export async function POST(request: Request) {
-  const body = await readJson(request);
-  if (body === null) return badRequest("Expected a JSON CleaningRequest body");
   try {
-    const result = await findCleaningQuotes(body as CleaningRequestInput, await cleaningContext());
+    const ctx = await cleaningContext();
+    const body = await readJson(request);
+    if (body === null) return badRequest("Expected a JSON CleaningRequest body");
+    const result = await findCleaningQuotes(body as CleaningRequestInput, ctx);
     return simulatedJson({ ...result });
   } catch (error) {
     return errorResponse(error);
