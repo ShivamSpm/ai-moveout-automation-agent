@@ -1,6 +1,7 @@
 import { z } from "zod";
 const optionalNumber = (schema: z.ZodNumber) => z.preprocess(v => v === "" || v === undefined ? undefined : Number(v), schema.optional());
 export const PHONE_PATTERN = /^\+?[0-9 ().-]{7,20}$/;
+export const landlordPhoneSchema = z.string().trim().regex(PHONE_PATTERN, "Enter a valid phone number").refine(v => v.replace(/\D/g, "").length >= 7, "Include the area code");
 export const moveFields = {
   renterName: z.string().trim().min(1, "Enter your name").max(100),
   address: z.string().trim().min(1, "Enter your street address").max(160),
@@ -11,7 +12,7 @@ export const moveFields = {
   propertyManagementCompany: z.string().trim().max(160).optional(),
   landlordName: z.string().trim().min(1, "Enter the landlord or manager's name").max(100),
   landlordEmail: z.email("Enter the landlord or property manager's email"),
-  landlordPhone: z.preprocess(v => v === "" ? undefined : v, z.string().trim().regex(PHONE_PATTERN, "Enter a valid phone number").refine(v => v.replace(/\D/g, "").length >= 7, "Include the area code").optional()),
+  landlordPhone: z.preprocess(v => v === "" ? undefined : v, landlordPhoneSchema.optional()),
   bedrooms: optionalNumber(z.number().int().min(0).max(10)),
   bathrooms: optionalNumber(z.number().min(0.5).max(10).multipleOf(0.5)),
   sqft: optionalNumber(z.number().int().min(100).max(20000)),

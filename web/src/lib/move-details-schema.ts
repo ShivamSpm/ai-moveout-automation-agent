@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { moveFields } from "./move-fields";
 import { depositSchema } from "./start-schema";
-export { PHONE_PATTERN } from "./move-fields";
+export { PHONE_PATTERN, landlordPhoneSchema } from "./move-fields";
 export const moveDetailsSchema = z.object({ ...moveFields, moveOutDate: z.iso.date("Pick your move-out day"), deposit: depositSchema });
 
 export type MoveDetails = z.infer<typeof moveDetailsSchema>;
