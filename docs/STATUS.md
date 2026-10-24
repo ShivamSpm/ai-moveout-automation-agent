@@ -1,6 +1,70 @@
 # Session handoff
 
-Updated: October 24, 2026. Phase: whiteboard analyzed; requirements expanded.
+Updated: October 24, 2026, 12:00 PM PDT. Phase: website integration planned; build next.
+
+## Website integration review (PR #1, `origin/website` at 88fc962)
+
+Author `ibm777p2`; PR already has one approval; repository owner `ShivamSpm`.
+Checked in an isolated worktree on Node 24.21 / npm 11.19: `npm ci`, `npm run lint`
+and `npm run build` (Next 16.4.3, includes typecheck) pass. Plain `tsc --noEmit` fails
+only on Next-generated `PageProps`/`LayoutProps` globals; use `next build` or run
+`next typegen` first. Not checked in a browser here.
+
+What it is: a front-end demo on static data (`web/src/lib/demo.ts`): landing, `/start`
+form, `/dashboard` (dated plan, deposit meter, approval queue, activity, lease clauses),
+`/items` and an item page with a rule-based buyer chat. No backend, auth or providers.
+Reusable as is: `LeaseRules` → `buildPlan()` (dates computed in code, not by the model)
+is the right extraction target for Flow A; the approval queue is the review-card UI.
+
+Gaps against confirmed requirements (requests to the web owner, not edits made here):
+
+1. **Simulated state shown as done.** "Approve & send" stamps "Sent" with nothing sent.
+   Label "Approved · simulated" until the execute route exists (AGENTS.md visibility rule).
+2. **No renter chat (D01).** Add a chat panel to `/dashboard` backed by `POST /api/chat`.
+3. **Flow B intake missing.** Items are pre-seeded; add photo upload → proposed
+   keep/sell/donate → user confirmation before anything is listed.
+4. **Flow A input is cosmetic.** Lease upload is not stored or read; form values are ignored.
+5. **Legal citations are hard-coded** (CA Civil Code §1950.5, Vehicle Code §14600, SFMTA).
+   Mark them "California general information, verify" or source them from the lease
+   extraction with page references; do not show them as extracted from the user's lease.
+6. **Marketplace channel.** Buyer chat lives on a Vacate page. D10's live path is
+   Facebook Marketplace via Muse; keep the page chat labeled as an in-app channel.
+7. **Demo-only seller floor** sits in client props; when wired, keep the floor server-side.
+
+Proposed web↔agent contract (teammate) mapped onto shared tools, as Next route handlers
+in `web/` first: `POST /api/moves/:id/start` (store lease, extract `LeaseRules` with page
+refs, draft notice as a pending action), `POST /api/actions/:id/execute` (owner check,
+payload-hash match, idempotency key, durable claim, provider call, reconcile),
+`POST /api/items/:id/chat` (`{ reply, proposedDeal? }`; deals stay pending seller OK).
+
+## First implementation steps (in order, owners proposed)
+
+1. Merge PR #1 to main (owner/approver), rebase this planning branch, open its PR.
+2. Create dedicated hackathon Supabase + Vercel projects (root dir `web`); see blockers.
+3. Migration 0001 at root `supabase/migrations`: `moves`, `documents`, `obligations`,
+   `items`, `item_photos`, `actions` (payload hash, idempotency key, state), `listings`,
+   `conversations`, `messages`; owner RLS; private `leases`/`photos` buckets. Shivam.
+4. Supabase Auth in `web/` and replace `demo.ts` reads with a server repository; move
+   demo values to `supabase/seed.sql` as synthetic data. Vincent + Shivam.
+5. `/api/chat` with OpenRouter (Claude) and a small tool registry: `extract_lease_rules`,
+   `build_checklist`, `draft_landlord_email`, `propose_item_dispositions`. Steven.
+6. In parallel from step 1: Muse spike per MUSE_SPIKE.md, 20-minute timebox. Jorge.
+7. Google OAuth (gmail.send, calendar.events) for test users, wired to execute route.
+8. Deploy preview; run ACCEPTANCE.md Flow A, then Flow B, on the hosted URL.
+
+## Service-access blockers (observed 12:00 PM)
+
+| Service | Observed | Needed to unblock |
+| --- | --- | --- |
+| GitHub | `jg-ctfbio` has write, not admin; PR #1 open | Merge PR #1; agree branch flow |
+| Vercel | CLI 58.8 logged in as `jg-ctfbio` (CTFBio account) | Which team/account hosts this; GitHub app on `ShivamSpm` repo needs owner, or deploy via CLI |
+| Supabase | CLI 2.118; no project chosen | Dedicated project/org (not CTFBio); URL + keys into Vercel env |
+| OpenRouter | No key in environment | Key with spend cap (Q23); confirm Claude model id available |
+| Google | No OAuth client | Dedicated GCP project, consent screen in testing, test users (Q04) |
+| Muse | `muse` CLI not installed; Facebook access untested | Run spike; Q01–Q03, Q25 |
+| Apify / Bland | No keys | Stretch only |
+
+No accounts were connected, no resources created and nothing was sent or published.
 
 ## Completed
 

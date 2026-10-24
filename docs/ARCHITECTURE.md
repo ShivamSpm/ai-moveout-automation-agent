@@ -5,7 +5,7 @@ This is a design proposal for an empty repository, not implemented functionality
 ## Application shape
 
 Use one TypeScript monorepo following [MONOREPO.md](MONOREPO.md).
-The website lives at `apps/web`; shared domain/tools/contracts and integrations
+The website lives at `web/` (teammate PR #1); shared domain/tools/contracts and integrations
 live under `packages`. The requested Muse Code SDK runs through a separate worker
 adapter; see [AGENT_STANDARDS.md](AGENT_STANDARDS.md). Vercel hosts the web UI and bounded
 server requests. Supabase owns identity, durable records and private file storage.
@@ -33,7 +33,7 @@ are separate systems. The web demo does not require launching coding agents.
 ## Code boundaries
 
 The canonical target tree and dependency rules are in [MONOREPO.md](MONOREPO.md).
-Use `apps/web`, shared `packages/*`, root `supabase/migrations`, the agent worker
+Use `web/`, shared `packages/*` (extracted as needed), root `supabase/migrations`, the agent worker
 and Muse connector. This supersedes the initial root `app/` / `lib/` proposal.
 
 ## State model

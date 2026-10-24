@@ -31,9 +31,9 @@ and git-ignored under `private/whiteboard/`; it will not travel with the PR.
 
 ## Immediate next work
 
-Confirm current time, git status and teammate ownership. `origin/website` already
-contains a Next.js app under `web/` (88fc962 at inspection); inspect and coordinate
-integration instead of generating a competing app. `apps/web` is the target proposal.
+Integration review is done: see "Website integration review", "First implementation
+steps" and "Service-access blockers" at the top of `docs/STATUS.md`. The teammate app
+stays at `web/` with npm (PR #1). Build on it; do not move it or generate another app.
 If authorized to build,
 scaffold the monorepo's first working web/auth/saved-move slice and immediately
 test dedicated service access. Prioritize the Muse capability spike and Google

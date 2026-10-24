@@ -15,4 +15,4 @@ development-framework change; no app, migration or live provider integration is
 implemented or deployed. Original whiteboard image and private inputs are excluded.
 
 The branch is based on the teammate main README. Preserve the existing website
-branch under web/; apps/web is a proposed monorepo migration to coordinate.
+branch under web/ (PR #1); it stays at web/, no apps/web migration during the hackathon.

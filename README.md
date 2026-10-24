@@ -33,9 +33,9 @@ and help coordinate communications, marketplaces, cleaning and moving services.
 
 **Status:** planning and Claude/Codex development scaffolding only. The upstream
 repository was empty when cloned on October 24, 2026. There is no running app,
-connected provider, database or deployment in this planning branch. Teammates
-subsequently created `origin/website` with a Next.js app at `web/`; it has not been
-merged or tested here. Coordinate before migrating it to the proposed `apps/web`.
+connected provider, database or deployment in this planning branch. The teammate
+website (PR #1, Next.js app at `web/`) builds locally and stays at `web/`; see
+[docs/MONOREPO.md](docs/MONOREPO.md).
 
 Start your next session with [START_HERE.md](START_HERE.md). The source whiteboard
 and this conversation are captured as requirements, decisions and implementation

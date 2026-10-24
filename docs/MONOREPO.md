@@ -2,9 +2,10 @@
 
 User decision: one repository owns website, agent runtimes, Muse connector, shared
 tools, Supabase migrations, development agents/skills, tests and architecture.
-This tree is the target layout. Teammate branch `origin/website` already has a
-Next.js app at `web/`; preserve it and coordinate any move to `apps/web`. The
-planning branch does not merge, rewrite or test that application.
+This tree is the target layout. Integration decision (proposed Oct 24, 12:00 PM):
+the teammate Next.js app (PR #1, `origin/website`) stays at root `web/` with npm
+for the hackathon. Moving it to `apps/web` or switching to pnpm would churn an
+actively edited branch and its lockfile for no demo benefit. Revisit after the event.
 
 ```text
 ai-moveout-automation-agent/
@@ -18,8 +19,8 @@ ai-moveout-automation-agent/
 ├── .codex/
 │   ├── config.toml
 │   └── agents/                      Codex development role definitions
+├── web/                             Next.js UI, chat, auth callbacks, API routes (PR #1)
 ├── apps/
-│   ├── web/                         Next.js UI, auth callbacks, bounded API routes
 │   ├── agent-worker/                durable jobs + isolated Muse Code SDK host
 │   └── connector-gateway/           thin authenticated MCP/A2A entry points
 ├── packages/
@@ -51,9 +52,8 @@ ai-moveout-automation-agent/
 │   └── adr/                        consequential implementation choices
 ├── .github/                        PR template and scoped CI workflows
 ├── private/                        ignored user files and local evidence
-├── package.json                    private root, tool scripts, package-manager pin
-├── pnpm-workspace.yaml             apps/* and packages/*
-└── pnpm-lock.yaml                  one committed dependency resolution
+├── package.json                    private root, npm workspaces (added with first package)
+└── package-lock.json               one committed resolution (moves up from web/ then)
 ```
 
 ## Boundaries and dependency direction
@@ -75,20 +75,24 @@ need a network protocol solely to resemble an agent framework.
 
 ## Implement incrementally today
 
-Scaffold `apps/web`, `contracts`, `domain`, `tools`, `integrations`, `db` and
-`supabase` first. Add the worker when running the Muse host or durable tasks;
+Build inside `web/` plus root `supabase/` first. Until a second runtime needs
+them, server code lives in `web/src/server/{tools,integrations,db}` and shared
+schemas in `web/src/contracts`, keeping the package import rules so each folder
+can be lifted into `packages/*` unchanged. Extract `packages/contracts` when the
+agent worker is added; that commit also introduces root npm workspaces. Add the worker when running the Muse host or durable tasks;
 add a separate gateway deployment only if authentication/transport/lifecycle
 requirements justify it. Its handlers may initially be hosted alongside the web
 app if supported. One monorepo does not require three deployments immediately.
 
-Recommend pnpm workspaces with one pinned package-manager version. Choose supported
+Use npm (the teammate lockfile's manager); pin `packageManager` when the root
+manifest is created. Choose supported
 Node/Next.js/SDK versions at implementation time, pin them and commit the lockfile.
 Add Turborepo only if caching/task orchestration materially helps this team today;
 the package split must work without it. Do not create empty packages to fill the tree.
 
 ## Deployment and database ownership
 
-- Vercel project root is `apps/web`; configure monorepo build/install behavior.
+- Vercel project root directory is `web`; configure monorepo install once workspaces exist.
 - A persistent `muse serve` process belongs in a compatible isolated worker host,
   not assumed to survive in a Vercel request. Worker hosting is an open decision.
 - Supabase has its own migration history, auth and private storage. Keep all SQL
@@ -108,7 +112,7 @@ coding skills such as migration or repository maintenance to renter conversation
 
 ## Proposed ownership and checks
 
-Vincent: `apps/web`; Steven: vision/lease tools and model adapter; Shivam: Supabase,
+Vincent: `web/`; Steven: vision/lease tools and model adapter; Shivam: Supabase,
 DB and Google paths; Jorge: Muse SDK/connector, protocols and marketplace workflow.
 Confirm these assignments. One owner integrates shared contracts, package manifests
 and lockfile; all others specify requested changes rather than co-editing them.

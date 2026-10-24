@@ -5,7 +5,7 @@ proposals for discussion; no one has been contacted or assigned work externally.
 
 | Proposed owner | Workstream | Suggested files | Done criterion |
 | --- | --- | --- | --- |
-| Vincent | Web chat and move dashboard | `apps/web/` | Hosted user can operate the full agreed journey |
+| Vincent | Web chat and move dashboard | `web/` | Hosted user can operate the full agreed journey |
 | Steven | Lease/photo intelligence and model adapter | `packages/tools/lease`, `packages/tools/photos`, `packages/integrations/openrouter/` | Cited obligations and confirmed keep/sell/donate inventory |
 | Shivam | Persistence, auth and Google actions | `supabase/`, `packages/db/`, `packages/integrations/google/` | Private saved move plus verified Gmail/Calendar path |
 | Jorge | Facebook/Muse publication and buyer pickup path | `apps/agent-worker/`, `connectors/muse/`, Meta/marketplace adapters | Real listing reference and reviewed pickup workflow; Apify/Bland services are stretch |

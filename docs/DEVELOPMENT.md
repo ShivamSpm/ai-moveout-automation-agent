@@ -11,7 +11,7 @@ At clone time the public repository had no commits. Local bootstrap branch:
 `codex/hackathon-bootstrap`. The remote's configured default branch is `main`.
 Teammates initialized main during setup. The planning branch is rebased onto
 real origin/main; see PR_PREPARATION.md for the feature-branch PR sequence.
-A separate origin/website branch contains a Next.js app at web/; preserve it.
+The teammate website (PR #1, origin/website) is the app at web/; build on it, don't replace it.
 
 ## Start either development assistant
 

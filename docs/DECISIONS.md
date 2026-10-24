@@ -21,6 +21,7 @@ Updated October 24, 2026 after whiteboard review. "Proposed" is not an approval.
 | D12 | One monorepository owns website, tools, Supabase migrations, Muse connector and development agents/skills. | User latest direction |
 | D13 | Build with the developer Muse SDK and current A2A standards. | User latest direction; official Muse Code SDK identified |
 | D14 | Prepare a clean Claude Code handoff and local PR-ready branch promptly. | User latest direction |
+| D15 | Integrate the teammate website at `web/` rather than a competing app. Proposed: keep path and npm for the hackathon. | User request to coordinate; path/manager pending team agreement |
 
 ## Proposed defaults, pending implementation agreement
 
@@ -42,7 +43,8 @@ later. Pacific timezone follows Jorge's environment but event timezone is unconf
 | Q04 | Which dedicated Google account and OAuth test users can be used? | A consenting test recipient and test calendar; no credentials in planning docs. |
 | Q05 | Which Vercel/Supabase/OpenRouter projects and accounts does the team already control? | Dedicated hackathon resources; verify access and model availability before scaffolding adapters. |
 | Q06 | Who owns each workstream and shared contracts? | TEAM.md is a proposal; confirm before concurrent edits. |
-| Q07 | Which city/jurisdiction, move dates and source lease will the demo use? | Synthetic fixture; real jurisdiction only if legal facts are being verified. |
+| Q07 | Which city/jurisdiction, move dates and source lease will the demo use? | Website assumes San Francisco/California with synthetic data; confirm, and verify any statute shown. |
+| Q25 | What does Muse do? Main README lists "Muse (vision)"; D10 uses Muse for Facebook Marketplace publishing/messaging. | Resolve with the team before the spike; both may be true, but they are different integrations. |
 
 ## Product decisions that can use defaults for today
 
@@ -64,7 +66,7 @@ later. Pacific timezone follows Jorge's environment but event timezone is unconf
 | Q21 | Claude plugin in today's demo? | Shared architecture only unless both web flows are complete early. |
 | Q22 | What counts as production-ready? | Tested hosted dev plus build/config/migration/deployment evidence; unknown integrations remain blockers, not "ready" labels. |
 | Q23 | What are per-user/demo spend and call-duration limits? | Set numeric caps before live model/Actor/call execution; no unlimited retries or implicit paid bookings. |
-| Q24 | Product name and demo visual identity? | Working name "Moving assistant"; no naming decision implied by repository name. |
+| Q24 | Product name and demo visual identity? | Website uses "Vacate" with its own visual identity; adopt unless the team objects. |
 
 ## Changes from the bootstrap plan
 
