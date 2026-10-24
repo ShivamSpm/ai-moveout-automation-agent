@@ -1,9 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   channelPostUrl,
-  groupLinkCode,
   groupLinkUrl,
-  ownerFromGroupLinkCode,
   parsePostRef,
   postRef,
   postUrl,
@@ -67,21 +65,11 @@ describe("toBuyerEvent", () => {
 
 describe("group linking", () => {
   const config = readTelegramConfig(env);
-  const owner = "0b1e7f52-4a59-4c3e-9d0e-6a3f5b2c1d00";
-
-  it("round-trips the seller id through a signed code within Telegram's payload limits", () => {
-    const code = groupLinkCode(owner, config);
-    expect(code).toMatch(/^[A-Za-z0-9_-]{1,64}$/);
-    expect(ownerFromGroupLinkCode(code, config)).toBe(owner);
-    expect(groupLinkUrl(config, owner)).toBe(`https://t.me/VacateSaleBot?startgroup=${code}`);
+  it("builds a group URL with an opaque nonce", () => {
+    expect(groupLinkUrl(config, "a".repeat(48))).toBe(`https://t.me/VacateSaleBot?startgroup=${"a".repeat(48)}`);
   });
-
-  it("rejects a code signed with another secret or for another seller", () => {
-    const forged = groupLinkCode(owner, { webhookSecret: "other" });
-    expect(ownerFromGroupLinkCode(forged, config)).toBeNull();
-    const swapped = `${"f".repeat(32)}-${groupLinkCode(owner, config).split("-").slice(1).join("-")}`;
-    expect(ownerFromGroupLinkCode(swapped, config)).toBeNull();
-    expect(ownerFromGroupLinkCode("hello", config)).toBeNull();
+  it("captures the private-start identity", () => {
+    expect(toBuyerEvent(update(`/start link_${"a".repeat(48)}`))).toEqual({ kind: "link_identity", code: "a".repeat(48), userId: "42" });
   });
 
   it("reads the add-to-group command in a group and ignores other group messages", () => {
@@ -95,6 +83,7 @@ describe("group linking", () => {
       title: "SF Moving Sales",
       username: null,
       code: "abc-123",
+      userId: "7",
     });
     expect(toBuyerEvent(group("anyone selling a desk?"))).toEqual({ kind: "ignored" });
   });

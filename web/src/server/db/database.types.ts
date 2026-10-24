@@ -340,6 +340,19 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"moving_providers": {
+                  Row: {
+                    "active": boolean,"appliance_fee_usd": number,"aquarium_fee_usd": number,"artwork_fee_usd": number,"cancellation_policy": string,"created_at": string,"crew_sizes": (number)[],"day_end_hour": number,"day_start_hour": number,"deposit_pct": number,"disassembly_usd_per_item": number,"display_name": string,"full_value_min_usd": number,"full_value_pct": number,"handles_appliance": boolean,"handles_aquarium": boolean,"handles_artwork": boolean,"handles_piano": boolean,"handles_pool_table": boolean,"handles_safe": boolean,"hourly_rate_per_mover_usd": number,"id": string,"is_simulated": boolean,"long_carry_fee_per_50ft_usd": number,"materials_usd_per_box": number,"max_distance_miles": number,"max_jobs_per_day": number,"max_trucks": number,"min_hours": number,"min_notice_hours": number,"notes": string | null,"offers_disassembly": boolean,"offers_full_value": boolean,"offers_packing": boolean,"offers_storage": boolean,"offers_unpacking": boolean,"packing_usd_per_box": number,"parking_permit_fee_usd": number,"piano_fee_usd": number,"pool_table_fee_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"safe_fee_usd": number,"service_zips": (string)[],"slug": string,"stairs_fee_per_flight_usd": number,"storage_usd_per_100cuft_month": number,"travel_fee_usd": number,"truck_capacity_cuft": number,"truck_fee_usd": number,"unpacking_usd_per_box": number,"works_weekdays": (number)[]
+                  }
+                  Insert: {
+                    "active"?: boolean,"appliance_fee_usd": number,"aquarium_fee_usd": number,"artwork_fee_usd": number,"cancellation_policy": string,"created_at"?: string,"crew_sizes": (number)[],"day_end_hour": number,"day_start_hour": number,"deposit_pct": number,"disassembly_usd_per_item": number,"display_name": string,"full_value_min_usd": number,"full_value_pct": number,"handles_appliance": boolean,"handles_aquarium": boolean,"handles_artwork": boolean,"handles_piano": boolean,"handles_pool_table": boolean,"handles_safe": boolean,"hourly_rate_per_mover_usd": number,"id"?: string,"is_simulated"?: boolean,"long_carry_fee_per_50ft_usd": number,"materials_usd_per_box": number,"max_distance_miles": number,"max_jobs_per_day": number,"max_trucks": number,"min_hours": number,"min_notice_hours": number,"notes"?: string | null,"offers_disassembly": boolean,"offers_full_value": boolean,"offers_packing": boolean,"offers_storage": boolean,"offers_unpacking": boolean,"packing_usd_per_box": number,"parking_permit_fee_usd": number,"piano_fee_usd": number,"pool_table_fee_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"safe_fee_usd": number,"service_zips": (string)[],"slug": string,"stairs_fee_per_flight_usd": number,"storage_usd_per_100cuft_month": number,"travel_fee_usd": number,"truck_capacity_cuft": number,"truck_fee_usd": number,"unpacking_usd_per_box": number,"works_weekdays": (number)[]
+                  }
+                  Update: {
+                    "active"?: boolean,"appliance_fee_usd"?: number,"aquarium_fee_usd"?: number,"artwork_fee_usd"?: number,"cancellation_policy"?: string,"created_at"?: string,"crew_sizes"?: (number)[],"day_end_hour"?: number,"day_start_hour"?: number,"deposit_pct"?: number,"disassembly_usd_per_item"?: number,"display_name"?: string,"full_value_min_usd"?: number,"full_value_pct"?: number,"handles_appliance"?: boolean,"handles_aquarium"?: boolean,"handles_artwork"?: boolean,"handles_piano"?: boolean,"handles_pool_table"?: boolean,"handles_safe"?: boolean,"hourly_rate_per_mover_usd"?: number,"id"?: string,"is_simulated"?: boolean,"long_carry_fee_per_50ft_usd"?: number,"materials_usd_per_box"?: number,"max_distance_miles"?: number,"max_jobs_per_day"?: number,"max_trucks"?: number,"min_hours"?: number,"min_notice_hours"?: number,"notes"?: string | null,"offers_disassembly"?: boolean,"offers_full_value"?: boolean,"offers_packing"?: boolean,"offers_storage"?: boolean,"offers_unpacking"?: boolean,"packing_usd_per_box"?: number,"parking_permit_fee_usd"?: number,"piano_fee_usd"?: number,"pool_table_fee_usd"?: number,"rating"?: number,"review_count"?: number,"rush_pct"?: number,"rush_window_hours"?: number,"safe_fee_usd"?: number,"service_zips"?: (string)[],"slug"?: string,"stairs_fee_per_flight_usd"?: number,"storage_usd_per_100cuft_month"?: number,"travel_fee_usd"?: number,"truck_capacity_cuft"?: number,"truck_fee_usd"?: number,"unpacking_usd_per_box"?: number,"works_weekdays"?: (number)[]
+                  }
+                  Relationships: [
+
+                  ]
                 },"reservations": {
                   Row: {
                     "conversation_id": string,"created_at": string,"id": string,"item_id": string,"owner_id": string,"pickup_end": string | null,"pickup_start": string | null,"price_cents": number | null,"status": string
@@ -409,15 +422,28 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
-                },"telegram_targets": {
+                },"telegram_link_nonces": {
                   Row: {
-                    "chat_id": string,"chat_title": string | null,"chat_username": string | null,"linked_at": string,"owner_id": string
+                    "expires_at": string,"nonce": string,"owner_id": string,"telegram_user_id": string | null
                   }
                   Insert: {
-                    "chat_id": string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id": string
+                    "expires_at"?: string,"nonce"?: string,"owner_id": string,"telegram_user_id"?: string | null
                   }
                   Update: {
-                    "chat_id"?: string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id"?: string
+                    "expires_at"?: string,"nonce"?: string,"owner_id"?: string,"telegram_user_id"?: string | null
+                  }
+                  Relationships: [
+
+                  ]
+                },"telegram_targets": {
+                  Row: {
+                    "chat_id": string,"chat_title": string | null,"chat_username": string | null,"linked_at": string,"owner_id": string,"telegram_user_id": string | null
+                  }
+                  Insert: {
+                    "chat_id": string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id": string,"telegram_user_id"?: string | null
+                  }
+                  Update: {
+                    "chat_id"?: string,"chat_title"?: string | null,"chat_username"?: string | null,"linked_at"?: string,"owner_id"?: string,"telegram_user_id"?: string | null
                   }
                   Relationships: [
 
@@ -478,6 +504,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"bind_telegram_link":
+{ Args: { "p_nonce": string,"p_user_id": string }; Returns: boolean
+                           },
 "cancel_action":
 { Args: { "p_action_id": string }; Returns: {
               "approved_at": string | null,
@@ -534,6 +563,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"consume_telegram_link":
+{ Args: { "p_chat_id": string,"p_nonce": string,"p_title": string,"p_user_id": string,"p_username": string }; Returns: boolean
+                           },
 "get_google_credentials":
 { Args: { "p_owner_id": string }; Returns: {
               "access_token": string,"access_token_expires_at": string,"google_email": string,"refresh_token": string,"scopes": (string)[]
@@ -618,6 +650,19 @@ isOneToOne: false
                           SetofOptions: {
         from: "*"
         to: "actions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"prepare_telegram_link":
+{ Args: { "p_owner_id": string }; Returns: {
+              "expires_at": string,
+"nonce": string,
+"owner_id": string,
+"telegram_user_id": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "telegram_link_nonces"
         isOneToOne: true
         isSetofReturn: false
       } },

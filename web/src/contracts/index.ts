@@ -48,6 +48,11 @@ export const ListingPublishPayload = z.object({
   body: z.string().min(1).max(5_000),
   priceCents: z.int().min(0),
   areaLabel: z.string().max(100).nullable(),
+  // The exact stored photos approved with this listing. Absent on older drafts.
+  photos: z
+    .array(z.object({ documentId: uuid, sha256: z.string().regex(/^[0-9a-f]{64}$/) }))
+    .max(10)
+    .optional(),
 });
 
 export const BuyerReplyPayload = z.object({

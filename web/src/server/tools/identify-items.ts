@@ -70,6 +70,11 @@ function ascii(bytes: Uint8Array, start: number, end: number): string {
   return String.fromCharCode(...bytes.subarray(start, end));
 }
 
+/** The accepted photo type the bytes actually are, whatever the uploader claimed. */
+export function sniffPhotoMime(bytes: Uint8Array): PhotoMimeType | null {
+  return ACCEPTED_PHOTO_MIME_TYPES.find((mime) => SIGNATURES[mime](bytes)) ?? null;
+}
+
 function isAccepted(mime: string): mime is PhotoMimeType {
   return (ACCEPTED_PHOTO_MIME_TYPES as readonly string[]).includes(mime);
 }
