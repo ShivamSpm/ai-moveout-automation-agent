@@ -19,6 +19,7 @@ export function Logo() {
 const links = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/move", label: "My move" },
+  { href: "/calls", label: "Landlord call" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/items", label: "Selling" },
   { href: "/sell", label: "Sell on Telegram" },
