@@ -12,7 +12,8 @@ landlord-side eviction assistance.
 Validation: local documentation links, unique requirement IDs, TOML/frontmatter,
 shared-skill validation and private-input ignore checks. This is a requirements and
 development-framework change; no app, migration or live provider integration is
-implemented or deployed. Original whiteboard image and private inputs are excluded.
+implemented or deployed. A shareable whiteboard JPEG is included at the user's
+explicit request; the original HEIC and private renter inputs are excluded.
 
 The branch is based on the teammate main README. Preserve the existing website
 branch under web/ (PR #1); it stays at web/, no apps/web migration during the hackathon.

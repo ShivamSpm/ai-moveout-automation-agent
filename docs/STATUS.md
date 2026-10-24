@@ -144,3 +144,12 @@ different from America/Los_Angeles. See DECISIONS.md for proposed defaults/quest
   `web/` branch before moving it. Do not scaffold a competing website blindly.
 - Teammate README mentions San Francisco and Muse vision; keep these as teammate
   context and confirm model responsibilities against the user's explicit choices.
+
+## User-approved whiteboard publication
+
+- User requested adding the whiteboard image to the repository. A visually checked
+  JPEG is now in `docs/brainstorming/pictures/2026-10-24-moving-assistant-whiteboard.jpg`.
+- Original HEIC/private PNG remain unchanged and uncommitted.
+- This addition was prepared on `codex/whiteboard-image` in a separate worktree
+  while Claude Code was active. Bring its commit into the planning branch before
+  publishing the requirements PR; preserve any in-flight Claude changes.

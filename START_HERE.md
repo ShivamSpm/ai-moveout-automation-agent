@@ -9,8 +9,9 @@
    `docs/ACCEPTANCE.md` for the work you are doing.
 
 Do not reread the entire previous chat; the decisions are captured in the repo.
-Whiteboard transcription: `docs/WHITEBOARD.md`. Original image conversion is local
-and git-ignored under `private/whiteboard/`; it will not travel with the PR.
+Whiteboard transcription: `docs/WHITEBOARD.md`. The user-approved shareable image
+is `docs/brainstorming/pictures/2026-10-24-moving-assistant-whiteboard.jpg` and is
+included in the PR. The original HEIC and local private PNG are not committed.
 
 ## User's confirmed intent
 

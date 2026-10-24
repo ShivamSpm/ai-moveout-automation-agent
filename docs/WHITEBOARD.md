@@ -3,8 +3,10 @@
 ## Source and handling
 
 Source: user-provided `IMG_4268.heic`. Inspected through a local PNG conversion at
-`private/whiteboard/IMG_4268.png`. The image is ignored by git; the original in
-Messages was not changed. This document records readable text and interpretation,
+`private/whiteboard/IMG_4268.png`. At the user's subsequent explicit request, a
+[shareable JPEG](brainstorming/pictures/2026-10-24-moving-assistant-whiteboard.jpg)
+is included in `docs/brainstorming/pictures/`. The private PNG remains ignored and
+the original in Messages was not changed. This document records text and interpretation,
 not a claim that every brainstormed feature was specified on the board.
 
 ## What is visible
