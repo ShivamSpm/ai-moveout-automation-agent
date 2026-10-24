@@ -90,6 +90,28 @@ supabase config diff                       # hosted auth settings live in [remot
 Never put `SUPABASE_SECRET_KEY` in a `NEXT_PUBLIC_` variable. New migrations go through
 the local stack and tests first.
 
+## Database migrations in CI
+
+`.github/workflows/supabase-migrations.yml` runs on every pull request that touches
+`supabase/`. It checks that each migration version is unique and that new migrations
+sort after the newest one on `main`, applies all migrations to a fresh database, lints
+the schema, and dry-runs against production. When migrations reach `main`, it applies
+them to production (`sejfkcrmcbsiidftraek`) with `supabase db push`.
+
+A repository admin adds these Actions secrets (Settings > Secrets and variables >
+Actions, or on the `production` environment):
+
+| Secret | Value |
+| --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | A personal access token from supabase.com/dashboard/account/tokens, created by a member of the Supabase org |
+| `SUPABASE_DB_PASSWORD` | Optional. The production database password (Project Settings > Database) |
+
+Vercel deploys `main` at the same time as the workflow runs, so for a minute new code
+may meet the old schema. Write migrations so that the current code keeps working
+(add columns and tables before code uses them; drop them in a later pull request).
+Always create migrations with `supabase migration new <name>` on an up-to-date `main`.
+Auth settings (`supabase config push`) stay a manual step.
+
 ## Enable Google or Microsoft sign-in
 
 In the Supabase dashboard, select hosted project `sejfkcrmcbsiidftraek`, then open
