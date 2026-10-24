@@ -5,9 +5,15 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Db } from "@/server/supabase";
 import type { Database } from "@/server/db/database.types";
 import type { ToolContext } from "@/server/auth";
-const state = vi.hoisted(() => ({ db: null as Db | null, complete: vi.fn(async () => "Review your checklist in /plan.") }));
+const state = vi.hoisted(() => ({ db: null as Db | null, complete: vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: "Review your checklist in /plan." } }], usage: { prompt_tokens: 10, completion_tokens: 10, cost: 0.001 } }), { status: 200 })) }));
 vi.mock("@/server/supabase", async original => ({ ...await original<typeof import("@/server/supabase")>(), userClient: async () => state.db! }));
 vi.mock("@/server/integrations/openrouter", async original => ({ ...await original<typeof import("@/server/integrations/openrouter")>(), isConfigured: () => true, complete: state.complete }));
+vi.mock("@/server/tools/identify-items", async original => {
+  const real = await original<typeof import("@/server/tools/identify-items")>();
+  const { SpendLedger } = await import("@/server/integrations/spend-ledger");
+  const pricing = { prompt: 0.000001, completion: 0.000001, image: 0, request: 0, internalReasoning: null };
+  return { ...real, loadIdentifyItemsDeps: async () => ({ openRouter: { apiKey: "synthetic", baseUrl: "https://model.example.test", fetch: state.complete }, ledger: new SpendLedger(1), pricing: new Map([[process.env.OPENROUTER_MODEL?.trim() || "anthropic/claude-opus-5.5", { id: "synthetic", pricing }]]) }) };
+});
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 for (const line of readFileSync(path.resolve(__dirname, "../../.env.local"), "utf8").split("\n")) {
   const m = line.match(/^([A-Z_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
@@ -76,8 +82,8 @@ describe.sequential("Saved dashboard and renter chat", () => {
     const request = () => new Request("http://localhost/api/chat", { method: "POST", body: JSON.stringify({ messages: [{ role: "user", content: "What next?" }] }) });
     state.db = client(); expect((await POST(request())).status).toBe(401);
     state.db = a.db; expect((await POST(request())).status).toBe(200);
-    const messages = state.complete.mock.calls[0] as unknown as [unknown[]];
-    const sent = JSON.stringify(messages[0]);
+    const call = state.complete.mock.calls[0] as unknown as [string, RequestInit];
+    const sent = JSON.stringify(JSON.parse(String(call[1].body)).messages);
     expect(sent).toContain("Quote-A"); expect(sent).toContain("renter_context");
     expect(sent).toContain("untrusted data"); expect(sent).not.toContain("PRIVATE-A");
     expect(sent).not.toContain("Quote-B"); expect(sent).not.toContain("Event-B");

@@ -1,7 +1,9 @@
-// Run alongside `next dev --port 3104`; synthetic local user removed afterward.
+// Run alongside `next dev --port 3105`; synthetic local user removed afterward.
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 process.loadEnvFile('.env.local');
+const base = process.env.VACATE_URL || 'http://localhost:3105';
+if (!['localhost', '127.0.0.1'].includes(new URL(base).hostname)) throw new Error('Local app only');
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 if (new URL(url).hostname !== '127.0.0.1') throw new Error('Local database only');
 const admin = createClient(url, process.env.SUPABASE_SECRET_KEY, {auth:{persistSession:false}});
@@ -20,13 +22,13 @@ try {
  ['/move',['100 Synthetic Avenue','Example Renter','Unit 4','Example City','Example Management','manager@example.test'],['1847 Guerrero']],
  ['/items',['No items yet'],['Offer pending']],
  ['/demo',['Example move','1847 Guerrero'],['100 Synthetic Avenue']]]){
- const r=await fetch('http://localhost:3104'+route,{headers:{cookie}}); const html=await r.text();
+ const r=await fetch(base+route,{headers:{cookie}}); const html=await r.text();
  if(r.status!==200)throw new Error(`${route}: ${r.status}`);
  for(const s of required)if(!html.includes(s))throw new Error(`${route} missing ${s}`);
  for(const s of excluded)if(html.includes(s))throw new Error(`${route} leaked ${s}`);
  console.log(`PASS ${route}: expected account/demo separation`);
  }
- const anonymous=await fetch('http://localhost:3104/dashboard',{redirect:'manual'});
- if(anonymous.status!==307)throw new Error('Anonymous dashboard should redirect');
- console.log('PASS anonymous dashboard requires sign-in');
+ const anonymous=await fetch(base+'/dashboard',{redirect:'manual'});
+ if(anonymous.status!==200 || !(await anonymous.text()).includes('Example move'))throw new Error('Anonymous dashboard should show a labeled example');
+ console.log('PASS anonymous dashboard shows labeled example');
 } finally { const removed=await admin.auth.admin.deleteUser(made.data.user.id); if(removed.error)throw removed.error; }

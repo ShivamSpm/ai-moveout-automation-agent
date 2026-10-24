@@ -35,7 +35,7 @@ export function ServicesPicker({
   );
 }
 
-function Section({ section, moveOutDate, initial }: { section: ServiceSection; moveOutDate: string | null; initial: SavedSelection | null }) {
+function Section({ section, initial }: { section: ServiceSection; moveOutDate: string | null; initial: SavedSelection | null }) {
   const [selection, setSelection] = useState<SavedSelection | null>(initial);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState<string | null>(null);
