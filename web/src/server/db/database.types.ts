@@ -99,6 +99,19 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"cleaning_providers": {
+                  Row: {
+                    "accepts_pets": boolean,"active": boolean,"base_usd": number,"bulky_items_surcharge_usd": number,"cancellation_policy": string,"carpet_usd_per_room": number,"created_at": string,"day_end_hour": number,"day_start_hour": number,"deep_clean_usd": number,"display_name": string,"id": string,"inside_appliances_usd": number,"is_simulated": boolean,"max_jobs_per_day": number,"min_notice_hours": number,"no_elevator_surcharge_usd": number,"notes": string | null,"offers_carpet": boolean,"offers_inside_appliances": boolean,"offers_walls": boolean,"offers_windows": boolean,"per_bathroom_usd": number,"per_bedroom_usd": number,"pet_surcharge_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"service_zips": (string)[],"slug": string,"walls_usd": number,"windows_usd": number,"works_weekdays": (number)[]
+                  }
+                  Insert: {
+                    "accepts_pets": boolean,"active"?: boolean,"base_usd": number,"bulky_items_surcharge_usd": number,"cancellation_policy": string,"carpet_usd_per_room": number,"created_at"?: string,"day_end_hour": number,"day_start_hour": number,"deep_clean_usd": number,"display_name": string,"id"?: string,"inside_appliances_usd": number,"is_simulated"?: boolean,"max_jobs_per_day": number,"min_notice_hours": number,"no_elevator_surcharge_usd": number,"notes"?: string | null,"offers_carpet": boolean,"offers_inside_appliances": boolean,"offers_walls": boolean,"offers_windows": boolean,"per_bathroom_usd": number,"per_bedroom_usd": number,"pet_surcharge_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"service_zips": (string)[],"slug": string,"walls_usd": number,"windows_usd": number,"works_weekdays": (number)[]
+                  }
+                  Update: {
+                    "accepts_pets"?: boolean,"active"?: boolean,"base_usd"?: number,"bulky_items_surcharge_usd"?: number,"cancellation_policy"?: string,"carpet_usd_per_room"?: number,"created_at"?: string,"day_end_hour"?: number,"day_start_hour"?: number,"deep_clean_usd"?: number,"display_name"?: string,"id"?: string,"inside_appliances_usd"?: number,"is_simulated"?: boolean,"max_jobs_per_day"?: number,"min_notice_hours"?: number,"no_elevator_surcharge_usd"?: number,"notes"?: string | null,"offers_carpet"?: boolean,"offers_inside_appliances"?: boolean,"offers_walls"?: boolean,"offers_windows"?: boolean,"per_bathroom_usd"?: number,"per_bedroom_usd"?: number,"pet_surcharge_usd"?: number,"rating"?: number,"review_count"?: number,"rush_pct"?: number,"rush_window_hours"?: number,"service_zips"?: (string)[],"slug"?: string,"walls_usd"?: number,"windows_usd"?: number,"works_weekdays"?: (number)[]
+                  }
+                  Relationships: [
+
+                  ]
                 },"connector_tokens": {
                   Row: {
                     "created_at": string,"id": string,"label": string,"last_used_at": string | null,"owner_id": string,"revoked_at": string | null,"token_hash": string,"token_hint": string
