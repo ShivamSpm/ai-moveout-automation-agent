@@ -13,28 +13,48 @@ import { runVisionJson } from "./describe-item";
 // saved to the item or listing by this call.
 
 const Confidence = z.enum(["high", "medium", "low"]);
+// No length limits here: strict structured-output modes drop them, so the
+// model can exceed them and a valid answer would be refused. The prompt asks
+// for short text and boundAnalysis trims it after parsing.
 const Identification = z.strictObject({
-  value: z.string().max(80).nullable(),
+  value: z.string().nullable(),
   confidence: Confidence,
-  evidence: z.string().max(300),
+  evidence: z.string(),
 });
 
 export const ItemAnalysisSchema = z.strictObject({
-  itemType: z.string().min(1).max(80),
+  itemType: z.string().min(1),
   brand: Identification,
   model: Identification,
-  visibleCondition: z.string().max(300),
-  // No array length limits: strict structured-output modes may reject them. Trimmed below.
-  visibleAccessories: z.array(z.string().max(80)),
-  title: z.string().min(1).max(80),
-  description: z.string().min(1).max(800),
+  visibleCondition: z.string(),
+  visibleAccessories: z.array(z.string()),
+  title: z.string().min(1),
+  description: z.string().min(1),
   priceSuggestionUsd: z
-    .strictObject({ low: z.number().min(0), high: z.number().min(0), basis: z.string().max(300) })
+    .strictObject({ low: z.number().min(0), high: z.number().min(0), basis: z.string() })
     .refine((p) => p.low <= p.high, { message: "low must not exceed high" })
     .nullable(),
-  questionsForRenter: z.array(z.string().max(200)),
+  questionsForRenter: z.array(z.string()),
 });
 export type ItemAnalysis = z.infer<typeof ItemAnalysisSchema>;
+
+const clip = (text: string, max: number) => (text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`);
+const clipId = (id: ItemAnalysis["brand"]) => ({ ...id, value: id.value === null ? null : clip(id.value, 80), evidence: clip(id.evidence, 300) });
+
+/** The analysis within display and listing limits (title fits a listing title). */
+export function boundAnalysis(a: ItemAnalysis): ItemAnalysis {
+  return {
+    itemType: clip(a.itemType, 80),
+    brand: clipId(a.brand),
+    model: clipId(a.model),
+    visibleCondition: clip(a.visibleCondition, 500),
+    visibleAccessories: a.visibleAccessories.slice(0, 10).map((x) => clip(x, 80)),
+    title: clip(a.title, 100),
+    description: clip(a.description, 1_000),
+    priceSuggestionUsd: a.priceSuggestionUsd && { ...a.priceSuggestionUsd, basis: clip(a.priceSuggestionUsd.basis, 300) },
+    questionsForRenter: a.questionsForRenter.slice(0, 6).map((x) => clip(x, 200)),
+  };
+}
 
 const MAX_ANALYSIS_PHOTOS = 4;
 const MAX_TOKENS = 1_500;
@@ -44,8 +64,8 @@ export const PROMPT = `These photos show one item a renter owns and wants to sel
 Identify the item for a marketplace listing:
 - itemType: the kind of item.
 - brand and model: report a value only when the photos support it. Name the evidence (printed logo or text, a distinctive design feature). Use "high" only for brand or model text that is legible in the photo; use "medium" or "low" when inferred from design, and null when you cannot tell. Never present a guess as fact.
-- visibleCondition: only wear, damage or cleanliness you can see; say what you cannot judge (for example whether it works).
-- visibleAccessories: only accessories visible in the photos.
+- visibleCondition: one or two sentences (under 300 characters) on wear, damage or cleanliness you can see; say what you cannot judge (for example whether it works).
+- visibleAccessories: only accessories visible in the photos (short names).
 - title: at most 80 characters. Include the brand only if confidence is high or medium; include a model only if its confidence is high.
 - description: 2-4 short sentences a buyer can trust. State only what is visible or identified with high confidence. Do not state working condition, dimensions, specs, included accessories that are not visible, price, pickup location, or contact details.
 - priceSuggestionUsd: a typical US used-resale range for this item in the visible condition, with a one-sentence basis that says it is an estimate. Null if you cannot identify the item well enough.
@@ -81,11 +101,7 @@ export async function analyzeItemPhotos(ctx: ToolContext, input: z.infer<typeof 
   if (!result.ok) throw new MarketplaceError(`Photo analysis failed: ${result.message}`, result.status);
   return {
     itemId: input.itemId,
-    analysis: {
-      ...result.value,
-      visibleAccessories: result.value.visibleAccessories.slice(0, 10),
-      questionsForRenter: result.value.questionsForRenter.slice(0, 6),
-    },
+    analysis: boundAnalysis(result.value),
     model: result.model,
     analyzedPhotos: usable.map((p) => ({ documentId: p.documentId, sha256: p.sha256 })),
     skippedPhotos: skipped,
