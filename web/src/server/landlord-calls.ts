@@ -125,17 +125,33 @@ function toView(row: {
   };
 }
 
-export async function latestCall(ctx: ToolContext): Promise<CallView | null> {
+const CALL_COLUMNS = "id, status, created_at, summary, transcript, checklist, error";
+
+/**
+ * The renter's calls for their move, newest first. A call still marked live is
+ * checked with Bland first, so one that ended while the renter was on another
+ * page gets its transcript and checklist saved now.
+ */
+export async function callHistory(ctx: ToolContext): Promise<CallView[]> {
   const move = await currentMove(ctx);
   const { data, error } = await ctx.db
     .from("landlord_calls")
-    .select("id, status, created_at, summary, transcript, checklist, error")
+    .select(CALL_COLUMNS)
     .eq("move_id", move.id)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(20);
   if (error) throw error;
-  return data ? toView(data) : null;
+  return Promise.all(
+    (data ?? []).map((row) =>
+      FINAL_STATUSES.includes(row.status as CallStatus)
+        ? toView(row)
+        : refreshLandlordCall(ctx, row.id).catch(() => toView(row)),
+    ),
+  );
+}
+
+export async function latestCall(ctx: ToolContext): Promise<CallView | null> {
+  return (await callHistory(ctx))[0] ?? null;
 }
 
 /** Check Bland for a call in progress; when it ends, save the summary, transcript and checklist. */
@@ -185,7 +201,7 @@ export async function refreshLandlordCall(ctx: ToolContext, id: string): Promise
     })
     .eq("id", id)
     .eq("status", row.status)
-    .select("id, status, created_at, summary, transcript, checklist, error")
+    .select(CALL_COLUMNS)
     .maybeSingle();
   if (updated.error) throw updated.error;
   if (!updated.data) return latestCallById(ctx, id);
@@ -211,7 +227,7 @@ export async function refreshLandlordCall(ctx: ToolContext, id: string): Promise
 async function latestCallById(ctx: ToolContext, id: string): Promise<CallView> {
   const { data, error } = await ctx.db
     .from("landlord_calls")
-    .select("id, status, created_at, summary, transcript, checklist, error")
+    .select(CALL_COLUMNS)
     .eq("id", id)
     .single();
   if (error) throw error;

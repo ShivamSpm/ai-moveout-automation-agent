@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { NavLinks } from "@/components/nav-links";
 import { UserMenu } from "@/components/user-menu";
 import { authEnabled } from "@/lib/supabase/env";
 
@@ -19,6 +20,7 @@ export function Logo() {
 const links = [
   { href: "/demo", label: "Example" },
   { href: "/move", label: "My move" },
+  { href: "/calls", label: "Landlord call" },
   { href: "/account/documents", label: "Documents" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/services", label: "Services" },
@@ -36,11 +38,7 @@ export function SiteNav() {
               <Logo />
             </Link>
             <div className="hidden items-center gap-5 whitespace-nowrap text-sm xl:flex">
-              {links.map((link) => (
-                <Link key={link.href} href={link.href} className="text-ink/80 transition hover:text-ink">
-                  {link.label}
-                </Link>
-              ))}
+              <NavLinks links={links} />
             </div>
           </div>
           <UserMenu authEnabled={authEnabled} links={links} />

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ToolContext } from "@/server/auth";
+import { FINAL, callTime } from "@/components/call-result";
+import { callHistory } from "@/server/landlord-calls";
 
 // Dashboard cards: the latest landlord call's top-3 checklist and the cleaning
 // and moving companies the renter picked on /services. Server component.
@@ -9,50 +11,69 @@ const usd = (n: number) => Number(n).toLocaleString("en-US", { style: "currency"
 const LABEL: Record<string, string> = { cleaning: "Cleaning", moving: "Moving" };
 
 export async function LandlordAndServices({ ctx, moveId }: { ctx: ToolContext; moveId: string }) {
-  const [call, picks] = await Promise.all([
-    ctx.db
-      .from("landlord_calls")
-      .select("status, summary, checklist, created_at")
-      .eq("move_id", moveId)
-      .eq("status", "completed")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+  const [calls, picks] = await Promise.all([
+    callHistory(ctx),
     ctx.db.from("service_selections").select("kind, provider_name, total_usd, slot_start, confirmation_code").eq("move_id", moveId),
   ]);
-  if (call.error) throw call.error;
   if (picks.error) throw picks.error;
-  const items = Array.isArray(call.data?.checklist) ? (call.data.checklist as { title: string; detail?: string | null }[]) : [];
+  const latest = calls[0];
+  const done = calls.find((c) => c.status === "completed");
+  const items = done?.checklist ?? [];
   const chosen = (kind: string) => (picks.data ?? []).find((p) => p.kind === kind);
 
   return (
     <div className="mb-6 grid gap-6 lg:grid-cols-2">
       <section className={card}>
         <h2 className="font-display text-3xl">Your landlord&rsquo;s top 3</h2>
-        {items.length ? (
+        {latest && !FINAL.includes(latest.status) && (
+          <p className="mt-4 flex items-center gap-2 rounded-xl bg-paper p-3 text-sm">
+            <span className="live-dot h-2.5 w-2.5 rounded-full bg-tape" aria-hidden /> Calling your landlord now.{" "}
+            <Link href="/calls" className="font-semibold underline">Follow the call</Link>
+          </p>
+        )}
+        {done ? (
           <>
-            <ol className="mt-4 space-y-3">
-              {items.slice(0, 3).map((item, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="tape grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-semibold">{i + 1}</span>
-                  <span>
-                    <strong>{item.title}</strong>
-                    {item.detail && <span className="block text-sm text-muted">{item.detail}</span>}
-                  </span>
-                </li>
-              ))}
-            </ol>
+            {items.length ? (
+              <ol className="mt-4 space-y-3">
+                {items.slice(0, 3).map((item, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="tape grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-semibold">{i + 1}</span>
+                    <span>
+                      <strong>{item.title}</strong>
+                      {item.detail && <span className="block text-sm text-muted">{item.detail}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-4 text-muted">Your landlord didn&rsquo;t give checklist items on the call.</p>
+            )}
+            {done.summary && <p className="mt-4 text-sm leading-relaxed">{done.summary}</p>}
+            {done.transcript && (
+              <details className="mt-4">
+                <summary className="cursor-pointer py-1 text-sm font-medium">Transcript</summary>
+                <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap rounded-2xl bg-paper p-4 text-sm leading-relaxed">{done.transcript}</pre>
+              </details>
+            )}
             <p className="mt-4 text-sm text-muted">
-              From your landlord call on {new Date(call.data!.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}.{" "}
+              From your landlord call on {callTime(done.createdAt)}.{" "}
               <Link href="/calls" className="underline">See the call</Link>
             </p>
           </>
-        ) : (
+        ) : latest && FINAL.includes(latest.status) ? (
+          <>
+            <p className="mt-4 text-muted">
+              Your last call ({callTime(latest.createdAt)}) ended without a checklist
+              {latest.status === "no_answer" ? ": no answer" : latest.status === "voicemail" ? ": it reached voicemail" : ""}.
+            </p>
+            <Link href="/calls" className="tape mt-4 inline-block rounded-xl px-4 py-2.5 font-semibold">Call again</Link>
+          </>
+        ) : !latest ? (
           <>
             <p className="mt-4 text-muted">No checklist from your landlord yet.</p>
             <Link href="/calls" className="tape mt-4 inline-block rounded-xl px-4 py-2.5 font-semibold">Call your landlord</Link>
           </>
-        )}
+        ) : null}
       </section>
 
       <section className={card}>
