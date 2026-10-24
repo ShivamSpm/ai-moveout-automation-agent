@@ -1,0 +1,33 @@
+# Credentials and machine-specific agent configuration
+.env
+.env.*
+*.pem
+*.key
+.mcp.json
+.claude/settings.local.json
+.claude/worktrees/
+.codex/*.local.toml
+
+# Private renter inputs, whiteboards and local evidence
+private/
+uploads/
+artifacts/private/
+*.local.json
+
+# Dependencies and generated output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.vercel/
+.supabase/
+supabase/.temp/
+supabase/.branches/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+__pycache__/
+.venv/
+.worktrees/

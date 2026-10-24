@@ -1,0 +1,4 @@
+# Project-local development settings. Model and permissions inherit user settings.
+# Role definitions do not authorize automatic delegation.
+[agents]
+max_concurrent_threads_per_session = 3
