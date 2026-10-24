@@ -8,9 +8,9 @@ const field =
 export async function EmailSignIn({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string | string[]; error?: string | string[] }>;
+  searchParams: Promise<{ next?: string | string[]; error?: string | string[]; notice?: string | string[] }>;
 }) {
-  const { next, error } = await searchParams;
+  const { next, error, notice } = await searchParams;
   const nextPath = typeof next === "string" ? next : "/muse";
   const message = typeof error === "string" && error !== "1" ? error : null;
   return (
@@ -24,7 +24,13 @@ export async function EmailSignIn({
         Password
         <input name="password" type="password" required minLength={8} autoComplete="current-password" className={field} />
       </label>
-      {message && <p className="rounded-xl bg-stamp/10 p-3 text-sm text-stamp">{message}</p>}
+      {notice === "confirm" && (
+        <p role="status" className="rounded-xl bg-leaf/10 p-3 text-sm text-leaf">
+          Check your email for a confirmation link. It brings you back here signed in. No email after a few minutes?
+          Check spam, then try signing in.
+        </p>
+      )}
+      {message && <p role="alert" className="rounded-xl bg-stamp/10 p-3 text-sm text-stamp">{message}</p>}
       <div className="flex gap-2">
         <button name="mode" value="signin" className="tape flex-1 rounded-xl px-5 py-2.5 text-sm font-semibold">
           Sign in with email
