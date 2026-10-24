@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { AccountGoodbye } from "@/components/account-goodbye";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -70,6 +72,7 @@ function Check({ on }: { on: boolean }) {
 export default function Home() {
   return (
     <main className="overflow-x-clip">
+      <Suspense fallback={null}><AccountGoodbye /></Suspense>
       {/* Hero: full-bleed photo under the floating nav */}
       <section className="relative -mt-[76px] flex min-h-[680px] items-center bg-slate pt-[76px] text-white sm:min-h-[740px]">
         <Image
