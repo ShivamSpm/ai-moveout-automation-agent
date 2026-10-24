@@ -117,7 +117,7 @@ How it works:
 - Prices and slots are deterministic for the same request and clock (seeded per company and day). Times are San Francisco local hours, returned in UTC.
 - Approval binds the exact quote, slot and price through `payloadHash`. Repeating it with the same or a new key returns the first result, and a slot can be claimed only once.
 - State (issued quotes, proposals, slot claims, approvals) is in server memory: it resets on restart and is not shared between serverless instances. A Supabase repository replaces it later.
-- There is no auth yet: every caller is one demo renter (`resolveOwnerId` in `src/app/api/cleaning/_lib/http.ts`).
+- Every route requires a signed-in renter and returns 401 otherwise; the owner is the Supabase session user (`resolveOwnerId` in `src/app/api/_lib/simulated-service.ts`), never a field in the body.
 
 ## Sell on Telegram (`/sell`)
 
@@ -142,6 +142,42 @@ curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" -d url=https:/
 ```
 
 Buyers must open the chat from a listing's **Message seller** button: a bot can't message someone first. Buyer chats need the deployed URL; they don't reach `localhost`.
+
+## Moving simulator (backend)
+
+A simulated moving marketplace built like the cleaning one. **Every mover is fictional and every result is simulated**: no real mover is contacted, nothing is reserved and no deposit or payment is taken. Responses carry `simulated: true`, prices are labeled `estimate`, and confirmations use a `SIM-` code. No page calls these routes yet.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /api/moving/quotes` | `MovingRequest` (`src/contracts/moving.ts`) | `{ catalogSource, catalogWarnings, matches, excluded: [{ provider, reasons[] }], warnings, reasons }` |
+| `POST /api/moving/bookings` | `{ quote, slotId }` (a quote issued to you) | `201 { proposal }` with `status: "pending_review"`, `payloadHash`, `idempotencyKey` |
+| `POST /api/moving/bookings/:id/approve` | `{ payloadHash, idempotencyKey }` from the user's approve action | `{ result }`: `simulated_confirmed` or `rejected` with a reason |
+
+```bash
+curl -s localhost:3000/api/moving/quotes -H 'content-type: application/json' -d '{
+  "requesterRole": "renter",
+  "origin": { "zip": "94110", "floor": 3, "hasElevator": false, "longCarryFeet": 0, "parkingPermitNeeded": true },
+  "destination": { "zip": "94117", "floor": 2, "hasElevator": true, "longCarryFeet": 0 },
+  "distanceMiles": 4,
+  "moveWindow": { "earliestStart": "2026-11-09T15:00:00Z", "latestFinish": "2026-11-14T02:00:00Z" },
+  "boxes": { "small": 10, "medium": 15, "large": 5, "wardrobe": 2 },
+  "furniture": { "small": 4, "medium": 3, "large": 2, "extraLarge": 1 },
+  "specialtyItems": [{ "kind": "piano", "count": 1 }],
+  "services": { "packing": "partial", "packingMaterials": true, "disassemblyReassembly": true },
+  "insurance": "full_value", "declaredValueUsd": 12000,
+  "maxBudgetUsd": 2500,
+  "cleaningEarliestStart": "2026-11-14T16:00:00Z"
+}'
+```
+
+How it works:
+
+- Movers come from `public.moving_providers` (migration in `../supabase/migrations/`, authored but not applied) or the identical fixture in `src/server/integrations/moving-catalog-fixture.ts`, chosen exactly like the cleaning catalog (`MOVING_CATALOG_SOURCE=fixture` forces the fixture; a missing table, PostgREST `PGRST205`, falls back to it with a `catalogWarnings` entry).
+- Furniture is given as counts by size, or as `fromInventory` (proposed vision items): `small`, `medium` and `large` map to the same names and `bulky` maps to `extraLarge`, counted by `quantity`.
+- Volume uses fixed cubic feet per box, furniture size and specialty item (`BOX_CUFT`, `FURNITURE_CUFT`, `SPECIALTY_CUFT` in `src/server/integrations/moving-simulator.ts`). Crew size follows volume (up to 250 cu ft: 2, 600: 3, 1000: 4, more: 5; pianos, safes and pool tables need at least 3), and a company is never quoted with a smaller crew; hours are load plus drive (20 mph up to 30 miles, 45 mph beyond) plus unload, slowed by stairs without an elevator, elevator waits and long carries. Volume above one truck adds trucks up to the company's limit; beyond that the company is excluded.
+- Each excluded company lists every reason: `outside_service_area`, `distance_exceeds_limit`, `specialty_not_handled` (names the item), `packing_not_offered`, `unpacking_not_offered`, `disassembly_not_offered`, `storage_not_offered`, `insurance_not_offered`, `capacity_exceeded`, `crew_too_small` (the volume or heavy-item rule needs more movers than the company's largest crew), `long_distance_not_supported` (the move, drive included, does not fit one working day; multi-day moves are not simulated), `insufficient_notice`, `no_availability`, `over_budget`, and `quote_invalid` (the simulated quote broke its own schema, so it is never offered).
+- If `cleaningEarliestStart` is before the end of the move window, a warning says cleaning should follow moving out (SERV-06).
+- Booking, idempotency, slot claims, owner scope and the in-memory state limits are shared with the cleaning simulator. Approving with a payload hash that does not match the proposal returns `rejected` / `payload_mismatch`, even after the proposal was confirmed.
 
 ## Not wired up yet
 
