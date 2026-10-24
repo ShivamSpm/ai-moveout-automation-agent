@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { NavLinks, type NavLink } from "@/components/nav-links";
 
 interface Account {
   name: string;
@@ -10,10 +11,6 @@ interface Account {
   avatar?: string;
 }
 
-export interface NavLink {
-  href: string;
-  label: string;
-}
 
 // Runs in the browser so the nav (and every page) stays in the static shell.
 function useAccount(authEnabled: boolean) {
@@ -110,17 +107,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
         >
           <nav aria-label="Main">
             <ul>
-              {links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="flex min-h-12 items-center rounded-xl px-4 text-base transition hover:bg-paper"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+              <NavLinks links={links} phone onPick={() => setOpen(false)} />
             </ul>
           </nav>
           {authEnabled && (
