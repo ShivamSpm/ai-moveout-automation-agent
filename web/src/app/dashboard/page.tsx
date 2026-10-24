@@ -2,29 +2,31 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { accountPageUser } from "@/server/account-page";
+import { requireUser, AuthError } from "@/server/auth";
+import ExampleDashboard from "@/app/demo/page";
+import { SavedChecklist } from "@/components/saved-checklist";
 import { getMoveView } from "@/server/move-view";
 import { daysUntil, todayInTimezone, leaseFees } from "@/lib/move-summary";
-import { AccountActionForm } from "@/components/account-action-form";
-import { setTaskStatus } from "@/app/plan/actions";
 import { LeaseUpload } from "@/components/lease-upload";
 import { RenterChat } from "@/components/renter-chat";
 import { LandlordAndServices } from "@/components/landlord-and-services";
 import { isConfigured } from "@/server/integrations/openrouter";
-import { urgency, type Lane } from "@/lib/schedule";
 
 export const metadata: Metadata = { title: "Your dashboard · Vacate" };
 const card = "box-label rounded-3xl p-6";
 async function Dashboard() {
   await connection();
-  const ctx = await accountPageUser("/dashboard");
+  let ctx;
+  try { ctx = await requireUser(); } catch (error) { if (error instanceof AuthError) return <ExampleDashboard />; throw error; }
   const view = await getMoveView(ctx);
   const { move } = view;
-  if (!move) return <section className={card}><h1 className="font-display text-5xl">Your move starts here</h1><p className="my-4">Save your address and move-out date to build your own plan.</p><Link className="tape rounded-xl px-4 py-3 inline-block" href="/start">Add your move details</Link></section>;
+  const shared = view.sharedTasks.length > 0 ? <section className={`${card} mb-6`}><h2 className="font-display text-3xl">Shared household checklist</h2><SavedChecklist tasks={view.sharedTasks} editable={false} /></section> : null;
+  if (!move) return <>{shared}<section className={card}><h1 className="font-display text-5xl">Your move starts here</h1><p className="my-4">Save your address and move-out date to build your own plan.</p><Link className="tape rounded-xl px-4 py-3 inline-block" href="/start">Add your move details</Link></section></>;
   const today = todayInTimezone(move.timezone);
   const days = move.move_out_date ? daysUntil(move.move_out_date, today) : null;
   const fees = leaseFees(view.findings);
   return <>
+    {shared}
     <header className="mb-8"><p className="text-sm text-muted">Your saved move · {move.move_out_date ?? "Move-out date needed"}{days !== null ? ` · ${days >= 0 ? `${days} days until move-out` : `${Math.abs(days)} days since move-out`}` : ""}</p>
       <h1 className="mt-4 font-display text-5xl sm:text-6xl">{move.address_private || "Add your address"}</h1>
       <p className="mt-4">{move.renter_name || "Your name not added"}</p>
@@ -42,9 +44,7 @@ async function Dashboard() {
       <div className="grid gap-6 content-start">
         <section className={card}><h2 className="font-display text-3xl">Your checklist</h2>
           {!view.tasks.length && <p className="mt-4 text-muted">No checklist yet. Upload your lease to extract its obligations, then review them. No sample tasks have been added.</p>}
-          {view.tasks.map(t => <article key={t.id} className="mt-5 border-t border-line pt-4"><p className="text-xs uppercase text-muted">{t.lane} · {t.status}</p><h3 className="font-semibold">{t.title}</h3><p className="text-sm text-muted">{t.detail}</p><p className="my-2 text-sm">{t.due_date ?? "Date to confirm"} · {t.source ?? "Source not recorded"}{t.due_date && move.move_out_date && t.status === "todo" ? ` · ${urgency({ id: t.id, title: t.title, detail: t.detail ?? "", lane: t.lane as Lane, source: t.source ?? "", due: new Date(`${t.due_date}T00:00:00Z`), agent: "" }, new Date(`${today}T00:00:00Z`), new Date(`${move.move_out_date}T00:00:00Z`)).replaceAll("-", " ")}` : ""}</p>
-            <AccountActionForm action={setTaskStatus}><input type="hidden" name="id" value={t.id} /><label>Status <select className="field" name="status" defaultValue={t.status}><option value="todo">To do</option><option value="done">Done</option><option value="skipped">Skipped</option></select></label><button className="underline">Save status</button></AccountActionForm>
-          </article>)}<Link className="mt-5 inline-block underline" href="/plan">Open full checklist and lease findings</Link>
+          <SavedChecklist tasks={view.tasks} editable today={today} moveOutDate={move.move_out_date} />
         </section>
         <section className={card}><h2 className="font-display text-3xl">Your documents</h2>{!view.documents.length ? <div className="mt-4"><LeaseUpload moveId={move.id} /></div> : <ul className="mt-4 space-y-3">{view.documents.map(d => <li key={d.id}><Link className="underline" href="/account/documents">{d.name ?? "Lease document"}</Link><p className="text-sm text-muted">{d.page_count ?? "Unknown"} pages · Uploaded {d.uploaded_at.slice(0,10)}</p></li>)}</ul>}</section>
         <section className={card}><h2 className="font-display text-3xl">Your listings</h2>{!view.listings.length ? <p className="my-4 text-muted">No listings yet. Your inventory has {view.items.length} items.</p> : <ul className="my-4 space-y-2">{view.listings.map(l => <li key={l.id}><Link href={`/muse#listing-${l.id}`} className="underline">{l.title}</Link> · {l.status} ({l.mode})</li>)}</ul>}<Link className="underline" href="/muse">Add items and prepare listings</Link></section>
@@ -58,4 +58,4 @@ async function Dashboard() {
     </div>
   </>;
 }
-export default function DashboardPage() { return <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><Suspense fallback={<p>Loading your saved move…</p>}><Dashboard /></Suspense></main>; }
+export default function DashboardPage() { return <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6"><Suspense fallback={<p>Loading your saved move…</p>}><Dashboard /></Suspense></div>; }
