@@ -2,9 +2,10 @@
 
 ## Account workflow repair — October 24, 2026, Codex
 
-PR #24 is open on `feat/continue-launch`; application release pending. Production
-schema migrations applied after PR opening under Jorge's explicit instruction; no
-existing renter records or personal files changed.
+PR #24 merged as `cbd8898`; production deployment is READY at the canonical
+Vercel URL. Production schema migrations were applied after PR opening and before
+merge under Jorge's explicit instruction. No existing renter records or personal
+files were changed.
 Production read-only verification found the reported move/contact/deposit/date saved,
 but no renter name, structured ZIP, documents, tasks, listings or chat history.
 Do not copy personal details or screenshots into this repository.
@@ -35,11 +36,19 @@ Do not copy personal details or screenshots into this repository.
 - Authenticated local HTTP checks confirmed account dashboard data, form prefill,
   empty inventory, public demo separation and anonymous redirect. Browser click-through
   remains unverified because native Chrome actions were interrupted by active-window changes.
-  Hosted preview `/start` and `/demo` returned 200 with the new form and labeled
-  examples. Real model calls and outgoing calls/messages/posts not run.
-- Next: finish PR checks and application release, then reattach the user's original
+  Hosted preview and production `/start`, `/move`, `/demo` and `/demo/items`
+  returned 200 with the new form and labeled examples; anonymous `/dashboard` and
+  `/items` redirect to login. Production OpenRouter key is configured; model calls
+  and outgoing calls/messages/posts were not run.
+- Next: the renter should confirm their name/company and reattach the original
   lease and confirm newly collected fields through the application. Do not label extraction
   complete until the original and cited findings are visible in that account.
+- PR fresh-database migration checks passed. The post-merge runner hit a Docker
+  port-54322 collision and was retried. Independently, production deployment
+  automation still lacks `SUPABASE_ACCESS_TOKEN`; a repository admin must add it.
+  Current CLI account has write access but no repository admin permissions.
+  Manual production application, all 10 version records, empty schema diff and
+  production DB lint were verified. This is not a claim that CI applied migrations.
 
 
 Updated: October 24, 2026, 2:10 PM PDT. Phase: production live on Vercel with the Muse bridge,
