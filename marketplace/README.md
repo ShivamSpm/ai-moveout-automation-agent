@@ -2,7 +2,7 @@
 
 Prepared locally; no repository or directory submission was created. The catalog
 lives at `../.claude-plugin/marketplace.json`; its name is **vacate** and its plugin
-is **moving-assistant 0.4.0**.
+is **moving-assistant 0.5.0**.
 
 After the orchestrator reviews and publishes these files to the existing repository,
 install in Claude Code:
@@ -23,6 +23,8 @@ plugin MCP server and a separate `claude mcp add` entry with the same endpoint.
 New renters can install before creating a Vacate account. Run
 `/moving-assistant:start` for signup/consent guidance, then
 `/moving-assistant:muse` for Muse setup and optional browser assistance.
+`/moving-assistant:telegram` uses direct tools for reviewed listings, buyer replies
+and pickups. No copy/paste of listing text is needed.
 Passwords and connector credentials belong in their secure account/setup pages,
 not in chat. The public walkthrough is `/claude`.
 

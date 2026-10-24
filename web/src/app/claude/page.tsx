@@ -80,11 +80,19 @@ export default function ClaudeSetupPage() {
         <Link className="mt-4 inline-block underline" href="/start">Add move details in Vacate</Link>
       </section>
 
+      <section className="box-label mt-6 rounded-3xl p-6" aria-labelledby="telegram-heading">
+        <h2 id="telegram-heading" className="font-display text-3xl">Sell on Telegram from Claude</h2>
+        <p className="mt-3 text-muted">Ask Claude to help sell an item on Telegram, or run <code>/moving-assistant:telegram</code> in Claude Code. Connect your Telegram account and group once using the private link Claude provides.</p>
+        <p className="mt-3 text-muted">Claude uses your saved inventory and attached photos to draft the listing. Review its exact destination, bot account, photo and caption in chat, then approve publication. No listing text needs to be copied into Vacate or Telegram.</p>
+        <p className="mt-3 text-muted">Ask Claude to check buyer messages, draft replies and arrange pickup. For listings prepared through these Claude tools, each reply and pickup confirmation waits for your review, and prices do not change automatically.</p>
+        <p className="mt-3 text-sm text-muted">Telegram must be configured on Vacate. Live delivery depends on the bot’s access to your selected destination. Older listings created through the website retain their existing negotiation behavior.</p>
+      </section>
+
       <section id="muse-from-claude" className="box-label mt-6 scroll-mt-6 rounded-3xl p-6" aria-labelledby="muse-heading">
         <h2 id="muse-heading" className="font-display text-3xl">Coordinate Muse from Claude</h2>
         <p className="mt-3 text-muted">Claude can help prepare your Marketplace listings, review each action with you, and check the results Muse reports to your Vacate account.</p>
         <code className={commandStyle}>Help me connect my own Muse account to Vacate, prepare a Marketplace listing for an item I own, and check its progress. Tell me when I need to sign in or approve something.</code>
-        <p className="mt-4 text-sm text-muted">In Claude Code, run <code>/moving-assistant:muse</code>. Existing plugin users should update the vacate marketplace and moving-assistant plugin to version 0.4.0 or later.</p>
+        <p className="mt-4 text-sm text-muted">In Claude Code, run <code>/moving-assistant:muse</code>. Existing plugin users should update the vacate marketplace and moving-assistant plugin to version 0.5.0 or later.</p>
         <h3 className="mt-6 text-lg font-semibold">With Claude Code and Chrome</h3>
         <p className="mt-2 text-muted">Install the official Claude in Chrome extension and start Claude Code with <code>claude --chrome</code>. Use <code>/chrome</code> to check the connection. With your site permissions, Claude can help navigate Muse’s visible website and follow the conversation while you stay in your Claude Code workflow.</p>
         <p className="mt-3 text-sm text-muted">This browser-assisted Muse workflow has not yet been verified end to end. You still complete sign-in, account connection, and Muse’s publish approvals yourself. Browser tools do not grant Facebook access.</p>
@@ -93,7 +101,7 @@ export default function ClaudeSetupPage() {
           <li>Sign into your own Muse account with the Facebook profile you want to use.</li>
           <li>Open <Link href="/muse" className="underline">Muse setup in Vacate</Link> with the same Vacate account connected to Claude. Create a connector token there and add Vacate as a custom connector in Muse using the displayed endpoint and token. Keep the token in the connector settings, out of chat.</li>
           <li>Ask Muse to check Vacate for approved work. Claude can inspect connector activity, but a token’s existence or past use does not prove that Facebook posting is available.</li>
-          <li>Review a listing in Claude. After approval, Claude can guide an available browser session to ask Muse to handle that specific task. Complete Muse’s own approval prompt, then ask Claude to check the result.</li>
+          <li>Review a listing in Claude. After approval, Claude retrieves a task-specific handoff through Vacate and can enter it directly into Muse using an available browser session—no prompt copying needed. Complete Muse’s own approval prompt, then ask Claude to check the result.</li>
         </ol>
         <h3 className="mt-6 text-lg font-semibold">Claude chat and Facebook posts</h3>
         <p className="mt-2 text-muted">Without browser tools, Claude chat can prepare listings and read reported activity, but you open Muse to connect and start the work. The Vacate connector cannot directly control personal Muse conversations.</p>

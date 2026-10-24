@@ -1,5 +1,24 @@
 # Vacate status — October 24, 2026
 
+## Claude sales tools — October 24, 2026
+
+- Plugin 0.5.0 adds `/moving-assistant:telegram`. Renter-only MCP tools read sales
+  and prepare connection links, draft Telegram listings/replies/pickups, and execute
+  separately approved exact versions. Uses existing items/photos, no prompt copying.
+- New Claude-prepared listings bind the destination, bot username, caption and photo
+  hash. Their buyer messages wait for review; automatic replies and price drops are
+  bypassed. Legacy website listing behavior remains unchanged. New pickup sends hold
+  inventory, keep holds on unknown outcomes, and never announce a reserved item sold.
+- `prepare_muse_handoff` returns an approved task/version-specific prompt for authorized
+  browser tools. It does not invoke a personal Muse API. General Facebook feed/group
+  posting and fully in-chat Muse control remain unsupported, not advertised as done.
+- Local real-DB/mock-provider verification covers ownership, exact approval, changed
+  targets/photos, duplicates, timeouts, pickup holds and executor tool scope. Full suite
+  passed (379 tests before the additional successful-pickup regression); lint/build pass.
+  No live Telegram/Muse sends, posts or account connections were executed.
+- No migrations. Next: verify release tool availability and run an explicitly reviewed
+  real Telegram listing and Muse browser flow before claiming live end-to-end completion.
+
 ## Claude-first public onboarding
 
 - Public home page links to `/claude` before any Vacate login. The guide explains

@@ -11,6 +11,8 @@ import { AnalyzeItemInput, analyzeItemPhotos } from "../tools/analyze-item";
 import * as bridge from "../muse/bridge";
 import { appLinks, actionLink } from "../links";
 import * as renter from "./renter";
+import * as sales from "../selling/claude-sales";
+import { sellingState } from "../selling/telegram-sales";
 import { ActivityInput, ActivityEntry, getActivity } from "./activity";
 import { progressHtml, progressMeta, PROGRESS_URI, PROGRESS_MIME } from "./progress";
 
@@ -93,6 +95,39 @@ export function buildMcpServer(caller: Caller) {
       title: "Recent move and Muse activity", description: "Poll for newest events since an optional timestamp. Muse reports are unverified. Listing/reservation snapshots are labeled; they are not a full change history. Limit 1–100.",
       inputSchema: ActivityInput.shape, outputSchema: { ...common, activity: z.array(ActivityEntry), checked_at: z.string() }, annotations: READ,
     }, input => result(async () => ({ activity: await getActivity(ctx, input), checked_at: new Date().toISOString() }), "Recent activity. Muse reports are not independently verified. Ask Claude to check for updates; this connector does not push."));
+    server.registerTool("get_telegram_sales", {
+      title: "Telegram sales and connection", description: "Read your Telegram listings, buyer messages and review actions; prepares an expiring account/group connection link when configured. Follow the link once to connect Telegram. No listing or buyer message is sent. Legacy listings may still use automatic negotiation; new Claude-prepared listings require review of each reply and do not auto-change prices.",
+      inputSchema: {}, annotations: DRAFT,
+    }, () => result(async () => {
+      const state = await sellingState(ctx);
+      const listingIds = new Set(state.listings.map(l => l.id));
+      const conversations = state.conversations.filter(c => listingIds.has(c.listing_id));
+      const conversationIds = new Set(conversations.map(c => c.id));
+      return { ...state, conversations, messages: state.messages.filter(m => conversationIds.has(m.conversation_id)), actions: state.actions.filter(a => {
+        const p = a.payload as { listingId?: string; conversationId?: string };
+        return (p.listingId && listingIds.has(p.listingId)) || (p.conversationId && conversationIds.has(p.conversationId));
+      }) };
+    }, "Telegram sales. Connection links are private and expire; share them only with this renter."));
+    server.registerTool("prepare_telegram_listing", {
+      title: "Prepare a Telegram listing", description: "Draft an existing confirmed sell/donate item with one attached photo. Binds the exact caption, bot account, destination and photo hash for review. No posting, automatic buyer replies or automatic price reductions.",
+      inputSchema: sales.PrepareTelegramInput.shape, annotations: DRAFT,
+    }, input => result(() => sales.prepareTelegramListing(ctx, input), "Review the exact Telegram destination, photo and caption before approving.", true));
+    server.registerTool("prepare_telegram_reply", {
+      title: "Prepare a Telegram buyer reply", description: "Draft a reply to a buyer on a Claude-prepared Telegram listing. Includes the recipient and exact text, flags address disclosure. Nothing sent.",
+      inputSchema: sales.PrepareReplyInput.shape, annotations: DRAFT,
+    }, input => result(() => sales.prepareTelegramReply(ctx, input), "Review the exact buyer, message and any address disclosure before approving.", true));
+    server.registerTool("prepare_telegram_pickup", {
+      title: "Prepare a Telegram pickup confirmation", description: "Prepare an exact buyer, price, future pickup window and message for review. The message must include the agreed details. Flags exact-address disclosure. Nothing sent or reserved until separately approved and executed; only one buyer can hold the item.",
+      inputSchema: sales.PreparePickupInput.shape, annotations: DRAFT,
+    }, input => result(() => sales.prepareTelegramPickup(ctx, input), "Review buyer, amount, pickup time, exact message and address disclosure before approval.", true));
+    server.registerTool("execute_telegram_action", {
+      title: "Send an approved Telegram action", description: "Execute one separately approved Telegram listing, reply or pickup version. Requires approve_action after explicit renter review of the exact account, recipient, text, photo and hash. Does not approve itself. Repeated calls do not resend; unknown outcomes need reconciliation.",
+      inputSchema: market.ApproveInput.shape, annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+    }, input => result(() => sales.executeTelegramAction(ctx, input), "Telegram execution status. Unknown does not mean unsent."));
+    server.registerTool("prepare_muse_handoff", {
+      title: "Prepare an approved Muse task handoff", description: "Get a task-specific prompt and Muse URL for a browser-enabled Claude to use without manual copy/paste. Requires an already approved exact version. Does not call Muse, post or claim the task. No API invocation is available; Muse's approval still belongs to the renter.",
+      inputSchema: sales.HandoffInput.shape, annotations: READ,
+    }, input => result(() => sales.museHandoff(ctx, input), "Muse browser handoff; check canStart before submitting. No Muse API call was made."));
     server.registerTool("get_app_links", {
       title: "Open Vacate", description: "Get app links and optional action/listing/conversation anchors. IDs do not grant access; the web app requires sign-in.",
       inputSchema: { actionId: z.uuid().optional(), listingId: z.uuid().optional(), conversationId: z.uuid().optional() }, outputSchema: { ...common, app_links: renter.LinksSchema }, annotations: READ,
