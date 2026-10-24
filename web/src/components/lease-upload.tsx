@@ -1,9 +1,11 @@
 "use client";
 import { createBrowserClient } from "@supabase/ssr";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { prepareUpload, registerDocument } from "@/app/account/documents/actions";
 export function LeaseUpload({ moveId }: { moveId: string }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   return <form className="grid gap-3" action={async data => {
@@ -19,7 +21,7 @@ export function LeaseUpload({ moveId }: { moveId: string }) {
       if (result.error) throw result.error;
       setMessage("Reading lease pages…");
       const registered = await registerDocument({ documentId: upload.documentId, moveId, name: file.name });
-      setMessage(registered.message);
+      setMessage(registered.message); router.refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Upload failed. Please try again."); }
     finally { setBusy(false); }
   }}>

@@ -8,8 +8,9 @@ export const LinksSchema = z.record(z.string(), z.string());
 export const TaskStatus = z.enum(['todo', 'done', 'skipped']);
 export const ChecklistInput = z.object({ lane: z.enum(['landlord', 'cleaning', 'moving', 'selling', 'admin']).optional(), status: TaskStatus.optional(), taskId: z.uuid().optional() });
 export const TaskSchema = z.object({ id: z.string(), title: z.string(), detail: z.string().nullable(), lane: z.string(), due_date: z.string().nullable(), status: z.string(), source: z.string().nullable(), source_kind: z.string(), page: z.number().nullable() });
-export async function getChecklist(ctx: ToolContext, input: z.infer<typeof ChecklistInput>) {
+export async function getChecklist(ctx: ToolContext, input: z.infer<typeof ChecklistInput>, ownerOnly = false) {
   let query = ctx.db.from('tasks').select('id, title, detail, lane, due_date, status, source, source_kind').order('due_date', { ascending: true, nullsFirst: false }).order('id');
+  if (ownerOnly) query = query.eq("owner_id", ctx.user.id);
   if (input.lane) query = query.eq('lane', input.lane);
   if (input.status) query = query.eq('status', input.status);
   if (input.taskId) query = query.eq('id', input.taskId);
@@ -24,16 +25,18 @@ export async function setTaskStatus(ctx: ToolContext, taskId: string, status: z.
   return data;
 }
 export const DocumentSchema = z.object({ id: z.string(), name: z.string().nullable(), kind: z.string(), uploaded_at: z.string(), page_count: z.number().nullable(), short_hash: z.string() });
-export async function listDocuments(ctx: ToolContext, documentId?: string) {
+export async function listDocuments(ctx: ToolContext, documentId?: string, ownerOnly = false) {
   let query = ctx.db.from('documents').select('id, original_name, kind, uploaded_at, page_count, sha256').order('uploaded_at', { ascending: false });
+  if (ownerOnly) query = query.eq("owner_id", ctx.user.id);
   if (documentId) query = query.eq('id', documentId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data ?? []).map(d => ({ id: d.id, name: d.original_name, kind: d.kind, uploaded_at: d.uploaded_at, page_count: d.page_count, short_hash: d.sha256.slice(0, 12) }));
 }
 export const FindingSchema = z.object({ id: z.string(), document_id: z.string().nullable(), rule: z.string(), value: z.unknown(), quote: z.string().nullable(), page: z.number().nullable(), confidence: z.string(), confirmed: z.boolean(), not_found: z.boolean() });
-export async function getLeaseFindings(ctx: ToolContext, documentId?: string) {
+export async function getLeaseFindings(ctx: ToolContext, documentId?: string, ownerOnly = false) {
   let query = ctx.db.from('lease_findings').select('id, document_id, rule_key, value, quote, page, confidence, confirmed').order('created_at');
+  if (ownerOnly) query = query.eq("owner_id", ctx.user.id);
   if (documentId) query = query.eq('document_id', documentId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);

@@ -56,7 +56,7 @@ export function ApprovalQueue({ approvals }: { approvals: Approval[] }) {
                       decision === "approved" ? "text-leaf" : "text-white/40"
                     }`}
                   >
-                    {decision === "approved" ? "Sent" : "Skipped"}
+                    {decision === "approved" ? "Simulated" : "Skipped"}
                   </span>
                 ) : (
                   a.cost && <span className="shrink-0 font-mono text-sm text-tape">{a.cost}</span>
@@ -72,7 +72,7 @@ export function ApprovalQueue({ approvals }: { approvals: Approval[] }) {
                       onClick={() => decide(a.id, "approved")}
                       className="flex-1 rounded-full bg-tape px-4 py-2 text-sm font-semibold text-tape-ink transition hover:brightness-105"
                     >
-                      Approve &amp; send
+                      Try approval
                     </button>
                     <button
                       onClick={() => decide(a.id, "skipped")}

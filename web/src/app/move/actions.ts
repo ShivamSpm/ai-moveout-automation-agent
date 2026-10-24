@@ -1,5 +1,6 @@
 "use server";
 
+import { fullAddress } from "@/lib/move-fields";
 import { z } from "zod";
 import { moveDetailsSchema, type MoveDetailsState } from "@/lib/move-details-schema";
 import { AuthError, requireUser } from "@/server/auth";
@@ -17,13 +18,14 @@ export async function saveMoveDetails(_previous: MoveDetailsState, form: FormDat
     await updateMove(ctx, {
       renterName: d.renterName,
       moveOutDate: d.moveOutDate,
-      addressPrivate: d.address,
+      addressPrivate: fullAddress(d), addressLine1: d.address, addressLine2: d.addressLine2 ?? null, city: d.city, region: d.region, depositCents: d.deposit,
       zip: d.zip,
-      bedrooms: d.bedrooms,
-      bathrooms: d.bathrooms,
+      bedrooms: d.bedrooms ?? null,
+      bathrooms: d.bathrooms ?? null,
       sqft: d.sqft ?? null,
+      propertyManagementCompany: d.propertyManagementCompany,
       landlordName: d.landlordName,
-      landlordPhone: d.landlordPhone,
+      landlordPhone: d.landlordPhone ?? null,
       landlordEmail: d.landlordEmail ?? null,
     });
     return { status: "saved" };

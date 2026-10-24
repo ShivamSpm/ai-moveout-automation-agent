@@ -87,3 +87,14 @@ Report changed files, verified behavior, remaining gaps and the next runnable st
 The current setup task authorizes local repository/framework preparation and
 planning. It does not itself authorize sending email, placing calls, publishing
 listings, booking services, provisioning paid resources or production deployment.
+
+## Migration release instruction — Jorge, October 24, 2026
+
+For every PR containing monorepo migrations, open the PR first, inspect a dry run
+against the dedicated production Supabase project, apply the pending migrations
+before the application merge reaches production, and verify migration history and
+schema drift afterward. Coordinate this with the merge to main; do not leave
+migration-bearing application changes deployed against an older schema. Production
+migration application in this release workflow is authorized by Jorge's instruction.
+If GitHub's production migration job lacks credentials, perform the authorized
+CLI release step and report the automation gap; do not claim CI applied it.

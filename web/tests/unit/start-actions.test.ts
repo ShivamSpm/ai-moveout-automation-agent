@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 const auth = vi.hoisted(() => ({ getUser: vi.fn(), signUp: vi.fn(), signInWithPassword: vi.fn() }));
 const save = vi.hoisted(() => vi.fn());
 vi.mock("@/server/supabase", () => ({ userClient: async () => ({ auth }) }));
@@ -8,7 +9,7 @@ vi.mock("@/server/env", () => ({ env: { appUrl: () => "http://localhost:3101" } 
 import { saveStart } from "@/app/start/actions";
 function form() {
   const data = new FormData();
-  for (const [key, value] of Object.entries({ email: "renter@example.test", password: "secret-test-password", address: "100 Example Street", moveOutDate: "2026-11-30", deposit: "3950", landlordName: "Example Manager", landlordPhone: "(415) 555-0134", landlordEmail: "renter@example.test" })) data.set(key, value);
+  for (const [key, value] of Object.entries({ email: "renter@example.test", password: "secret-test-password", address: "100 Example Street", moveOutDate: "2026-11-30", deposit: "3950", renterName: "Example Renter", city: "Example City", region: "CA", zip: "94110", propertyManagementCompany: "Example Management", landlordName: "Example Manager", landlordPhone: "(415) 555-0134", landlordEmail: "renter@example.test" })) data.set(key, value);
   return data;
 }
 beforeEach(() => { vi.resetAllMocks(); auth.getUser.mockResolvedValue({ data: { user: null } }); });

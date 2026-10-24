@@ -140,3 +140,17 @@ it('returns configured links, review links, progress and safe self-contained HTM
   expect(html).not.toMatch(/<script[^>]+src=|SUPABASE_SECRET|access_token/);
   expect(html).not.toContain('message-b');
 });
+
+it('loads only the signed-in renter dashboard and chat context', async () => {
+  const { getMoveView } = await import('@/server/move-view');
+  const { renterContext } = await import('@/lib/move-summary');
+  await market.updateMove(a, { propertyManagementCompany: 'Example Management' });
+  const view = await getMoveView(a);
+  expect(view.move?.property_management_company).toBe('Example Management');
+  expect(view.tasks.some(t => t.id === taskA)).toBe(true);
+  expect(view.tasks.some(t => t.id === taskB)).toBe(false);
+  expect(view.documents.some(d => d.id === docB)).toBe(false);
+  expect(JSON.stringify(view)).not.toContain('message-b');
+  expect(JSON.stringify(view)).not.toContain('Quote-b');
+  expect(renterContext(view)).toContain('Quote-a');
+});

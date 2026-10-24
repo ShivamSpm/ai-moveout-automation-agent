@@ -1,13 +1,15 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { currentMove } from "@/server/marketplace";
 import { requireUser } from "@/server/auth";
 import * as documents from "@/server/documents";
 import { readLease } from "@/server/domain/lease-pipeline";
+export async function prepareCurrentUpload() { const ctx = await requireUser(); return documents.prepareLeaseUpload(ctx, (await currentMove(ctx)).id); }
 export async function prepareUpload(moveId: string) { return documents.prepareLeaseUpload(await requireUser(), moveId); }
 export async function registerDocument(input: unknown) {
   const result = await documents.registerDocument(await requireUser(), input);
-  revalidatePath("/account/documents"); revalidatePath("/plan"); return result;
+  revalidatePath("/account/documents"); revalidatePath("/plan"); revalidatePath("/dashboard"); return result;
 }
 export async function fileAction(form: FormData) {
   try {
@@ -25,6 +27,6 @@ export async function fileAction(form: FormData) {
     } else if (action === "read") message = (await readLease(ctx, id)).message;
     else if (action === "download" || action === "view") return { url: await documents.documentUrl(ctx, id, action === "download"), message: "Link ready (expires in 60 seconds)" };
     else throw new Error("Unknown file action");
-    revalidatePath("/account/documents"); revalidatePath("/plan"); return { message };
+    revalidatePath("/account/documents"); revalidatePath("/plan"); revalidatePath("/dashboard"); return { message };
   } catch (e) { return { error: e instanceof Error ? e.message : "Could not update file" }; }
 }

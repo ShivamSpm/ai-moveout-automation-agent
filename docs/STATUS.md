@@ -1,5 +1,47 @@
 # Session handoff
 
+## Account workflow repair — October 24, 2026, Codex
+
+PR #24 is open on `feat/continue-launch`; application release pending. Production
+schema migrations applied after PR opening under Jorge's explicit instruction; no
+existing renter records or personal files changed.
+Production read-only verification found the reported move/contact/deposit/date saved,
+but no renter name, structured ZIP, documents, tasks, listings or chat history.
+Do not copy personal details or screenshots into this repository.
+
+- Root cause: `/dashboard` and `/items` always rendered fixtures; `/start` discarded
+  the selected lease before submitting. The two move forms captured different fields.
+- `/start` and `/move` now share the same form with renter name, street/unit/city/state/ZIP,
+  date, deposit, management company, manager name/email and optional phone/apartment size.
+  Legacy full addresses are preserved and prefilled for renter confirmation.
+- Onboarding uploads the selected PDF to private storage after saving the move,
+  then registers/reads it. Upload failure leaves move details intact and offers recovery.
+- Dashboard uses the connector's user-scoped checklist/document/finding/activity readers,
+  real inventory/approvals, empty states and persisted chat. No sample records are inserted.
+  Chat context excludes private move address/contact fields and treats source text as data.
+- Public examples moved to `/demo` and `/demo/items`; private item URLs require ownership.
+  Cleaning simulation endpoints now derive identity from the authenticated session.
+- Two additive migrations authored and applied locally: `20261024233001_property_management_company`
+  and `20261024233002_structured_move_address`. Generated application DB types refreshed.
+  Applied both to production along with the already-merged `20261024233000_landlord_calls`.
+  All 10 migration versions are recorded; public/private/storage schema diff is empty.
+  The CLI-created files were resequenced after the future-dated teammate migration
+  before publication; local history was reconciled without changing schema. Jorge
+  authorized production migration application after PR opening (October 24).
+- Validation: npm ci (0 vulnerabilities), route typegen, TypeScript, lint, 271 tests,
+  production build (37 routes), local database lint and diff whitespace checks passed.
+  Root/plugin validation passed; plugin directory submission still flags missing license,
+  icon and privacy-policy metadata (not changed here).
+- Authenticated local HTTP checks confirmed account dashboard data, form prefill,
+  empty inventory, public demo separation and anonymous redirect. Browser click-through
+  remains unverified because native Chrome actions were interrupted by active-window changes.
+  Hosted preview `/start` and `/demo` returned 200 with the new form and labeled
+  examples. Real model calls and outgoing calls/messages/posts not run.
+- Next: finish PR checks and application release, then reattach the user's original
+  lease and confirm newly collected fields through the application. Do not label extraction
+  complete until the original and cited findings are visible in that account.
+
+
 Updated: October 24, 2026, 2:10 PM PDT. Phase: production live on Vercel with the Muse bridge,
 signup and Claude connector; custom domain, SMTP and live Muse test pending.
 

@@ -27,6 +27,7 @@ export async function currentMove(ctx: ToolContext) {
   const { data, error } = await ctx.db
     .from("moves")
     .select("*")
+    .eq("owner_id", ctx.user.id)
     .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -39,9 +40,14 @@ export async function currentMove(ctx: ToolContext) {
 
 export const UpdateMoveInput = z.object({
   areaLabel: z.string().max(100).nullish(),
-  addressPrivate: z.string().max(200).nullish(),
+  addressLine1: z.string().max(160).nullish(),
+  addressLine2: z.string().max(80).nullish(),
+  city: z.string().max(100).nullish(),
+  region: z.string().max(100).nullish(),
+  addressPrivate: z.string().max(500).nullish(),
   moveOutDate: z.iso.date().nullish(),
   depositCents: z.number().int().min(0).max(2147483647).nullish(),
+  propertyManagementCompany: z.string().trim().max(160).nullish(),
   landlordName: z.string().max(100).nullish(),
   landlordEmail: z.email().nullish(),
   renterName: z.string().max(100).nullish(),
@@ -58,9 +64,11 @@ export async function updateMove(ctx: ToolContext, input: z.infer<typeof UpdateM
   const patch = {
     area_label: input.areaLabel,
     address_private: input.addressPrivate,
+    address_line1: input.addressLine1, address_line2: input.addressLine2, city: input.city, region: input.region,
     move_out_date: input.moveOutDate,
     deposit_cents: input.depositCents,
     landlord_name: input.landlordName,
+    property_management_company: input.propertyManagementCompany,
     landlord_email: input.landlordEmail,
     renter_name: input.renterName,
     landlord_phone: input.landlordPhone,
