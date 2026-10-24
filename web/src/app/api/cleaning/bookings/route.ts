@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const body = await readJson(request);
   if (body === null) return badRequest("Expected a JSON body { quote, slotId }");
   try {
-    const proposal = await proposeCleaningBooking(body as ProposeCleaningBookingInput, cleaningContext(request));
+    const proposal = await proposeCleaningBooking(body as ProposeCleaningBookingInput, await cleaningContext());
     return simulatedJson({ proposal }, 201);
   } catch (error) {
     return errorResponse(error);

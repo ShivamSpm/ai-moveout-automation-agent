@@ -1,9 +1,10 @@
 import "server-only";
+import { AuthError, requireUser } from "@/server/auth";
 import { CatalogUnavailableError } from "@/server/integrations/cleaning-catalog";
 import { CleaningToolError, createCleaningContext, type CleaningContext, type CleaningErrorCode } from "@/server/tools/cleaning";
 
 const MAX_BODY_CHARS = 64_000;
-const DEMO_OWNER_ID = "demo-renter";
+
 
 const STATUS: Record<CleaningErrorCode, number> = {
   invalid_request: 400,
@@ -13,18 +14,12 @@ const STATUS: Record<CleaningErrorCode, number> = {
   slot_unavailable: 409,
 };
 
-/**
- * The only place a cleaning route learns who is calling. Auth is not on main yet, so every caller
- * is one demo renter. Swap in the Supabase session user here (auth.getUser() on the server) once
- * login lands; never take an owner id from the request body or from model output.
- */
-export function resolveOwnerId(request: Request): string {
-  void request;
-  return DEMO_OWNER_ID;
+// Session identity is the only authority for simulated service state.
+export async function resolveOwnerId(): Promise<string> {
+  return (await requireUser()).user.id;
 }
-
-export function cleaningContext(request: Request): CleaningContext {
-  return createCleaningContext(resolveOwnerId(request));
+export async function cleaningContext(): Promise<CleaningContext> {
+  return createCleaningContext(await resolveOwnerId());
 }
 
 /** The parsed JSON body, or null when it is missing, too large or not JSON. */
@@ -48,6 +43,7 @@ export function badRequest(message: string): Response {
 
 /** Maps the typed errors the cleaning tools throw; anything else is a bug and propagates. */
 export function errorResponse(error: unknown): Response {
+  if (error instanceof AuthError) return simulatedJson({ error: { code: "unauthorized", message: "Sign in required" } }, 401);
   if (error instanceof CleaningToolError) {
     return simulatedJson({ error: { code: error.code, message: error.message } }, STATUS[error.code]);
   }

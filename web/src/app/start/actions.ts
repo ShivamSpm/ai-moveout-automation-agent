@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { fullAddress } from "@/lib/move-fields";
 import { z } from "zod";
 import { startSchema, type StartState } from "@/lib/start-schema";
 import { safeNextPath } from "@/lib/safe-next";
@@ -35,9 +37,12 @@ export async function saveStart(_previous: StartState, form: FormData): Promise<
     }
     const ctx = await requireUser();
     await updateMove(ctx, {
-      addressPrivate: input.address, moveOutDate: input.moveOutDate, depositCents: input.deposit,
-      landlordName: input.landlordName, landlordEmail: input.landlordEmail,
+      renterName: input.renterName, addressPrivate: fullAddress(input),
+      addressLine1: input.address, addressLine2: input.addressLine2 ?? null, city: input.city, region: input.region, zip: input.zip,
+      landlordPhone: input.landlordPhone ?? null, bedrooms: input.bedrooms ?? null, bathrooms: input.bathrooms ?? null, sqft: input.sqft ?? null, moveOutDate: input.moveOutDate, depositCents: input.deposit,
+      propertyManagementCompany: input.propertyManagementCompany, landlordName: input.landlordName, landlordEmail: input.landlordEmail,
     });
+    revalidatePath("/dashboard"); revalidatePath("/move"); revalidatePath("/start");
     return { status: "success" };
   } catch {
     return { status: "error", message: "Your move could not be saved. Please try again; if your account was created, sign in instead." };

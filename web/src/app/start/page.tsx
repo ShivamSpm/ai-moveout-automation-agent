@@ -1,3 +1,4 @@
+import { addressFields } from "@/lib/move-fields";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -15,9 +16,9 @@ async function Intake({ searchParams }: PageProps<"/start">) {
   const { resume } = await searchParams;
   let initial;
   if (ctx) {
-    const { data: move, error } = await ctx.db.from("moves").select("address_private, move_out_date, deposit_cents, landlord_name, landlord_email").order("created_at").limit(1).maybeSingle();
+    const { data: move, error } = await ctx.db.from("moves").select("*").eq("owner_id", ctx.user.id).order("created_at").limit(1).maybeSingle();
     if (error) throw error;
-    if (move) initial = { email: ctx.user.email ?? "", address: move.address_private ?? "", moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
+    if (move) initial = { email: ctx.user.email ?? "", ...addressFields(move), renterName: move.renter_name ?? "", landlordPhone: move.landlord_phone ?? "", bedrooms: move.bedrooms == null ? "" : String(move.bedrooms), bathrooms: move.bathrooms == null ? "" : String(move.bathrooms), sqft: move.sqft == null ? "" : String(move.sqft), moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), propertyManagementCompany: move.property_management_company ?? "", landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
   }
   return <StartForm signedInEmail={ctx?.user.email} initial={initial} providers={providers} resume={resume === "1"} />;
 }
@@ -31,11 +32,10 @@ export default function Start(props: PageProps<"/start">) {
           Where are you <span className="marker">leaving?</span>
         </h1>
         <p className="mt-6 max-w-md leading-relaxed text-muted">
-          The agent reads your lease, emails your landlord for their move-out guide, and builds the
-          plan backward from your move-out date. Nothing gets sent until you approve it.
+          Save your move and upload your lease to build a checklist with page references. Then prepare contact with your property manager and listings for the items you want to sell. You review every outgoing action.
         </p>
         <ol className="mt-10 space-y-4 font-medium">
-          {["Read lease", "Email landlord", "Build the plan", "Start the four lanes"].map((step, i) => (
+          {["Save move details", "Upload and review lease", "Contact property manager", "Add items to sell"].map((step, i) => (
             <li key={step} className="flex items-center gap-4">
               <span className="tape grid h-9 w-9 place-items-center rounded-full border border-line font-display text-base">{i + 1}</span>
               {step}

@@ -239,6 +239,25 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"landlord_calls": {
+                  Row: {
+                    "checklist": NonNullable<Json>,"completed_at": string | null,"created_at": string,"error": string | null,"id": string,"move_id": string,"owner_id": string,"price_usd": number | null,"provider_call_id": string | null,"script": string,"status": string,"summary": string | null,"to_phone": string,"transcript": string | null
+                  }
+                  Insert: {
+                    "checklist"?: NonNullable<Json>,"completed_at"?: string | null,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id": string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script": string,"status"?: string,"summary"?: string | null,"to_phone": string,"transcript"?: string | null
+                  }
+                  Update: {
+                    "checklist"?: NonNullable<Json>,"completed_at"?: string | null,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id"?: string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script"?: string,"status"?: string,"summary"?: string | null,"to_phone"?: string,"transcript"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "landlord_calls_move_id_owner_id_fkey"
+      columns: ["move_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "moves"
+      referencedColumns: ["id","owner_id"]
+    }
+                  ]
                 },"lease_findings": {
                   Row: {
                     "confidence": string,"confirmed": boolean,"created_at": string,"document_id": string | null,"extractor": string,"id": string,"move_id": string,"owner_id": string,"page": number | null,"quote": string | null,"rule_key": string,"value": Json | null
@@ -258,25 +277,6 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     },{
       foreignKeyName: "lease_findings_move_id_owner_id_fkey"
-      columns: ["move_id","owner_id"]
-isOneToOne: false
-      referencedRelation: "moves"
-      referencedColumns: ["id","owner_id"]
-    }
-                  ]
-                },"landlord_calls": {
-                  Row: {
-                    "completed_at": string | null,"checklist": Json,"created_at": string,"error": string | null,"id": string,"move_id": string,"owner_id": string,"price_usd": number | null,"provider_call_id": string | null,"script": string,"status": string,"summary": string | null,"to_phone": string,"transcript": string | null
-                  }
-                  Insert: {
-                    "completed_at"?: string | null,"checklist"?: Json,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id": string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script": string,"status"?: string,"summary"?: string | null,"to_phone": string,"transcript"?: string | null
-                  }
-                  Update: {
-                    "completed_at"?: string | null,"checklist"?: Json,"created_at"?: string,"error"?: string | null,"id"?: string,"move_id"?: string,"owner_id"?: string,"price_usd"?: number | null,"provider_call_id"?: string | null,"script"?: string,"status"?: string,"summary"?: string | null,"to_phone"?: string,"transcript"?: string | null
-                  }
-                  Relationships: [
-                    {
-      foreignKeyName: "landlord_calls_move_id_owner_id_fkey"
       columns: ["move_id","owner_id"]
 isOneToOne: false
       referencedRelation: "moves"
@@ -323,13 +323,13 @@ isOneToOne: false
                   ]
                 },"moves": {
                   Row: {
-                    "address_private": string | null,"area_label": string | null,"created_at": string,"deposit_cents": number | null,"household_id": string | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"landlord_phone": string | null,"renter_name": string | null,"zip": string | null,"bedrooms": number | null,"bathrooms": number | null,"sqft": number | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"timezone": string,"title": string,"updated_at": string
+                    "address_line1": string | null,"address_line2": string | null,"address_private": string | null,"area_label": string | null,"bathrooms": number | null,"bedrooms": number | null,"city": string | null,"created_at": string,"deposit_cents": number | null,"household_id": string | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"landlord_phone": string | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"property_management_company": string | null,"region": string | null,"renter_name": string | null,"sqft": number | null,"timezone": string,"title": string,"updated_at": string,"zip": string | null
                   }
                   Insert: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"renter_name"?: string | null,"zip"?: string | null,"bedrooms"?: number | null,"bathrooms"?: number | null,"sqft"?: number | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_line1"?: string | null,"address_line2"?: string | null,"address_private"?: string | null,"area_label"?: string | null,"bathrooms"?: number | null,"bedrooms"?: number | null,"city"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"property_management_company"?: string | null,"region"?: string | null,"renter_name"?: string | null,"sqft"?: number | null,"timezone"?: string,"title"?: string,"updated_at"?: string,"zip"?: string | null
                   }
                   Update: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"renter_name"?: string | null,"zip"?: string | null,"bedrooms"?: number | null,"bathrooms"?: number | null,"sqft"?: number | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_line1"?: string | null,"address_line2"?: string | null,"address_private"?: string | null,"area_label"?: string | null,"bathrooms"?: number | null,"bedrooms"?: number | null,"city"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"property_management_company"?: string | null,"region"?: string | null,"renter_name"?: string | null,"sqft"?: number | null,"timezone"?: string,"title"?: string,"updated_at"?: string,"zip"?: string | null
                   }
                   Relationships: [
                     {

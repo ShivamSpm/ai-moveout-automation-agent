@@ -1,5 +1,42 @@
 # Session handoff
 
+## Account workflow repair — October 24, 2026, Codex
+
+Prepared on `feat/continue-launch`; not deployed and no production records changed.
+Production read-only verification found the reported move/contact/deposit/date saved,
+but no renter name, structured ZIP, documents, tasks, listings or chat history.
+Do not copy personal details or screenshots into this repository.
+
+- Root cause: `/dashboard` and `/items` always rendered fixtures; `/start` discarded
+  the selected lease before submitting. The two move forms captured different fields.
+- `/start` and `/move` now share the same form with renter name, street/unit/city/state/ZIP,
+  date, deposit, management company, manager name/email and optional phone/apartment size.
+  Legacy full addresses are preserved and prefilled for renter confirmation.
+- Onboarding uploads the selected PDF to private storage after saving the move,
+  then registers/reads it. Upload failure leaves move details intact and offers recovery.
+- Dashboard uses the connector's user-scoped checklist/document/finding/activity readers,
+  real inventory/approvals, empty states and persisted chat. No sample records are inserted.
+  Chat context excludes private move address/contact fields and treats source text as data.
+- Public examples moved to `/demo` and `/demo/items`; private item URLs require ownership.
+  Cleaning simulation endpoints now derive identity from the authenticated session.
+- Two additive migrations authored and applied locally: `20261024221221_property_management_company`
+  and `20261024221829_structured_move_address`. Generated application DB types refreshed.
+  Production dry run also finds the already-merged `20261024233000_landlord_calls` pending.
+  Use `--include-all` for the earlier CLI-generated timestamps, inspect the dry run, and
+  obtain Jorge's release approval before any production migration or merge.
+- Validation: npm ci (0 vulnerabilities), route typegen, TypeScript, lint, 269 tests,
+  production build (37 routes), local database lint and diff whitespace checks passed.
+  Root/plugin validation passed; plugin directory submission still flags missing license,
+  icon and privacy-policy metadata (not changed here).
+- Authenticated local HTTP checks confirmed account dashboard data, form prefill,
+  empty inventory, public demo separation and anonymous redirect. Browser click-through
+  remains unverified because native Chrome actions were interrupted by active-window changes.
+  Real model calls, outgoing calls/messages/posts and hosted release verification not run.
+- Next: review PR, approve production schema/release, then reattach the user's original
+  lease and confirm newly collected fields through the application. Do not label extraction
+  complete until the original and cited findings are visible in that account.
+
+
 Updated: October 24, 2026, 2:10 PM PDT. Phase: production live on Vercel with the Muse bridge,
 signup and Claude connector; custom domain, SMTP and live Muse test pending.
 

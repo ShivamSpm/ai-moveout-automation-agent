@@ -1,4 +1,9 @@
-import { describe, expect, it } from "vitest";
+const identity = vi.hoisted(() => ({ id: "renter-a", signedIn: true }));
+vi.mock("@/server/auth", () => ({
+  AuthError: class AuthError extends Error {},
+  requireUser: async () => { if (!identity.signedIn) { const { AuthError } = await import("@/server/auth"); throw new AuthError("Sign in"); } return { user: { id: identity.id } }; },
+}));
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST as approve } from "@/app/api/cleaning/bookings/[id]/approve/route";
 import { POST as propose } from "@/app/api/cleaning/bookings/route";
 import { POST as quotes } from "@/app/api/cleaning/quotes/route";
@@ -24,6 +29,14 @@ function cleaningRequest() {
 }
 
 describe("cleaning API routes", () => {
+  beforeEach(() => { identity.id = "renter-a"; identity.signedIn = true; });
+  it("requires sign-in", async () => { identity.signedIn = false; expect((await quotes(post(cleaningRequest()))).status).toBe(401); });
+  it("does not let a second renter propose from another renter's quote", async () => {
+    const result = await (await quotes(post(cleaningRequest()))).json();
+    const quote = result.matches[0]; identity.id = "renter-b";
+    const response = await propose(post({ quote, slotId: quote.slots[0].slotId }));
+    expect(response.status).not.toBe(201);
+  });
   it("runs quote, propose and approve end to end, all labeled simulated", async () => {
     const quoteRes = await quotes(post(cleaningRequest()));
     expect(quoteRes.status).toBe(200);

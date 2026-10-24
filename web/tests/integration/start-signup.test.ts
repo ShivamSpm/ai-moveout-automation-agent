@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 
 // Real local Auth, SSR cookies, requireUser and RLS. Only Next's request cookie
 // container is replaced; no admin/service client is used by this test.
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 const jar = vi.hoisted(() => new Map<string, string>());
 vi.mock("next/headers", () => ({ cookies: async () => ({
   getAll: () => [...jar].map(([name, value]) => ({ name, value })),
@@ -23,7 +24,7 @@ const email = `start-${crypto.randomUUID()}@example.test`;
 const password = `pw-${crypto.randomUUID()}`;
 function form(emailAddress = email, address = "100 Example Street") {
   const data = new FormData();
-  for (const [key, value] of Object.entries({ email: emailAddress, password, address, moveOutDate: "2026-11-30", deposit: "$3,950", landlordName: "Example Manager", landlordEmail: emailAddress })) data.set(key, value);
+  for (const [key, value] of Object.entries({ email: emailAddress, password, address, moveOutDate: "2026-11-30", deposit: "$3,950", renterName: "Example Renter", city: "Example City", region: "CA", zip: "94110", propertyManagementCompany: "Example Management", landlordName: "Example Manager", landlordEmail: emailAddress })) data.set(key, value);
   return data;
 }
 beforeAll(() => {
@@ -36,7 +37,7 @@ describe.sequential("start signup and saved move", () => {
     ownerCookies = new Map(jar);
     const { data, error } = await owner.db.from("moves").select("*").single();
     expect(error).toBeNull();
-    expect(data).toMatchObject({ owner_id: owner.user.id, address_private: "100 Example Street", move_out_date: "2026-11-30", deposit_cents: 395000, landlord_name: "Example Manager", landlord_email: email });
+    expect(data).toMatchObject({ owner_id: owner.user.id, address_private: "100 Example Street, Example City, CA 94110", renter_name: "Example Renter", city: "Example City", region: "CA", zip: "94110", property_management_company: "Example Management", move_out_date: "2026-11-30", deposit_cents: 395000, landlord_name: "Example Manager", landlord_email: email });
     moveId = data!.id;
   });
   it("prevents another renter from reading or updating the move", async () => {
@@ -48,7 +49,7 @@ describe.sequential("start signup and saved move", () => {
     const update = await other.db.from("moves").update({ address_private: "Unwanted change" }).eq("id", moveId).select("id");
     expect(update.error).toBeNull(); expect(update.data).toEqual([]);
     jar.clear(); for (const [key, value] of ownerCookies) jar.set(key, value);
-    expect((await owner.db.from("moves").select("address_private").eq("id", moveId).single()).data?.address_private).toBe("100 Example Street");
+    expect((await owner.db.from("moves").select("address_private").eq("id", moveId).single()).data?.address_private).toBe("100 Example Street, Example City, CA 94110");
   });
   it("updates the existing move without accepting a supplied owner", async () => {
     jar.clear(); for (const [key, value] of ownerCookies) jar.set(key, value);
@@ -56,7 +57,7 @@ describe.sequential("start signup and saved move", () => {
     data.delete("email"); data.delete("password"); data.set("owner_id", other.user.id);
     expect(await saveStart({ status: "idle" }, data)).toEqual({ status: "success" });
     const result = await owner.db.from("moves").select("id, owner_id, address_private");
-    expect(result.data).toEqual([{ id: moveId, owner_id: owner.user.id, address_private: "200 Example Street" }]);
+    expect(result.data).toEqual([{ id: moveId, owner_id: owner.user.id, address_private: "200 Example Street, Example City, CA 94110" }]);
   });
   it("offers existing-account sign-in and saves after password authentication", async () => {
     jar.clear();

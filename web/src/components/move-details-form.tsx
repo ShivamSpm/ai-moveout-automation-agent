@@ -14,6 +14,7 @@ export interface MoveDetailsInitial {
   bedrooms: string;
   bathrooms: string;
   sqft: string;
+  propertyManagementCompany: string;
   landlordName: string;
   landlordPhone: string;
   landlordEmail: string;
@@ -38,6 +39,7 @@ export function MoveDetailsForm({ initial, canSave }: { initial: MoveDetailsInit
       </Section>
 
       <Section step="3" title="Your landlord" hint="The agent contacts them to confirm the date and get the move-out checklist.">
+        <Input name="propertyManagementCompany" label="Property management company (optional)" defaultValue={initial.propertyManagementCompany} errors={errors} />
         <Input name="landlordName" label="Landlord or property manager" defaultValue={initial.landlordName} errors={errors} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Input name="landlordPhone" label="Phone" type="tel" placeholder="(415) 555-0134" defaultValue={initial.landlordPhone} autoComplete="off" errors={errors} />

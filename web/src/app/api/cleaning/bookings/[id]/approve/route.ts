@@ -11,7 +11,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const parsed = bodySchema.safeParse(await readJson(request));
   if (!parsed.success) return badRequest("Expected a JSON body { payloadHash, idempotencyKey }");
   try {
-    const result = await approveCleaningBooking({ proposalId: id, ...parsed.data }, cleaningContext(request));
+    const result = await approveCleaningBooking({ proposalId: id, ...parsed.data }, await cleaningContext());
     return simulatedJson({ result });
   } catch (error) {
     return errorResponse(error);

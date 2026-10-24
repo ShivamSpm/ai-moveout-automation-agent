@@ -186,8 +186,8 @@ export default function Home() {
               Every deadline counted back from move-out day, the money at stake on each task, and a
               short list of things waiting for your OK.
             </p>
-            <Link href="/dashboard" className="tape mt-8 inline-block rounded-xl px-6 py-3.5 font-semibold transition hover:brightness-110">
-              See the live demo
+            <Link href="/demo" className="tape mt-8 inline-block rounded-xl px-6 py-3.5 font-semibold transition hover:brightness-110">
+              Explore the example move
             </Link>
           </div>
           <div className="box-label rounded-3xl p-6 sm:p-8">

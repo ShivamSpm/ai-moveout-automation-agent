@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const body = await readJson(request);
   if (body === null) return badRequest("Expected a JSON CleaningRequest body");
   try {
-    const result = await findCleaningQuotes(body as CleaningRequestInput, cleaningContext(request));
+    const result = await findCleaningQuotes(body as CleaningRequestInput, await cleaningContext());
     return simulatedJson({ ...result });
   } catch (error) {
     return errorResponse(error);
