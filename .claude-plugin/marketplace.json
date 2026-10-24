@@ -1,0 +1,17 @@
+{
+  "name": "vacate",
+  "owner": {
+    "name": "Vacate team"
+  },
+  "metadata": {
+    "description": "Renter-serving moving workflows with Vacate and Muse."
+  },
+  "plugins": [
+    {
+      "name": "moving-assistant",
+      "source": "./plugins/moving-assistant",
+      "description": "Vacate move-out assistant for renters: inventory, keep/sell/donate, reviewed listings and buyer messages, with Facebook Marketplace work handed to the renter's own Muse agent.",
+      "version": "0.2.0"
+    }
+  ]
+}

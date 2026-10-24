@@ -1,0 +1,149 @@
+$ npx tsc --noEmit (cwd: web/)
+
+Exit code: 0
+
+$ npm run lint (cwd: web/)
+
+> moveout-agent@0.1.0 lint
+> eslint
+
+
+Exit code: 0
+
+$ npm test (cwd: web/)
+
+> moveout-agent@0.1.0 pretest
+> node scripts/build-progress.mjs
+
+
+> moveout-agent@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 /Users/jorge/ai-moveout-claude-connector/web
+
+
+ Test Files  11 passed (11)
+      Tests  86 passed (86)
+   Start at  13:40:28
+   Duration  800ms (transform 352ms, setup 0ms, import 803ms, tests 1.10s, environment 0ms)
+
+
+Exit code: 0
+
+$ npm run build (cwd: web/)
+
+> moveout-agent@0.1.0 prebuild
+> node scripts/build-progress.mjs
+
+
+> moveout-agent@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 13ms
+- Cache Components enabled
+- Partial Prefetching enabled
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 451ms
+  Running TypeScript ...
+  Finished TypeScript in 1070ms ...
+  Collecting page data using 17 workers ...
+  Generating static pages using 17 workers (0/20) ...
+  Generating static pages using 17 workers (5/20) 
+  Generating static pages using 17 workers (10/20) 
+  Generating static pages using 17 workers (15/20) 
+✓ Generating static pages using 17 workers (20/20) in 210ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /.well-known/agent-card.json
+├ ƒ /.well-known/oauth-protected-resource
+├ ƒ /api/a2a
+├ ƒ /api/chat
+├ ƒ /api/mcp
+├ ƒ /api/muse/ops
+├ ƒ /api/oauth/decision
+├ ƒ /auth/callback
+├ ƒ /auth/signout
+├ ○ /dashboard
+├ ○ /items
+├   /items/[id]
+│ └ ◐ /items/[id]
+├ ◐ /login
+├ ◐ /muse
+├ ◐ /oauth/consent
+└ ○ /start
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)             prerendered as static content
+◐  (Partial Prerender)  prerendered as static HTML with dynamic server-streamed content
+ƒ  (Dynamic)            server-rendered on demand
+
+
+Exit code: 0
+
+$ claude plugin validate ./plugins/moving-assistant (cwd: repo root)
+Validating plugin manifest: /Users/jorge/ai-moveout-claude-connector/plugins/moving-assistant/.claude-plugin/plugin.json
+
+Plugin directory checks for /Users/jorge/ai-moveout-claude-connector/plugins/moving-assistant. The plugin directory is the catalog that plugins are submitted to; this is a subset of what it runs.
+
+✘ Found 1 problem the plugin directory refuses a submission for:
+
+  ❯ LICENSE: License missing (LICENSE_MISSING). This plugin has no LICENSE file and plugin.json has no `license`. The directory requires one of them.
+    Fix: Add a LICENSE file to the plugin folder, or set `license` (an SPDX id) in plugin.json. A LICENSE at the repository root also counts for a plugin in a sub-folder.
+
+⚠ Found 2 plugin directory warnings:
+
+  ❯ .claude-plugin/plugin.json icon: No icon (ICON_MISSING). No icon found in the plugin. The validator looked for `icon` in plugin.json and for a file at .claude-plugin/icon.png or .svg, assets/icon.png or .svg, or a similar path.
+    Fix: Add a square PNG to the plugin folder at .claude-plugin/icon.png, or set `icon` in plugin.json to the path of a square PNG or JPEG in the plugin: 512 to 2048 px on each side, under 2 MB. SVG and WebP are not accepted. That file may become the listing icon only once: the first time the plugin is saved or submitted in the developer portal. Adding or changing it later does not change the icon.
+  ❯ .claude-plugin/plugin.json privacyPolicyUrl: No privacy policy URL (PRIVACY_URL_MISSING). This plugin connects to a remote MCP server or HTTP hook but declares no privacy policy URL (plugin.json `privacyPolicyUrl`, or a 'Privacy' link in README).
+    Fix: Set `privacyPolicyUrl` in plugin.json.
+
+About these checks:
+
+  ❯ The repository root was taken to be /Users/jorge/ai-moveout-claude-connector, the nearest parent folder with a .git folder or file. README.md was taken from it, because this plugin folder has none of its own. No license file that counts (a regular file with one of the file names the plugin directory accepts) was found there either. For a plugin submitted from a git repository, the repository root is the top folder of that repository, with only what is committed there, so check that the folder named above is that top folder.
+
+These plugin directory checks do not change the result below. To fail on problems the directory refuses a submission for, run this command with --profile directory.
+
+The directory also runs a safety scan and a policy review that this command does not.
+
+✔ Validation passed
+
+Exit code: 0
+
+$ claude plugin validate . (cwd: repo root)
+Validating marketplace manifest: /Users/jorge/ai-moveout-claude-connector/.claude-plugin/marketplace.json
+
+ℹ Advice (does not change the verdict):
+
+  ❯ /Users/jorge/ai-moveout-claude-connector/README.md: This README has no line that installs "moving-assistant" from a marketplace. Add the install line, which works in one step on Claude Code 2.1.275 or later. In it, replace <owner>/<repo> with the repository that holds the marketplace.
+      /plugin install moving-assistant --marketplace <owner>/<repo>
+
+✔ Validation passed
+
+Exit code: 0
+
+Additional local HTTP smoke check (npx next dev --port 3103;
+APP_URL=https://vacate.example.test; synthetic example.test renter):
+HTTP/1.1 401 Unauthorized
+www-authenticate: Bearer resource_metadata="https://vacate.example.test/.well-known/oauth-protected-resource"
+{"error":"Bearer token required"}
+Protected resource metadata:
+{"resource":"https://vacate.example.test/api/mcp","authorization_servers":["http://127.0.0.1:54321/auth/v1"],"bearer_methods_supported":["header"],"resource_name":"Vacate move-out agent"}
+HTTP OAuth-bearer tools/list: 20 tools
+HTTP get_move_status: https://vacate.example.test/dashboard
+HTTP resources/read: text/html;profile=mcp-app; bundled HTML present
+Exit code: 0
+Synthetic HTTP user deleted; dev server stopped with SIGINT.
+
+Production trace includes progress bundle: True
+
+git diff --check: no output; exit code 0.
+Branch remains feat/claude-connector. No commits, pushes, deployments or migrations.
