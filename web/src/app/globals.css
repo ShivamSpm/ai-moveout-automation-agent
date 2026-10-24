@@ -191,3 +191,20 @@
     animation: none;
   }
 }
+
+/* "Saved" feedback on /services: the chosen card pops and the check scales in. */
+@keyframes saved-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.03); box-shadow: 0 0 0 8px color-mix(in oklab, var(--leaf) 25%, transparent); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes saved-check {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.saved-pop { animation: saved-pop 0.6s ease-out; }
+.saved-check { display: inline-block; animation: saved-check 0.45s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .saved-pop, .saved-check { animation: none; }
+}

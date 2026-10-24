@@ -9,6 +9,7 @@ import { AccountActionForm } from "@/components/account-action-form";
 import { setTaskStatus } from "@/app/plan/actions";
 import { LeaseUpload } from "@/components/lease-upload";
 import { RenterChat } from "@/components/renter-chat";
+import { LandlordAndServices } from "@/components/landlord-and-services";
 import { isConfigured } from "@/server/integrations/openrouter";
 import { urgency, type Lane } from "@/lib/schedule";
 
@@ -30,11 +31,13 @@ async function Dashboard() {
       <p className="mt-2">{move.property_management_company || "Property management company not added"} · {move.landlord_name || "Contact name not added"}</p>
       <p className="text-muted">{move.landlord_email}</p><Link className="mt-3 inline-block underline" href="/move">Edit move and property manager details</Link>
     </header>
-    <section className={`${card} mb-6`}><h2 className="font-display text-3xl">Next steps</h2><div className="mt-4 grid gap-4 sm:grid-cols-3">
+    <section className={`${card} mb-6`}><h2 className="font-display text-3xl">Next steps</h2><div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Link className="rounded-xl border border-line p-4" href="/account/documents"><strong>{view.documents.length ? "Review your lease" : "Upload your lease"}</strong><p className="mt-2 text-sm text-muted">Save the original and check the extracted obligations and page references.</p></Link>
       <Link className="rounded-xl border border-line p-4" href="/calls"><strong>Contact your property manager</strong><p className="mt-2 text-sm text-muted">Prepare a call to confirm move-out steps. Review the recipient and script before any call.</p></Link>
+      <Link className="rounded-xl border border-line p-4" href="/services"><strong>Choose cleaners &amp; movers</strong><p className="mt-2 text-sm text-muted">Compare three options each on price and timing, and save your pick.</p></Link>
       <Link className="rounded-xl border border-line p-4" href="/muse"><strong>Add items to sell</strong><p className="mt-2 text-sm text-muted">Add your belongings, prepare listings, and approve what Muse can post.</p></Link>
     </div></section>
+    <LandlordAndServices ctx={ctx} moveId={move.id} />
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
       <div className="grid gap-6 content-start">
         <section className={card}><h2 className="font-display text-3xl">Your checklist</h2>
