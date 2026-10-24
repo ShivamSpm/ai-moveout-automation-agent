@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ApprovalQueue } from "@/components/approval-queue";
 import { MoveBoard, type PlanRow } from "@/components/move-board";
 import { activity, approvals, doneAtStart, leaseRules, move, plan, TODAY } from "@/lib/demo";
@@ -66,6 +67,14 @@ export default function Dashboard() {
         <MoveBoard rows={rows} deposit={move.deposit} initiallyDone={doneAtStart} />
 
         <aside className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-6">
+          <Link href="/cleanup" className="pop group block rounded-3xl bg-card p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-tape">Next step</p>
+            <p className="mt-2 font-display text-3xl">Choose your cleaners</p>
+            <p className="mt-1 text-sm text-muted">
+              The agent compared cleaning companies near you on price and your Nov 28 deadline.
+            </p>
+            <span className="mt-4 inline-block text-sm font-semibold text-tape group-hover:underline">See the options →</span>
+          </Link>
           <ApprovalQueue approvals={approvals} />
 
           <section className="box-label rounded-3xl p-6">
