@@ -1,6 +1,36 @@
 # Session handoff
 
-Updated: October 24, 2026, 12:35 PM PDT. Phase: Muse bridge built and tested locally; live Muse test next.
+Updated: October 24, 2026, 2:10 PM PDT. Phase: production live on Vercel with the Muse bridge,
+signup and Claude connector; custom domain, SMTP and live Muse test pending.
+
+## Production state (orchestrator: Jorge + Claude Code)
+
+- **Live:** https://ai-moveout-automation-agent-tau.vercel.app, built from `main`
+  (Vercel team `ai-moveout-automation-agent`, repo `ShivamSpm/ai-moveout-automation-agent`,
+  root `web`, Next.js, `npm ci`, `npm run build`, production branch `main`).
+  Shivam's personal Vercel project also builds this repo; disconnect it to avoid two production copies.
+- **Merged to main:** PR #3 (Muse bridge, MCP/A2A, schema, login, `/start` signup),
+  PR #10 (`/api/chat` signed-in only + 20 turns/10 min per renter; hosted isolation check).
+  Claude connector (tools, MCP Apps progress card, plugin 0.2.0, marketplace `vacate`) is in the next PR.
+- **Hosted Supabase `sejfkcrmcbsiidftraek`:** migration history matches the repo (2 migrations); RLS on
+  every public table; `move-files` private with owner policies. `web/scripts/hosted-isolation-check.mjs`
+  passed 13/13 (two throwaway users, deleted after). Free plan: **no backups**, project pauses when idle.
+- **Fixed:** the Supabase secret key in Vercel and the share file had been copied masked (CLI needs
+  `--reveal`); replaced and verified by a signed-in `muse_list_tasks` call on production.
+- **Blocked:**
+  - Staging Supabase for previews — a second free project is refused because org admin ibm777p2 already
+    has two free projects. Previews still use the production database.
+  - `vacate.dev` — Vercel requires the user to buy it interactively. Then nameservers → Cloudflare
+    (Email Routing `support@` → team), Vercel records DNS-only, `APP_URL`, Supabase site URL/redirects.
+  - Custom SMTP (external sign-up confirmation), OpenRouter key, Google/Microsoft providers.
+- **In progress (Codex worktrees):** `feat/lease-storage` (upload, households, `/plan`, `/account`,
+  account deletion), `feat/custom-domain` (runbook, redirects, `domain:check`). Prepared brief:
+  dashboard real data + renter chat context (start after lease-storage merges).
+- **Connector review notes:** `get_move_status` creates an empty move (so `readOnlyHint:false`);
+  task page numbers come only from a saved "Lease p.N" source; listing/reservation history is
+  snapshot-only; landlord messages are draft-only in chat; `resource_link` omitted; MCP Apps rendering
+  in Claude and all Claude-client tests are not yet verified. Links to `/plan` and `/account*` 404
+  until the lease-storage branch merges.
 
 ## Start signup feature — local worktree, October 24, 2026
 
