@@ -22,7 +22,7 @@
     "react-dom": "19.3.0",
     "server-only": "0.0.1",
     "unpdf": "1.8.1",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -32,7 +32,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",
+    "tsx": "4.23.15",
     "typescript": "^5",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   }
 }
