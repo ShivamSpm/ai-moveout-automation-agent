@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 import { EmailSignIn } from "@/components/email-sign-in";
-import { GoogleSignIn } from "@/components/google-sign-in";
+import { OAuthButton } from "@/components/google-sign-in";
 import { authEnabled } from "@/lib/supabase/env";
 
 export const metadata: Metadata = { title: "Log in · Vacate" };
@@ -28,7 +28,7 @@ export default function Login({ searchParams }: PageProps<"/login">) {
           <Suspense fallback={null}>
             <CallbackError searchParams={searchParams} />
           </Suspense>
-          <GoogleSignIn enabled={authEnabled} />
+          <OAuthButton provider="google" enabled={authEnabled} />
           {authEnabled && (
             <Suspense fallback={null}>
               <EmailSignIn searchParams={searchParams as Promise<{ next?: string; error?: string }>} />
