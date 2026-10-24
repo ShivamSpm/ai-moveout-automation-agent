@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { LandlordCallPanel } from "@/components/landlord-call-panel";
+import { formatPhone } from "@/lib/phone";
 import { authEnabled } from "@/lib/supabase/env";
 import { AuthError, requireUser } from "@/server/auth";
 import { callPreview, latestCall } from "@/server/landlord-calls";
@@ -42,7 +43,7 @@ async function Panel() {
       canCall={!blocker}
       blocker={blocker}
       landlordName={preview.move.landlord_name ?? ""}
-      phoneDisplay={preview.move.landlord_phone ?? ""}
+      phoneDisplay={formatPhone(preview.move.landlord_phone)}
       firstSentence={preview.script?.firstSentence ?? null}
       task={preview.script?.task ?? null}
       initialCall={call}

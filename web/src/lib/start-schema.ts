@@ -30,8 +30,11 @@ export const startDraftSchema = z.object({
   deposit: z.string().max(40), landlordName: z.string().max(100), landlordEmail: z.string().max(320),
 });
 export type StartDraft = z.infer<typeof startDraftSchema>;
+// No account needed to begin: a name is enough to open a private guest session.
+export const quickStartSchema = z.object({ renterName: z.string().trim().min(1, "Enter your name").max(100) });
+
 export type StartState = {
-  status: "idle" | "error" | "confirm_email" | "existing_account" | "success";
+  status: "idle" | "error" | "confirm_email" | "existing_account" | "success" | "started";
   email?: string;
   message?: string;
   fieldErrors?: Record<string, string[] | undefined>;

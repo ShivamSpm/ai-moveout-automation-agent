@@ -4,15 +4,7 @@ import { z } from "zod";
 // the voice agent follows, mapping Bland's call status, and parsing the
 // checklist the model extracts from the transcript. No I/O here.
 
-/** US-centric E.164: "(415) 555-0134" -> "+14155550134". Returns null if it can't tell. */
-export function toE164(phone: string): string | null {
-  const trimmed = phone.trim();
-  const digits = trimmed.replace(/\D/g, "");
-  if (trimmed.startsWith("+")) return digits.length >= 8 && digits.length <= 15 && digits[0] !== "0" ? `+${digits}` : null;
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
+export { toE164 } from "@/lib/phone";
 
 export interface CallFacts {
   renterName: string;

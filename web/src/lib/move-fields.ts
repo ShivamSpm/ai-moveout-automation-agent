@@ -1,7 +1,14 @@
 import { z } from "zod";
+import { toE164 } from "./phone";
 const optionalNumber = (schema: z.ZodNumber) => z.preprocess(v => v === "" || v === undefined ? undefined : Number(v), schema.optional());
 export const PHONE_PATTERN = /^\+?[0-9 ().-]{7,20}$/;
-export const landlordPhoneSchema = z.string().trim().regex(PHONE_PATTERN, "Enter a valid phone number").refine(v => v.replace(/\D/g, "").length >= 7, "Include the area code");
+// Accepts whatever was typed and keeps only the number, as E.164 ("+14155550134").
+export const landlordPhoneSchema = z.string().trim().max(40)
+  .transform((v, ctx) => {
+    const e164 = toE164(v);
+    if (!e164) { ctx.addIssue({ code: "custom", message: "Enter a 10-digit phone number with the area code" }); return z.NEVER; }
+    return e164;
+  });
 export const moveFields = {
   renterName: z.string().trim().min(1, "Enter your name").max(100),
   address: z.string().trim().min(1, "Enter your street address").max(160),

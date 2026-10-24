@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-const auth = vi.hoisted(() => ({ getUser: vi.fn(), signUp: vi.fn(), signInWithPassword: vi.fn() }));
+const auth = vi.hoisted(() => ({ getUser: vi.fn(), signUp: vi.fn(), signInWithPassword: vi.fn(), signInAnonymously: vi.fn() }));
 const save = vi.hoisted(() => vi.fn());
 vi.mock("@/server/supabase", () => ({ userClient: async () => ({ auth }) }));
 vi.mock("@/server/auth", () => ({ requireUser: vi.fn() }));
 vi.mock("@/server/marketplace", () => ({ updateMove: save }));
 vi.mock("@/server/env", () => ({ env: { appUrl: () => "http://localhost:3101" } }));
-import { saveStart } from "@/app/start/actions";
+import { quickStart, saveStart } from "@/app/start/actions";
 function form() {
   const data = new FormData();
   for (const [key, value] of Object.entries({ email: "renter@example.test", password: "secret-test-password", address: "100 Example Street", moveOutDate: "2026-11-30", deposit: "3950", renterName: "Example Renter", city: "Example City", region: "CA", zip: "94110", propertyManagementCompany: "Example Management", landlordName: "Example Manager", landlordPhone: "(415) 555-0134", landlordEmail: "renter@example.test" })) data.set(key, value);
@@ -37,7 +37,7 @@ describe("start action confirmation and error states", () => {
     const { requireUser } = await import("@/server/auth");
     vi.mocked(requireUser).mockResolvedValue({} as never);
     expect(await saveStart({ status: "idle" }, form())).toEqual({ status: "success" });
-    expect(save.mock.calls[0][1]).toMatchObject({ landlordPhone: "(415) 555-0134", landlordName: "Example Manager" });
+    expect(save.mock.calls[0][1]).toMatchObject({ landlordPhone: "+14155550134", landlordName: "Example Manager" });
   });
   it("rejects a landlord phone that can't be dialed", async () => {
     const data = form(); data.set("landlordPhone", "call me");
@@ -50,5 +50,30 @@ describe("start action confirmation and error states", () => {
     const state = await saveStart({ status: "idle" }, data);
     expect(state.fieldErrors?.deposit).toBeDefined();
     expect(auth.signUp).not.toHaveBeenCalled();
+  });
+});
+describe("quick start with only a name", () => {
+  function nameForm(name: string) { const data = new FormData(); data.set("renterName", name); return data; }
+  it("opens a guest session and saves the name on the move", async () => {
+    auth.signInAnonymously.mockResolvedValue({ data: {}, error: null });
+    const { requireUser } = await import("@/server/auth");
+    vi.mocked(requireUser).mockResolvedValue({} as never);
+    expect(await quickStart({ status: "idle" }, nameForm("Ana Rivera"))).toEqual({ status: "started" });
+    expect(auth.signInAnonymously.mock.calls[0][0]).toEqual({ options: { data: { full_name: "Ana Rivera" } } });
+    expect(save.mock.calls[0][1]).toEqual({ renterName: "Ana Rivera" });
+  });
+  it("reuses an existing session instead of creating another", async () => {
+    auth.getUser.mockResolvedValue({ data: { user: { id: "renter" } } });
+    const { requireUser } = await import("@/server/auth");
+    vi.mocked(requireUser).mockResolvedValue({} as never);
+    expect(await quickStart({ status: "idle" }, nameForm("Ana"))).toEqual({ status: "started" });
+    expect(auth.signInAnonymously).not.toHaveBeenCalled();
+  });
+  it("requires a name and explains when guest sessions are off", async () => {
+    expect((await quickStart({ status: "idle" }, nameForm("  "))).fieldErrors?.renterName).toBeDefined();
+    auth.signInAnonymously.mockResolvedValue({ data: {}, error: { message: "Anonymous sign-ins are disabled" } });
+    const state = await quickStart({ status: "idle" }, nameForm("Ana"));
+    expect(state).toMatchObject({ status: "error", message: expect.stringMatching(/Log in instead/) });
+    expect(save).not.toHaveBeenCalled();
   });
 });
