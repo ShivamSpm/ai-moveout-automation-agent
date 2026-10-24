@@ -1,6 +1,53 @@
 # Session handoff
 
-Updated: October 24, 2026, 12:00 PM PDT. Phase: website integration planned; build next.
+Updated: October 24, 2026, 12:35 PM PDT. Phase: Muse bridge built and tested locally; live Muse test next.
+
+## Muse lane (Jorge) — branch `feat/primary-flows`
+
+Built (local stack only; nothing hosted, nothing posted):
+- Muse bridge: renter-approved Facebook Marketplace listings, buyer replies and pickup
+  confirmations become a work queue for the renter's own Muse agent. Served over
+  **A2A 1.0** (`/api/a2a`, Agent Card at `/.well-known/agent-card.json`, official
+  `@a2a-js/sdk@1.3.0`) and **MCP** (`/api/mcp`, `@modelcontextprotocol/sdk@1.32.1`).
+- One MCP server for Claude.ai/Desktop/Code, Muse and Muse Code. OAuth 2.1 through the
+  Supabase OAuth server (dynamic client registration, consent page `/oauth/consent`)
+  gives the full renter toolset as that renter; `vac_` connector tokens give Muse the
+  executor tools only. Claude plugin in `plugins/moving-assistant` (validated).
+- `/muse` page: items, keep/sell/donate, listing review cards bound to payload hash,
+  connector tokens, buyer threads, honest status labels ("Done by Muse · reported").
+- Migrations `20261024190219_init_moving_assistant`, `20261024191716_muse_bridge`
+  (applied to the local stack only). `@muse-code/sdk@1.4.4` + `npm run muse:check`.
+
+Verified:
+- `npm test`: 30 passing (unit + integration on local Supabase: A03, A04, A06, A08,
+  A09, A13, A15, A2A JSON-RPC round trip, MCP tool scoping). Lint, typecheck, build pass.
+- `npm run oauth:check`: discovery → DCR (201) → PKCE authorize → consent → token →
+  MCP `2025-11-25` tools/list (14 tools) as the signed-in renter.
+- Browser on `localhost:3100`: sign up, add item, sell, draft, approve, create token.
+  Official A2A client discovered the card and listed/claimed/reported over HTTP; the
+  report used a **simulated** Marketplace URL. Nothing was posted to Facebook.
+
+Not yet verified (blockers for the live demo):
+- `muse` host not installed / not signed in (`npm run muse:check` reports it).
+- Consumer Muse custom connector: whether it accepts MCP, A2A or an API key is
+  undocumented. Needs a public HTTPS URL and Jorge's Muse + Facebook account.
+- Public URL: Vercel preview with Vincent's hosted Supabase, or a deliberate tunnel.
+- Port 3000 is used by another local app; this app runs on 3100.
+
+
+## Backlog addition — family/household collaboration (October 24, 2026)
+
+- User requested "family" invitations as stretch, allowing spouses, caregivers
+  and patients, or parents and children to add item photos and use the moving
+  personal agent/application together for apartment or college dorm moves.
+- Updated CASE-05 from proposed NEXT to user-requested STRETCH; added HOUSE-01–05,
+  decision D17, product scope and H01–H04 acceptance specifications.
+- Invitation lifecycle, shared visibility, attribution, revocation and delegated
+  authority are proposed acceptance details; no feature implementation is claimed.
+- Verification: documentation diff/whitespace and requirement/acceptance ID checks.
+  No runtime checks needed for this documentation-only addition.
+- Next step when prioritizing this stretch goal: settle member permissions and
+  shared-chat visibility before designing membership/storage access or invitations.
 
 ## Website integration review (PR #1, `origin/website` at 88fc962)
 

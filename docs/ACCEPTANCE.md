@@ -30,6 +30,16 @@ Cleaner/mover search returns sourced candidates; a reviewed test call records a
 real call ID and outcome; a booking is labeled confirmed only with confirmation
 from the provider. Call completion alone does not satisfy a booking claim.
 
+Family/household collaboration checks below are stretch specifications, not
+executed tests or requirements for the two primary demo flows.
+
+| ID | Given / when | Required result | Requirement links |
+| --- | --- | --- | --- |
+| H01 | A renter invites a spouse, caregiver or family helper to an apartment or college dorm move | Invitee accepts with their own account and sees only the authorized shared move; pending, expired or revoked invitations grant no access | CASE-05, HOUSE-01, HOUSE-04 |
+| H02 | Two accepted members upload item photos and use the agent from separate sessions | Both see saved shared inventory, conversation and checklist updates; photo contributors and item owners remain distinct; originals survive duplicate reconciliation and conflicting edits are surfaced | HOUSE-02–03 |
+| H03 | An unrelated user or removed member requests shared move data or a private photo | New access is denied at application/tool and storage boundaries; unrelated moves and private account data remain inaccessible to household members | HOUSE-04 |
+| H04 | A helper proposes selling another member's item or sending through their account; two members attempt the same approved action | Appropriate ownership/delegated authority and exact-action review are required; membership alone grants no execution authority; authorized execution occurs at most once | HOUSE-05, EXEC-01–05 |
+
 ## Evidence to collect
 
 For each scenario: build revision, development URL, test identity (sanitized),

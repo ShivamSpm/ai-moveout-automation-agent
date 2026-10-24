@@ -50,11 +50,11 @@ export async function resolveConnector(authorization: string | null): Promise<Br
 
 const INSTRUCTIONS = {
   "listing.publish":
-    "Publish this exact listing on Facebook Marketplace from the renter's own account. Use the title, description and price as given; do not add an exact address, phone number or other personal details. Follow Muse's own approval prompt before publishing. Then call report_result with the listing URL, or status 'failed' with the reason. If you cannot tell whether it was published, report 'unknown'; do not publish twice.",
+    "Publish this exact listing on Facebook Marketplace from the renter's own account. Use the title, description and price as given; do not add an exact address, phone number or other personal details. Follow Muse's own approval prompt before publishing. Then report the result (MCP muse_report_result, or A2A op 'report') with the listing URL, or status 'failed' with the reason. If you cannot tell whether it was published, report 'unknown'; do not publish twice.",
   "buyer.reply":
-    "Send this exact message to the named buyer in the Marketplace conversation for this listing. Do not change wording, add commitments or share an address the message does not contain. Follow Muse's approval prompt, then call report_result.",
+    "Send this exact message to the named buyer in the Marketplace conversation for this listing. Do not change wording, add commitments or share an address the message does not contain. Follow Muse's approval prompt, then report the result.",
   "pickup.confirm":
-    "Send this exact pickup confirmation to the named buyer. The item is now held for this buyer only; do not confirm a pickup to anyone else. Follow Muse's approval prompt, then call report_result.",
+    "Send this exact pickup confirmation to the named buyer. The item is now held for this buyer only; do not confirm a pickup to anyone else. Follow Muse's approval prompt, then report the result.",
 } as const;
 
 type QueueRow = {

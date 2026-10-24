@@ -29,8 +29,23 @@ Draft/manual fallbacks must be visible and do not satisfy a live-posting claim.
 | CASE-02 | MUST P | Capture renter name, landlord contact, relevant apartment, move goal and constraints; missing fields block only dependent actions. |
 | CASE-03 | MUST U/P | Chat and dashboard share saved move state; a refresh retains messages, checklist, items and pending actions. |
 | CASE-04 | MUST P | Chat distinguishes proposal, user-confirmed fact and provider result; corrections update the affected records visibly. |
-| CASE-05 | NEXT P | Household/roommate collaboration is invite-based with explicit ownership; shared tenancy never implies authority over another person's belongings. |
+| CASE-05 | STRETCH U/P | Offer a "family" invitation to collaborate on a household move using separate member accounts; members can add item images and use the shared moving personal agent and application. Support spouses, a caregiver and patient, and a mother and daughter planning an apartment or college dorm move together. See HOUSE-01–05 for proposed acceptance details; shared membership never implies authority over another person's belongings. |
 | CASE-06 | NEXT P | Multiple moves and two leases can coexist; each document/action belongs to the correct home and move. |
+
+## Stretch backlog: family invitations and household collaboration
+
+Requested October 24, 2026. Optional after the two primary journeys; not implemented.
+"Family" includes invited caregivers and other trusted helpers, including people
+who do not live at the moving address. The following details elaborate CASE-05;
+permission design remains proposed pending implementation.
+
+| ID | Priority/source | Requirement and observable acceptance |
+| --- | --- | --- |
+| HOUSE-01 | STRETCH U/P | A move owner can invite a family member or trusted helper to a specific household move. The recipient accepts using their own account; show pending, accepted and revoked membership. Invitations can expire or be revoked and do not grant access before acceptance. |
+| HOUSE-02 | STRETCH U/P | Accepted members can upload images of items into the shared move inventory, associate photos with items and contribute confirmed item details. Preserve originals and identify the contributor separately from the item's owner; reconcile duplicate views without losing provenance. |
+| HOUSE-03 | STRETCH U/P | Each accepted member can use the moving personal agent and application against the same saved move, shared conversation, checklist and inventory. Make shared content and the acting member visible; changes persist across member sessions without silently overwriting conflicting edits. |
+| HOUSE-04 | STRETCH P | Make member permissions explicit and revocable. Enforce membership and scope on server tools and private file access; unrelated users, pending invitees and removed members cannot obtain new access to shared data. Membership grants no access to another member's unrelated moves, private conversations or connected-account credentials. |
+| HOUSE-05 | STRETCH P | Household membership or a family/caregiving relationship alone does not authorize disposing of someone else's belongings or acting through their accounts. Record item ownership and appropriate delegated authority; retain exact-action review for sends, calls, posts, bookings, offer acceptance and address disclosure. Recheck authority at execution and prevent duplicate actions across members. |
 
 ## Lease agreement review
 

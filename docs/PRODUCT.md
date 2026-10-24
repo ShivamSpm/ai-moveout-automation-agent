@@ -49,7 +49,12 @@ Confirm inventory, choose disposition, review/publish a listing and coordinate
 reviewed buyer replies and pickup. Facebook Marketplace through Muse is the priority.
 Muse access needs testing; live buyer messaging is the goal, not a verified capability.
 
-**Stretch:** find and schedule movers and cleaners, including calls to providers.
+**Stretch:** find and schedule movers and cleaners, including calls to providers;
+and offer "family" invitations so multiple household members or trusted helpers
+can add item photos and use the shared moving personal agent and application.
+Examples include spouses, a caregiver and patient, or a mother and daughter
+planning an apartment or college dorm move together. This is backlog scope, not
+implemented functionality; see CASE-05 and HOUSE-01–05 in REQUIREMENTS.md.
 
 Acceptance criteria:
 
