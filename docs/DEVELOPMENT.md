@@ -1,78 +1,22 @@
-# Development setup and GitHub access
+# Development and release
 
-## Local checkout
-
-```bash
-cd /Users/jorge/ai-moveout-automation-agent
-```
-
-Origin: `https://github.com/ShivamSpm/ai-moveout-automation-agent.git`.
-At clone time the public repository had no commits. Local bootstrap branch:
-`codex/hackathon-bootstrap`. The remote's configured default branch is `main`.
-Teammates initialized main during setup. The planning branch is rebased onto
-real origin/main; see PR_PREPARATION.md for the feature-branch PR sequence.
-The teammate website (PR #1, origin/website) is the app at web/; build on it, don't replace it.
-
-## Start either development assistant
+The app is Next.js 16 in `web/`, deployed from main by Vercel.
+Use one writer per isolated worktree; never perform feature edits in the shared checkout.
 
 ```bash
-claude 'Read CLAUDE.md and docs/STATUS.md. Read START_HERE.md and continue from the captured requirements without restarting discovery.'
+git fetch origin
+git worktree add ../ai-moveout-task -b feat/task origin/main
+# Copy the local, ignored web/.env.local into the worktree without printing it.
+cd ../ai-moveout-task/web
+npm ci
+npx next dev --port 3105
 ```
 
-```bash
-codex 'Read AGENTS.md and docs/STATUS.md. Read START_HERE.md and continue from the captured requirements without restarting discovery.'
-```
-
-Both CLIs are installed on Jorge's Mac. These commands start interactive sessions;
-the bootstrap process has not launched interactive sessions or made model calls.
-Codex Doctor confirms configured authentication and provider reachability; Claude
-model authentication has not been checked.
-Starting in this directory loads repository instructions. CLI trust/login prompts
-may still apply. Global user settings can still be inherited; no global settings
-were changed by this setup.
-
-The `.claude/agents/` Markdown files and `.codex/agents/` TOML files define matching
-development roles. They inherit model choices; they do not auto-run. See official
-[Claude instructions](https://code.claude.com/docs/en/memory),
-[Claude roles](https://code.claude.com/docs/en/sub-agents),
-[Codex instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
-and [Codex roles](https://learn.chatgpt.com/docs/agent-configuration/subagents).
-
-## GitHub permissions
-
-Read-only checks during setup identified `jg-ctfbio` as the active `gh` identity.
-GitHub reported repository permission `WRITE` and REST `permissions.push=true`;
-`admin=false`. Ordinary pushes do not require admin privileges. Branch rules can
-still require PRs/checks. Git operations also need working credentials for the
-remote transport; this bootstrap has not attempted a push.
-
-Claude and Codex use the credentials available in their execution environment;
-they do not require separate GitHub collaborator roles. If another machine or
-cloud session uses a different identity/token, verify that identity independently.
-Do not grant admin access just to address a token, SSH or branch-rule problem.
-
-Checks that do not publish anything:
-
-```bash
-gh api user --jq .login
-gh repo view ShivamSpm/ai-moveout-automation-agent --json viewerPermission
-git remote -v
-git status --short --branch
-```
-
-For simultaneous development after the first commit, use separate worktrees or
-clones with distinct branches and file ownership. Running `claude` and `codex`
-as simultaneous writers in this one checkout is not an isolation mechanism.
-
-## Next implementation step
-
-Following START_HERE.md and MONOREPO.md, scaffold the web app and real package scripts,
-choose pinned dependencies, create project-specific service resources, and deliver
-the saved-move journey on a hosted development URL. Record actual environment
-variable names and commands here as implementation introduces them.
-
-The Claude product plugin/MCP server, Muse connector and hosted runtime are still
-planned. The development instruction files do not create those integrations.
+Run `npx next typegen`, `npx tsc --noEmit`, `npm run lint`, `npm test` and
+`npm run build` from web. From root, run `claude plugin validate .`,
+`claude plugin validate ./plugins/moving-assistant`, `supabase db lint --local`
+and `git diff --check`. Integration tests use the local Supabase stack and
+synthetic example.test accounts; they must not target production.
 
 ## Hosted project (team access)
 
@@ -106,8 +50,11 @@ Actions, or on the `production` environment):
 | `SUPABASE_ACCESS_TOKEN` | A personal access token from supabase.com/dashboard/account/tokens, created by a member of the Supabase org |
 | `SUPABASE_DB_PASSWORD` | Optional. The production database password (Project Settings > Database) |
 
-Vercel deploys `main` at the same time as the workflow runs, so for a minute new code
-may meet the old schema. Write migrations so that the current code keeps working
+Before merging migration-dependent application code, inspect `supabase db push --dry-run`,
+apply the approved migration, and verify `supabase migration list` and
+`supabase db diff --linked --schema public,private,storage`. Do not rely on CI until
+Shivam installs its access-token secret and makes the migration check required.
+Write migrations so that the current code keeps working
 (add columns and tables before code uses them; drop them in a later pull request).
 Always create migrations with `supabase migration new <name>` on an up-to-date `main`.
 Auth settings (`supabase config push`) stay a manual step.

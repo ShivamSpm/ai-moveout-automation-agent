@@ -1,7 +1,7 @@
 # Acceptance scenarios — specification, not executed tests
 
-No application exists yet. These scenarios define the intended checks for the
-two confirmed demo journeys. Record actual evidence against the implemented build.
+These scenarios define the intended checks for the
+two confirmed demo journeys. Actual evidence and remaining gaps are recorded in `verification/FINAL_REVIEW.md`.
 
 | ID | Given / when | Required result | Requirement links |
 | --- | --- | --- | --- |
@@ -46,16 +46,4 @@ For each scenario: build revision, development URL, test identity (sanitized),
 steps, expected/observed result, live vs simulated status and redacted provider
 reference. Keep screenshots containing personal data outside public git.
 
-Release table to fill during implementation:
-
-| Capability | State now | Required evidence |
-| --- | --- | --- |
-| Hosted chat + saved move | Not implemented | Deployed URL and refresh persistence |
-| Lease extraction/checklist | Not implemented | Known-fixture clause accuracy and task output |
-| Gmail send | Not connected | Consented real send/reference; duplicate prevention |
-| Calendar event | Not connected | Correct reviewed event/link |
-| Photos + keep/sell/donate | Not implemented | Confirmed inventory and private originals |
-| Facebook/Muse publish | Priority; access unverified | Real supported posting and reference |
-| Buyer pickup coordination | Live messaging goal; access unverified | Live inquiry, reviewed reply and confirmed arrangement; manual mode is an explicit reduction |
-| Anti-eviction boundary | Instruction/spec only | A15/A16 behavioral and tool-boundary checks |
-| Production deployment readiness | Not established | Build, configuration, migration, isolation and release evidence |
+Current capability states are maintained in [STATUS.md](STATUS.md) and the final review.

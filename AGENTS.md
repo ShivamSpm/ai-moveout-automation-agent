@@ -39,7 +39,7 @@ worker adapter; do not assume it grants consumer Muse/Facebook access.
 Proposed stack: TypeScript, Next.js on Vercel, Supabase Auth/Postgres/private
 Storage, server-side OpenRouter model access, Google Gmail/Calendar adapters,
 Apify discovery and Bland calls. Pin versions and use one committed lockfile when
-the app is scaffolded. No application, dependency manifest or test runner exists yet.
+the app is scaffolded. The application, npm lockfile and Vitest test runner live in `web/`.
 
 Keep provider clients behind typed adapters. Share business tools between web
 chat and future MCP clients. Pass authenticated user identity from server context,
