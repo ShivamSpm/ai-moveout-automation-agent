@@ -32,6 +32,7 @@ grant authority to contact landlords, vendors, buyers or teammates.
 | Owner | Scope | State |
 | --- | --- | --- |
 | Codex bootstrap session | README, shared instructions, agent definitions, planning docs, ignores | Completed; files released for next session; no application files claimed |
+| Jorge (Claude Code) | `web/src/server/{muse,connector,marketplace.ts}`, `web/src/app/{muse,login,oauth,api/{a2a,mcp,muse,oauth},.well-known}`, `web/src/components/muse-console.tsx`, `supabase/migrations/*muse_bridge*`, `plugins/`, `connectors/muse/` | Active on `feat/primary-flows`; existing teammate pages untouched. Shared: `web/package.json`/lockfile (added deps), `web/src/contracts`, root `supabase/` |
 
 Teammate work exists on origin/website under web/. Confirm its owner and integration
 plan before app edits; no teammate application files were changed in this session.

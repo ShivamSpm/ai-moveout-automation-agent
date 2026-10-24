@@ -1,9 +1,28 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { AuthError, requireUser } from "@/server/auth";
+import { enabledAuthProviders } from "@/server/auth-providers";
 import { StartForm } from "@/components/start-form";
 
 export const metadata: Metadata = { title: "Start a move · Vacate" };
 
-export default function Start() {
+async function Intake({ searchParams }: PageProps<"/start">) {
+  await connection();
+  let ctx;
+  try { ctx = await requireUser(); } catch (error) { if (!(error instanceof AuthError)) throw error; }
+  const providers = await enabledAuthProviders();
+  const { resume } = await searchParams;
+  let initial;
+  if (ctx) {
+    const { data: move, error } = await ctx.db.from("moves").select("address_private, move_out_date, deposit_cents, landlord_name, landlord_email").order("created_at").limit(1).maybeSingle();
+    if (error) throw error;
+    if (move) initial = { email: ctx.user.email ?? "", address: move.address_private ?? "", moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
+  }
+  return <StartForm signedInEmail={ctx?.user.email} initial={initial} providers={providers} resume={resume === "1"} />;
+}
+
+export default function Start(props: PageProps<"/start">) {
   return (
     <main className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
       <div className="rise">
@@ -24,7 +43,7 @@ export default function Start() {
           ))}
         </ol>
       </div>
-      <StartForm />
+      <Suspense fallback={<p>Loading your move…</p>}><Intake {...props} /></Suspense>
     </main>
   );
 }

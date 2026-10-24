@@ -52,9 +52,10 @@ Do not transmit a web approval as permission to bypass a required Muse approval.
 
 | Capability | Current state | Evidence to fill |
 | --- | --- | --- |
-| Muse account + Facebook access | Not tested | Account capability observation, no credentials |
-| Supported connector setup | Not tested | Official setup path and successful authentication |
-| Task/result round trip | Not tested | Synthetic task ID and returned result |
+| Muse account + Facebook access | Not tested | Docs: Facebook connects via Accounts Center; Marketplace integration is opt-in (press reports, Sept 2026) |
+| Supported connector setup | Documented, not tested | Muse "Custom Connector" (Help Center); format unspecified. Public connectors need Meta review |
+| Task/result round trip | Passed with simulated agent | Official A2A client → `/api/a2a` list/claim/report on local stack; Muse itself not yet connected |
+| Muse Code SDK host | Not installed | `npm run muse:check` (spawn `muse serve`, handshake, one turn) |
 | Listing publication | Not tested | Reviewed action and real listing reference |
 | Inquiry read | Not tested | Authorized listing-bound message reference |
 | Reviewed reply send | Not tested | Matching recipient/content and provider outcome |

@@ -17,7 +17,7 @@ Use [MUSE_SPIKE.md](MUSE_SPIKE.md) for the early capability check.
 | Google Calendar | Deadlines, calls, inspections and service visits | OAuth, timezone and attendee/invite behavior | Event preview/export |
 | Apify | Discover allowed public service/listing information | Selected Actor's contract, access, cost and result quality | User-provided links or manual shortlist |
 | Bland | Authorized calls for inquiries and scheduling | Dedicated account, approved test recipient, duration/cost cap and result callback | Call brief |
-| Meta Muse | Task bridge and supported Facebook Marketplace actions | Connector access/review, task pickup and actual account action | Listing draft and explicit user handoff |
+| Meta Muse | Renter's own agent performs approved Facebook Marketplace posts/messages | Built: A2A 1.0 + MCP bridge, tested with a simulated client. Pending: custom connector on a real Muse account | Listing draft and explicit user handoff |
 | Craigslist | Listing preparation, publication if authorized mechanism exists | Verify current official posting/access options for target category | Copy-ready listing with manual publication |
 | Buy Nothing | Local giving with community-specific rules | Identify app vs Facebook group and supported account integration | Giving post draft and user handoff |
 | Vinted | Clothing/item sale preparation and supported account actions | Verify official integration availability and relevant seller eligibility | Copy-ready listing and manual publication |

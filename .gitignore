@@ -31,3 +31,8 @@ test-results/
 __pycache__/
 .venv/
 .worktrees/
+
+# Vercel CLI link and pulled env files (root and web/)
+.vercel
+.env*
+!.env.example

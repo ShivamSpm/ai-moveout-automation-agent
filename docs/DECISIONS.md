@@ -21,7 +21,9 @@ Updated October 24, 2026 after whiteboard review. "Proposed" is not an approval.
 | D12 | One monorepository owns website, tools, Supabase migrations, Muse connector and development agents/skills. | User latest direction |
 | D13 | Build with the developer Muse SDK and current A2A standards. | User latest direction; official Muse Code SDK identified |
 | D14 | Prepare a clean Claude Code handoff and local PR-ready branch promptly. | User latest direction |
+| D16 | Hosted Supabase is a dedicated instance managed by Vincent. Local development uses this repo's own `supabase start` stack (project_id `ai-moveout-automation-agent`) for accounts, personal data, checklists, items, schedules and tool-call tracking; root `supabase/migrations` is the single history applied to both. | User reply, Oct 24 |
 | D15 | Integrate the teammate website at `web/` rather than a competing app. Proposed: keep path and npm for the hackathon. | User request to coordinate; path/manager pending team agreement |
+| D17 | Family/household invitations are a stretch goal: multiple members or trusted helpers can contribute item images and use the moving personal agent and application together, including spouses, caregiver/patient and mother/daughter apartment or college dorm moves. | User request, Oct 24 |
 
 ## Proposed defaults, pending implementation agreement
 
@@ -30,8 +32,9 @@ chat plus a Muse Code SDK worker boundary; A2A and MCP as described in
 AGENT_STANDARDS.md; persistent
 task/action state; Claude model via OpenRouter; Supabase private documents and
 ownership-based data access; a shared reviewed-action service reusable by future
-Claude/Muse connectors. Initial single-renter ownership; household collaboration
-later. Pacific timezone follows Jorge's environment but event timezone is unconfirmed.
+Claude/Muse connectors. Initial single-renter ownership; family/household
+collaboration is confirmed stretch backlog (D17), with detailed permissions still
+proposed. Pacific timezone follows Jorge's environment but event timezone is unconfirmed.
 
 ## Blocking decisions for the two live flows
 
@@ -50,7 +53,7 @@ later. Pacific timezone follows Jorge's environment but event timezone is unconf
 
 | ID | Question | Proposed default / later expansion |
 | --- | --- | --- |
-| Q08 | Tenant vs household permissions? | One renter owns each move; no implicit roommate authority. |
+| Q08 | Tenant vs household permissions? | One renter owns each move initially; D17 confirms invited collaboration as stretch. Define member visibility and delegated action authority before implementation; no implicit family, caregiver or roommate authority. |
 | Q09 | Both old/new leases on day one? | One lease and two move dates first; label which home it governs. |
 | Q10 | What is "negotiation" today? | Draft landlord requests and buyer responses; no autonomous concessions or acceptance. |
 | Q11 | Calendar deadline or actual appointment? | One reviewed event; appointments require participant confirmation distinct from event creation. |
