@@ -17,7 +17,10 @@ Branch `feat/connector-item-photos`. No schema migration. Plugin and MCP server 
 - `sell-with-muse` skill documents the upload, attach, analyze and confirm steps.
 - Validation: TypeScript, lint, 329 tests (new local-Supabase integration test covers upload,
   hash mismatch, non-image rejection, cross-renter isolation and photo binding) and build.
-  The production vision call is verified only after deploy; see the PR.
+  Post-deploy: production `OPENROUTER_SPEND_CAP_USD` was the invalid value `y`; set to `5`
+  (Jorge's choice) and redeployed. The first live analysis was refused because the model exceeded
+  a length limit the provider drops from strict schemas; the vision schema now has no length
+  limits and results are trimmed after parsing.
 
 ## Account workflow repair — October 24, 2026, Codex
 
