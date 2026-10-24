@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -55,11 +54,6 @@ function Avatar({ account }: { account: Account }) {
 export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: NavLink[] }) {
   const account = useAccount(authEnabled);
   const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-  const [openedOn, setOpenedOn] = useState(pathname);
-
-  // Close the menu after navigating (adjusting state during render, not in an effect).
-  if (open && openedOn !== pathname) setOpen(false);
 
   useEffect(() => {
     if (!open) return;
@@ -97,10 +91,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
         </Link>
         <button
           type="button"
-          onClick={() => {
-            setOpenedOn(pathname);
-            setOpen((o) => !o);
-          }}
+          onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -124,9 +115,7 @@ export function UserMenu({ authEnabled, links }: { authEnabled: boolean; links: 
                   <Link
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className={`flex min-h-12 items-center rounded-xl px-4 text-base transition hover:bg-paper ${
-                      pathname === link.href ? "font-semibold text-tape" : ""
-                    }`}
+                    className="flex min-h-12 items-center rounded-xl px-4 text-base transition hover:bg-paper"
                   >
                     {link.label}
                   </Link>
