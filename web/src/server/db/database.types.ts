@@ -259,13 +259,13 @@ isOneToOne: false
                   ]
                 },"moves": {
                   Row: {
-                    "address_private": string | null,"area_label": string | null,"created_at": string,"deposit_cents": number | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"timezone": string,"title": string,"updated_at": string
+                    "address_private": string | null,"area_label": string | null,"created_at": string,"deposit_cents": number | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"landlord_phone": string | null,"renter_name": string | null,"zip": string | null,"bedrooms": number | null,"bathrooms": number | null,"sqft": number | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"timezone": string,"title": string,"updated_at": string
                   }
                   Insert: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"renter_name"?: string | null,"zip"?: string | null,"bedrooms"?: number | null,"bathrooms"?: number | null,"sqft"?: number | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"landlord_phone"?: string | null,"renter_name"?: string | null,"zip"?: string | null,"bedrooms"?: number | null,"bathrooms"?: number | null,"sqft"?: number | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     

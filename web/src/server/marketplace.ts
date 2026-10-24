@@ -44,6 +44,12 @@ export const UpdateMoveInput = z.object({
   depositCents: z.number().int().min(0).max(2147483647).nullish(),
   landlordName: z.string().max(100).nullish(),
   landlordEmail: z.email().nullish(),
+  renterName: z.string().max(100).nullish(),
+  landlordPhone: z.string().max(20).nullish(),
+  zip: z.string().regex(/^\d{5}$/).nullish(),
+  bedrooms: z.number().int().min(0).max(10).nullish(),
+  bathrooms: z.number().min(0.5).max(10).multipleOf(0.5).nullish(),
+  sqft: z.number().int().min(100).max(20000).nullish(),
 });
 
 export async function updateMove(ctx: ToolContext, input: z.infer<typeof UpdateMoveInput>) {
@@ -56,6 +62,12 @@ export async function updateMove(ctx: ToolContext, input: z.infer<typeof UpdateM
     deposit_cents: input.depositCents,
     landlord_name: input.landlordName,
     landlord_email: input.landlordEmail,
+    renter_name: input.renterName,
+    landlord_phone: input.landlordPhone,
+    zip: input.zip,
+    bedrooms: input.bedrooms,
+    bathrooms: input.bathrooms,
+    sqft: input.sqft,
   };
   for (const key of Object.keys(patch) as (keyof typeof patch)[]) {
     if (patch[key] === undefined) delete patch[key];
