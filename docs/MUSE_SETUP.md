@@ -103,8 +103,10 @@ account). A custom connector for your own account is the hackathon path.
 
 Muse (and Claude.ai) run in the cloud and need an HTTPS URL. Options:
 
-- A Vercel preview of `web/` with the hosted Supabase project Vincent manages
-  (preferred; OAuth and redirects work as deployed).
+- The hosted app: https://ai-moveout-automation-agent-tau.vercel.app (MCP at
+  `/api/mcp`, Agent Card at `/.well-known/agent-card.json`), backed by Supabase
+  project `sejfkcrmcbsiidftraek`. Preview deployment URLs sit behind Vercel login,
+  so Muse and Claude.ai can only reach the production domain.
 - A tunnel to local development (`ngrok http 3000`). Exposing a dev server is an
   outward-facing step; start it deliberately and stop it after the test. For OAuth
   against a local Supabase you must also tunnel Supabase and set `[auth] jwt_issuer`.

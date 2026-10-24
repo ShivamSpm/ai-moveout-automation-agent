@@ -416,7 +416,8 @@ enabled = true
 
 # Hosted project for the hackathon (org ai-moveout-automation-agent). Applied with
 # `supabase link --project-ref sejfkcrmcbsiidftraek && supabase config push`.
-# Only keys declared here differ from the local settings above.
+# Only keys declared here differ from the local settings above. No wildcard for
+# preview hosts: any Vercel account can claim a *.vercel.app name that fits one.
 [remotes.production]
 project_id = "sejfkcrmcbsiidftraek"
 
@@ -424,7 +425,6 @@ project_id = "sejfkcrmcbsiidftraek"
 site_url = "https://ai-moveout-automation-agent-tau.vercel.app"
 additional_redirect_urls = [
   "https://ai-moveout-automation-agent-tau.vercel.app/**",
-  "https://ai-moveout-automation-agent-*-ai-moveout-automation-agent.vercel.app/**",
   "http://localhost:3100/**",
 ]
 # Keep the hosted project's stricter defaults instead of the local-dev values above.

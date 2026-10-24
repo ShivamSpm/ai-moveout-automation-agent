@@ -37,6 +37,24 @@ Added 12:55 PM:
 - The deployed app (ai-moveout-automation-agent.vercel.app) serves main without the
   bridge; this Mac's Vercel login (CTFBio team) has no access to that project.
 
+Hosted setup (1:20 PM, Jorge):
+- Supabase org `ai-moveout-automation-agent`, project `sejfkcrmcbsiidftraek` (us-east-1).
+  Both migrations applied with `supabase db push`; `db lint` clean. Auth settings from
+  `[remotes.production]` in `supabase/config.toml` via `supabase config push`: site URL,
+  production + localhost redirects, OAuth 2.1 server with dynamic registration and
+  `/oauth/consent`. Hosted email confirmation and TOTP stay on.
+- Vercel team `ai-moveout-automation-agent` (Pro; members jg-ctfbio owner, ibm777p2,
+  spmshivam-9122, yw8676-3655), project `ai-moveout-automation-agent`, root `web/`.
+  Env: Supabase URL, publishable key, secret key (sensitive; production + preview).
+  Production domain https://ai-moveout-automation-agent-tau.vercel.app is public;
+  per-deployment URLs require Vercel login.
+- First deployment came from the CLI on `feat/primary-flows` (39a4d09) and became
+  production because no Git repository is connected yet. Connecting Git needs the
+  Vercel GitHub app on ShivamSpm's account; then production follows `main`.
+- Not configured yet: Google provider in the new Supabase project, OpenRouter key
+  (`/api/chat` returns 503), custom SMTP (Supabase's built-in email only reaches org
+  members, so outside sign-ups cannot confirm).
+
 Not yet verified (blockers for the live demo):
 - `muse` host not installed / not signed in (`npm run muse:check` reports it).
 - Consumer Muse custom connector: whether it accepts MCP, A2A or an API key is

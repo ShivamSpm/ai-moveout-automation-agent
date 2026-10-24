@@ -73,3 +73,19 @@ variable names and commands here as implementation introduces them.
 
 The Claude product plugin/MCP server, Muse connector and hosted runtime are still
 planned. The development instruction files do not create those integrations.
+
+## Hosted project (team access)
+
+Ask Jorge for an invite to the Vercel team `ai-moveout-automation-agent` and, if you
+change the schema, the Supabase org of the same name. Then, from the repo root:
+
+```bash
+vercel link --project ai-moveout-automation-agent --scope ai-moveout-automation-agent
+vercel env pull web/.env.vercel.local      # hosted values; local dev still uses web/.env.local
+supabase link --project-ref sejfkcrmcbsiidftraek
+supabase db push --dry-run                 # review, then without --dry-run
+supabase config diff                       # hosted auth settings live in [remotes.production]
+```
+
+Never put `SUPABASE_SECRET_KEY` in a `NEXT_PUBLIC_` variable. New migrations go through
+the local stack and tests first.
