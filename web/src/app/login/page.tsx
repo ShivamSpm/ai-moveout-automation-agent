@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { EmailSignIn } from "@/components/email-sign-in";
 import { OAuthButton } from "@/components/google-sign-in";
 import { authEnabled } from "@/lib/supabase/env";
+import { enabledAuthProviders } from "@/server/auth-providers";
 
 export const metadata: Metadata = { title: "Log in · Vacate" };
 
@@ -28,15 +29,19 @@ export default function Login({ searchParams }: PageProps<"/login">) {
           <Suspense fallback={null}>
             <CallbackError searchParams={searchParams} />
           </Suspense>
-          <OAuthButton provider="google" enabled={authEnabled} />
+          {authEnabled && (
+            <Suspense fallback={null}>
+              <GoogleButton />
+            </Suspense>
+          )}
           {authEnabled && (
             <Suspense fallback={null}>
               <EmailSignIn searchParams={searchParams as Promise<{ next?: string; error?: string }>} />
             </Suspense>
           )}
           <p className="mt-5 text-xs leading-relaxed text-muted">
-            We only use your Google account to sign you in. Vacate never sends anything on your
-            behalf without your approval.
+            We only use your account to sign you in. Vacate never sends anything on your behalf
+            without your approval.
           </p>
         </div>
       </div>
@@ -46,10 +51,18 @@ export default function Login({ searchParams }: PageProps<"/login">) {
 
 async function CallbackError({ searchParams }: { searchParams: PageProps<"/login">["searchParams"] }) {
   const { error } = await searchParams;
-  if (!error) return null;
+  // "1" comes from /auth/callback; other values are messages EmailSignIn shows itself.
+  if (error !== "1") return null;
   return (
-    <p className="mb-4 rounded-xl bg-stamp/10 p-3 text-sm text-stamp">
-      That sign-in didn&rsquo;t go through. Please try again.
+    <p role="alert" className="mb-4 rounded-xl bg-stamp/10 p-3 text-sm text-stamp">
+      That link didn&rsquo;t sign you in. If you just confirmed your email, it&rsquo;s confirmed: sign in below.
     </p>
   );
+}
+
+// Only offer Google when the Supabase project has the provider turned on;
+// otherwise the button leads to Supabase's "provider is not enabled" error.
+async function GoogleButton() {
+  const providers = await enabledAuthProviders();
+  return providers.google ? <OAuthButton provider="google" /> : null;
 }
