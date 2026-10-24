@@ -15,9 +15,9 @@ async function Intake({ searchParams }: PageProps<"/start">) {
   const { resume } = await searchParams;
   let initial;
   if (ctx) {
-    const { data: move, error } = await ctx.db.from("moves").select("address_private, move_out_date, deposit_cents, landlord_name, landlord_email").order("created_at").limit(1).maybeSingle();
+    const { data: move, error } = await ctx.db.from("moves").select("address_private, move_out_date, deposit_cents, landlord_name, landlord_phone, landlord_email").order("created_at").limit(1).maybeSingle();
     if (error) throw error;
-    if (move) initial = { email: ctx.user.email ?? "", address: move.address_private ?? "", moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), landlordName: move.landlord_name ?? "", landlordEmail: move.landlord_email ?? "" };
+    if (move) initial = { email: ctx.user.email ?? "", address: move.address_private ?? "", moveOutDate: move.move_out_date ?? "", deposit: move.deposit_cents == null ? "" : (move.deposit_cents / 100).toFixed(2), landlordName: move.landlord_name ?? "", landlordPhone: move.landlord_phone ?? "", landlordEmail: move.landlord_email ?? "" };
   }
   return <StartForm signedInEmail={ctx?.user.email} initial={initial} providers={providers} resume={resume === "1"} />;
 }

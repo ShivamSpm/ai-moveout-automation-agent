@@ -23,7 +23,7 @@ const email = `start-${crypto.randomUUID()}@example.test`;
 const password = `pw-${crypto.randomUUID()}`;
 function form(emailAddress = email, address = "100 Example Street") {
   const data = new FormData();
-  for (const [key, value] of Object.entries({ email: emailAddress, password, address, moveOutDate: "2026-11-30", deposit: "$3,950", landlordName: "Example Manager", landlordEmail: emailAddress })) data.set(key, value);
+  for (const [key, value] of Object.entries({ email: emailAddress, password, address, moveOutDate: "2026-11-30", deposit: "$3,950", landlordName: "Example Manager", landlordPhone: "(415) 555-0134", landlordEmail: emailAddress })) data.set(key, value);
   return data;
 }
 beforeAll(() => {

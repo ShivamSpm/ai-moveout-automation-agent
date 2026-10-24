@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { landlordPhoneSchema } from "./move-details-schema";
 
 export const depositSchema = z.string().trim()
   .regex(/^\$?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d{1,2})?$/, "Enter a dollar amount, such as $3,950")
@@ -16,6 +17,7 @@ export function startSchema(signedIn: boolean) {
     moveOutDate: z.iso.date("Enter a valid move-out date"),
     deposit: depositSchema,
     landlordName: z.string().trim().min(1, "Enter the landlord or manager's name").max(100),
+    landlordPhone: landlordPhoneSchema,
     landlordEmail: z.email("Enter the landlord's email address"),
     intent: z.enum(["signup", "signin"]).default("signup"),
   });
@@ -25,6 +27,8 @@ export function startSchema(signedIn: boolean) {
 export const startDraftSchema = z.object({
   email: z.string().max(320), address: z.string().max(200), moveOutDate: z.string().max(10),
   deposit: z.string().max(40), landlordName: z.string().max(100), landlordEmail: z.string().max(320),
+  // Older drafts saved before this field existed still parse.
+  landlordPhone: z.string().max(20).default(""),
 });
 export type StartDraft = z.infer<typeof startDraftSchema>;
 export type StartState = {

@@ -36,7 +36,7 @@ export async function saveStart(_previous: StartState, form: FormData): Promise<
     const ctx = await requireUser();
     await updateMove(ctx, {
       addressPrivate: input.address, moveOutDate: input.moveOutDate, depositCents: input.deposit,
-      landlordName: input.landlordName, landlordEmail: input.landlordEmail,
+      landlordName: input.landlordName, landlordPhone: input.landlordPhone, landlordEmail: input.landlordEmail,
     });
     return { status: "success" };
   } catch {
