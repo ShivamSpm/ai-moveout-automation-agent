@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { UserMenu } from "@/components/user-menu";
+import { authEnabled } from "@/lib/supabase/env";
 
 export function Logo() {
   return (
@@ -36,12 +38,15 @@ export function SiteNav() {
             ))}
           </div>
         </div>
-        <Link
-          href="/start"
-          className="tape rounded-xl px-5 py-2.5 text-sm font-semibold transition hover:brightness-110"
-        >
-          Start my move-out
-        </Link>
+        <div className="flex items-center gap-1">
+          <UserMenu authEnabled={authEnabled} />
+          <Link
+            href="/start"
+            className="tape rounded-xl px-5 py-2.5 text-sm font-semibold transition hover:brightness-110"
+          >
+            Start my move-out
+          </Link>
+        </div>
       </nav>
     </header>
   );

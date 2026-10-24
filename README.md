@@ -23,7 +23,8 @@ Bland (voice), Vercel, Muse (vision), Supabase, OpenRouter (vision and negotiati
 
 | Folder | What's in it |
 |---|---|
-| `web/` | Next.js website: landing page, dashboard, items for sale |
+| `web/` | Next.js website: landing page, login, dashboard, items for sale |
+| `docs/user-workflow.md` | The renter's step-by-step workflow, in order |
 
 ## Requirements and development handoff
 
