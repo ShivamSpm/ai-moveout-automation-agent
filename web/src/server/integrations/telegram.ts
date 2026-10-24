@@ -127,6 +127,14 @@ export function groupLinkUrl(config: Pick<TelegramConfig, "botUsername">, nonce:
   return `https://t.me/${config.botUsername}?startgroup=${nonce}`;
 }
 
+/**
+ * Fallback for Telegram apps that add the bot without sending the start code:
+ * the seller pastes this in the group. It names the bot so privacy mode delivers it.
+ */
+export function groupLinkCommand(config: Pick<TelegramConfig, "botUsername">, nonce: string): string {
+  return `/link@${config.botUsername} ${nonce}`;
+}
+
 // Only the update fields the selling agent reads. Anything else is ignored.
 export const TelegramUpdate = z.object({
   update_id: z.number().int(),
@@ -159,8 +167,9 @@ export function toBuyerEvent(update: TelegramUpdate): BuyerEvent {
   const m = update.message;
   if (!m || m.from?.is_bot) return { kind: "ignored" };
   if (m.chat.type === "group" || m.chat.type === "supergroup") {
-    // Sent by Telegram when someone adds the bot through the add-to-group link.
-    const link = m.text?.match(/^\/start(?:@\w+)?\s+([A-Za-z0-9_-]{1,64})\s*$/);
+    // "/start@bot <code>" is sent by Telegram when someone adds the bot through the
+    // add-to-group link; "/link@bot <code>" is the same code pasted by the seller.
+    const link = m.text?.match(/^\/(?:start|link)(?:@\w+)?\s+([A-Za-z0-9_-]{1,64})\s*$/);
     if (!link) return { kind: "ignored" };
     return { kind: "group_link", chatId: String(m.chat.id), title: m.chat.title ?? null, username: m.chat.username ?? null, code: link[1], userId: m.from ? String(m.from.id) : null };
   }

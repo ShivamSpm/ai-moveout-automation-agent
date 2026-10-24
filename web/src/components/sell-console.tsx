@@ -10,7 +10,13 @@ export interface SellState {
   move: { moveOutDate: string | null; timezone: string; areaLabel: string | null };
   cutoff: string | null;
   pastCutoff: boolean;
-  telegram: { configured: boolean; group: { title: string } | null; addToGroupUrl: string | null; connectIdentityUrl: string | null };
+  telegram: {
+    configured: boolean;
+    group: { title: string } | null;
+    addToGroupUrl: string | null;
+    connectIdentityUrl: string | null;
+    linkCommand: string | null;
+  };
   listings: ListingRow[];
   conversations: Row<"conversations">[];
   messages: Pick<Row<"messages">, "conversation_id" | "direction" | "body" | "source" | "created_at">[];
@@ -49,6 +55,7 @@ const dealStatus: Record<string, string> = {
 export function SellConsole({ initial }: { initial: SellState }) {
   const [state, setState] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState({ title: "", description: "" });
   const [photo, setPhoto] = useState<File | null>(null);
@@ -165,6 +172,29 @@ export function SellConsole({ initial }: { initial: SellState }) {
             )}
           </div>
           <p className="mt-2 text-xs text-muted">First open the private bot chat and press Start, then return here to add the bot to a group using the same Telegram account. Links expire after 15 minutes and work once. This page updates automatically.</p>
+          {state.telegram.linkCommand && (
+            <div className="mt-3 rounded-2xl bg-paper p-3 text-sm ring-1 ring-line">
+              <p>
+                Bot already in the group but it didn&apos;t post &quot;Vacate is set up here&quot;? Paste this message in the group from the same
+                Telegram account:
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <code className="break-all rounded-lg bg-card px-2 py-1 font-mono text-xs ring-1 ring-line">{state.telegram.linkCommand}</code>
+                <button
+                  type="button"
+                  className={ghost}
+                  onClick={() => {
+                    void navigator.clipboard.writeText(state.telegram.linkCommand!).then(
+                      () => setCopied(true),
+                      () => setError("Couldn't copy; select the text and copy it instead."),
+                    );
+                  }}
+                >
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

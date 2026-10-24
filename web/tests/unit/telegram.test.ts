@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   channelPostUrl,
+  groupLinkCommand,
   groupLinkUrl,
   parsePostRef,
   postRef,
@@ -86,6 +87,16 @@ describe("group linking", () => {
       userId: "7",
     });
     expect(toBuyerEvent(group("anyone selling a desk?"))).toEqual({ kind: "ignored" });
+  });
+
+  it("accepts the pasted /link command as the same group link", () => {
+    const code = "a".repeat(48);
+    expect(groupLinkCommand(config, code)).toBe(`/link@VacateSaleBot ${code}`);
+    const pasted: TelegramUpdate = {
+      update_id: 3,
+      message: { message_id: 2, date: 0, chat: { id: -100555, type: "supergroup", title: "SF Moving Sales" }, from: { id: 7, is_bot: false }, text: groupLinkCommand(config, code) },
+    };
+    expect(toBuyerEvent(pasted)).toMatchObject({ kind: "group_link", chatId: "-100555", code, userId: "7" });
   });
 
   it("stores and links posts in groups and in the default channel", () => {
