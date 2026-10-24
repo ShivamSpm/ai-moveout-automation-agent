@@ -61,7 +61,7 @@ describe("moving_providers migration", () => {
   it("sorts after the cleaning migration and seeds exactly the fixture rows", () => {
     expect(file).toBeDefined();
     expect(file).toBe("20261024233100_moving_providers.sql");
-    const others = readdirSync(dir).filter((name) => name !== file).map((name) => Number(name.slice(0, 14)));
+    const others = readdirSync(dir).filter((name) => name.endsWith("_cleaning_providers.sql")).map((name) => Number(name.slice(0, 14)));
     expect(Number(file!.slice(0, 14))).toBeGreaterThan(Math.max(...others));
     for (const row of MOVING_CATALOG_FIXTURE) expect(sql, row.slug).toContain(renderMovingSeedRow(row));
     expect(sql.match(/'::uuid/g)).toHaveLength(MOVING_CATALOG_FIXTURE.length);

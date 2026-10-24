@@ -10,7 +10,6 @@ import { isConfigured as openRouterConfigured } from "@/server/integrations/open
 import {
   editCaption,
   groupLinkUrl,
-  ownerFromGroupLinkCode,
   parsePostRef,
   postRef,
   postUrl,
@@ -245,16 +244,19 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
 
   const event = toBuyerEvent(update);
   if (event.kind === "ignored") return { handled: "ignored" };
+  if (event.kind === "link_identity") {
+    const bound = await db.rpc("bind_telegram_link", { p_nonce: event.code, p_user_id: event.userId });
+    if (bound.error) throw new Error(bound.error.message);
+    return { handled: bound.data ? "identity_linked" : "group_link_invalid" };
+  }
   if (event.kind === "group_link") {
-    const ownerId = ownerFromGroupLinkCode(event.code, config);
-    if (!ownerId) return { handled: "group_link_invalid" };
-    const saved = await db.from("telegram_targets").upsert(
-      { owner_id: ownerId, chat_id: event.chatId, chat_title: event.title, chat_username: event.username, linked_at: now.toISOString() },
-      { onConflict: "owner_id" },
-    );
+    if (!event.userId) return { handled: "group_link_invalid" };
+    const saved = await db.rpc("consume_telegram_link", {
+      p_nonce: event.code, p_user_id: event.userId, p_chat_id: event.chatId,
+      p_title: event.title ?? "Telegram group", p_username: event.username ?? "",
+    });
     if (saved.error) throw new Error(saved.error.message);
-    await sendMessage(config, event.chatId, "Vacate is set up here. Approved listings will be posted in this group. Tap \"Message seller\" on a listing to chat privately about it.");
-    return { handled: "group_linked" };
+    return { handled: saved.data ? "group_linked" : "group_link_invalid" };
   }
   if (event.kind === "unsupported") {
     await sendMessage(config, event.chatId, "Sorry, I can only read text messages.");
@@ -570,6 +572,9 @@ export async function sellingState(ctx: ToolContext, now = new Date()) {
   ]);
   const cutoff = move.move_out_date ? pickupCutoff(move.move_out_date, move.timezone) : null;
   const configured = telegramConfigured();
+  const link = configured ? await serviceClient().rpc("prepare_telegram_link", { p_owner_id: ctx.user.id }) : null;
+  if (link?.error) throw new MarketplaceError(link.error.message, 500);
+  const nonce = link?.data;
   return {
     move: { moveOutDate: move.move_out_date, timezone: move.timezone, areaLabel: move.area_label },
     cutoff: cutoff?.toISOString() ?? null,
@@ -578,7 +583,8 @@ export async function sellingState(ctx: ToolContext, now = new Date()) {
       configured,
       // Null: listings go to the app's default sale channel.
       group: group.data ? { title: group.data.chat_title ?? "your Telegram group" } : null,
-      addToGroupUrl: configured ? groupLinkUrl(readTelegramConfig(), ctx.user.id) : null,
+      addToGroupUrl: nonce?.telegram_user_id ? groupLinkUrl(readTelegramConfig(), nonce.nonce) : null,
+      connectIdentityUrl: nonce && !nonce.telegram_user_id ? startLink(readTelegramConfig(), `link_${nonce.nonce}`) : null,
     },
     listings: listings.data ?? [],
     conversations: conversations.data ?? [],

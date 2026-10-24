@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
 // Telegram Bot API adapter. The bot is the account the selling agent speaks
@@ -122,31 +122,9 @@ export function parsePostRef(ref: string, defaultChatId: string): { chatId: stri
   return at === -1 ? { chatId: defaultChatId, messageId: Number(ref) } : { chatId: ref.slice(0, at), messageId: Number(ref.slice(at + 1)) };
 }
 
-// Linking a group: /sell shows an add-to-group link whose payload is the
-// seller's id signed with the webhook secret, so only that link can attach a
-// group to that seller. Telegram limits the payload to 64 chars of [A-Za-z0-9_-].
-function linkSignature(compactId: string, secret: string) {
-  return createHmac("sha256", secret).update(`group-link:${compactId}`).digest("base64url").slice(0, 16);
-}
-
-export function groupLinkCode(ownerId: string, config: Pick<TelegramConfig, "webhookSecret">): string {
-  const compact = ownerId.replace(/-/g, "").toLowerCase();
-  return `${compact}-${linkSignature(compact, config.webhookSecret)}`;
-}
-
-export function ownerFromGroupLinkCode(code: string, config: Pick<TelegramConfig, "webhookSecret">): string | null {
-  const m = code.match(/^([0-9a-f]{32})-([A-Za-z0-9_-]{16})$/);
-  if (!m) return null;
-  const expected = Buffer.from(linkSignature(m[1], config.webhookSecret));
-  const given = Buffer.from(m[2]);
-  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
-  const h = m[1];
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
-}
-
-/** Opens Telegram's "add to group" picker for the shared bot, carrying the seller's link code. */
-export function groupLinkUrl(config: Pick<TelegramConfig, "botUsername" | "webhookSecret">, ownerId: string): string {
-  return `https://t.me/${config.botUsername}?startgroup=${groupLinkCode(ownerId, config)}`;
+/** Opaque, expiring server-issued credential (never an encoded owner ID). */
+export function groupLinkUrl(config: Pick<TelegramConfig, "botUsername">, nonce: string): string {
+  return `https://t.me/${config.botUsername}?startgroup=${nonce}`;
 }
 
 // Only the update fields the selling agent reads. Anything else is ignored.
@@ -170,7 +148,8 @@ export type BuyerEvent =
   | { kind: "start"; chatId: string; buyerLabel: string; listingId: string | null }
   | { kind: "text"; chatId: string; buyerLabel: string; text: string }
   | { kind: "unsupported"; chatId: string }
-  | { kind: "group_link"; chatId: string; title: string | null; username: string | null; code: string }
+  | { kind: "link_identity"; code: string; userId: string }
+  | { kind: "group_link"; userId: string | null; chatId: string; title: string | null; username: string | null; code: string }
   | { kind: "ignored" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -183,9 +162,11 @@ export function toBuyerEvent(update: TelegramUpdate): BuyerEvent {
     // Sent by Telegram when someone adds the bot through the add-to-group link.
     const link = m.text?.match(/^\/start(?:@\w+)?\s+([A-Za-z0-9_-]{1,64})\s*$/);
     if (!link) return { kind: "ignored" };
-    return { kind: "group_link", chatId: String(m.chat.id), title: m.chat.title ?? null, username: m.chat.username ?? null, code: link[1] };
+    return { kind: "group_link", chatId: String(m.chat.id), title: m.chat.title ?? null, username: m.chat.username ?? null, code: link[1], userId: m.from ? String(m.from.id) : null };
   }
   if (m.chat.type !== "private") return { kind: "ignored" };
+  const identity = m.text?.match(/^\/start\s+link_([a-f0-9]{48})\s*$/);
+  if (identity && m.from) return { kind: "link_identity", code: identity[1], userId: String(m.from.id) };
   const chatId = String(m.chat.id);
   const buyerLabel = (m.from?.username ? `@${m.from.username}` : m.from?.first_name || `Buyer ${chatId.slice(-4)}`).slice(0, 100);
   if (!m.text) return { kind: "unsupported", chatId };
