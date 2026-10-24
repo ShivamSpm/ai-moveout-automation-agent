@@ -13,3 +13,6 @@ Validation: local documentation links, unique requirement IDs, TOML/frontmatter,
 shared-skill validation and private-input ignore checks. This is a requirements and
 development-framework change; no app, migration or live provider integration is
 implemented or deployed. Original whiteboard image and private inputs are excluded.
+
+The branch is based on the teammate main README. Preserve the existing website
+branch under web/; apps/web is a proposed monorepo migration to coordinate.

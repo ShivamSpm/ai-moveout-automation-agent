@@ -2,7 +2,9 @@
 
 User decision: one repository owns website, agent runtimes, Muse connector, shared
 tools, Supabase migrations, development agents/skills, tests and architecture.
-This tree is the target layout; application packages are not implemented yet.
+This tree is the target layout. Teammate branch `origin/website` already has a
+Next.js app at `web/`; preserve it and coordinate any move to `apps/web`. The
+planning branch does not merge, rewrite or test that application.
 
 ```text
 ai-moveout-automation-agent/

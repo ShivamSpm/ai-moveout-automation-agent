@@ -9,9 +9,9 @@ cd /Users/jorge/ai-moveout-automation-agent
 Origin: `https://github.com/ShivamSpm/ai-moveout-automation-agent.git`.
 At clone time the public repository had no commits. Local bootstrap branch:
 `codex/hackathon-bootstrap`. The remote's configured default branch is `main`.
-A local main baseline and planning feature commit are prepared; neither is pushed.
-See PR_PREPARATION.md for the empty-remote initialization and PR sequence.
-Do not assume `origin/main` exists before it is published.
+Teammates initialized main during setup. The planning branch is rebased onto
+real origin/main; see PR_PREPARATION.md for the feature-branch PR sequence.
+A separate origin/website branch contains a Next.js app at web/; preserve it.
 
 ## Start either development assistant
 

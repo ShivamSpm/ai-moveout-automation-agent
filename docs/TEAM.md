@@ -33,4 +33,5 @@ grant authority to contact landlords, vendors, buyers or teammates.
 | --- | --- | --- |
 | Codex bootstrap session | README, shared instructions, agent definitions, planning docs, ignores | Completed; files released for next session; no application files claimed |
 
-No other claims are known. Check current git state and with the team before edits.
+Teammate work exists on origin/website under web/. Confirm its owner and integration
+plan before app edits; no teammate application files were changed in this session.

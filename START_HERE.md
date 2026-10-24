@@ -31,7 +31,10 @@ and git-ignored under `private/whiteboard/`; it will not travel with the PR.
 
 ## Immediate next work
 
-Confirm current time, git status and teammate ownership. If authorized to build,
+Confirm current time, git status and teammate ownership. `origin/website` already
+contains a Next.js app under `web/` (88fc962 at inspection); inspect and coordinate
+integration instead of generating a competing app. `apps/web` is the target proposal.
+If authorized to build,
 scaffold the monorepo's first working web/auth/saved-move slice and immediately
 test dedicated service access. Prioritize the Muse capability spike and Google
 OAuth because both primary flows depend on them. Install/pin the real SDK only
@@ -49,6 +52,6 @@ cd /Users/jorge/ai-moveout-automation-agent
 claude 'Read CLAUDE.md and START_HERE.md. Continue from the captured requirements. Confirm remaining implementation blockers and prepare the first monorepo build slice without restarting discovery.'
 ```
 
-Both assistant frameworks and shared skills are prepared. No app/provider SDK,
-database or hosted environment has been implemented. See `docs/PR_PREPARATION.md`
+Both assistant frameworks and shared skills are prepared. This planning branch adds no app/provider SDK, database or hosted environment.
+Teammate website work exists remotely and has not been tested here. See `docs/PR_PREPARATION.md`
 for publishing the local plan; no remote push is part of this handoff.
