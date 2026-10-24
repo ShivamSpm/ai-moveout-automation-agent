@@ -2,7 +2,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  
+
   "graphql_public": {
           Tables: {
             [_ in never]: never
@@ -99,6 +99,19 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"cleaning_providers": {
+                  Row: {
+                    "accepts_pets": boolean,"active": boolean,"base_usd": number,"bulky_items_surcharge_usd": number,"cancellation_policy": string,"carpet_usd_per_room": number,"created_at": string,"day_end_hour": number,"day_start_hour": number,"deep_clean_usd": number,"display_name": string,"id": string,"inside_appliances_usd": number,"is_simulated": boolean,"max_jobs_per_day": number,"min_notice_hours": number,"no_elevator_surcharge_usd": number,"notes": string | null,"offers_carpet": boolean,"offers_inside_appliances": boolean,"offers_walls": boolean,"offers_windows": boolean,"per_bathroom_usd": number,"per_bedroom_usd": number,"pet_surcharge_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"service_zips": (string)[],"slug": string,"walls_usd": number,"windows_usd": number,"works_weekdays": (number)[]
+                  }
+                  Insert: {
+                    "accepts_pets": boolean,"active"?: boolean,"base_usd": number,"bulky_items_surcharge_usd": number,"cancellation_policy": string,"carpet_usd_per_room": number,"created_at"?: string,"day_end_hour": number,"day_start_hour": number,"deep_clean_usd": number,"display_name": string,"id"?: string,"inside_appliances_usd": number,"is_simulated"?: boolean,"max_jobs_per_day": number,"min_notice_hours": number,"no_elevator_surcharge_usd": number,"notes"?: string | null,"offers_carpet": boolean,"offers_inside_appliances": boolean,"offers_walls": boolean,"offers_windows": boolean,"per_bathroom_usd": number,"per_bedroom_usd": number,"pet_surcharge_usd": number,"rating": number,"review_count": number,"rush_pct": number,"rush_window_hours": number,"service_zips": (string)[],"slug": string,"walls_usd": number,"windows_usd": number,"works_weekdays": (number)[]
+                  }
+                  Update: {
+                    "accepts_pets"?: boolean,"active"?: boolean,"base_usd"?: number,"bulky_items_surcharge_usd"?: number,"cancellation_policy"?: string,"carpet_usd_per_room"?: number,"created_at"?: string,"day_end_hour"?: number,"day_start_hour"?: number,"deep_clean_usd"?: number,"display_name"?: string,"id"?: string,"inside_appliances_usd"?: number,"is_simulated"?: boolean,"max_jobs_per_day"?: number,"min_notice_hours"?: number,"no_elevator_surcharge_usd"?: number,"notes"?: string | null,"offers_carpet"?: boolean,"offers_inside_appliances"?: boolean,"offers_walls"?: boolean,"offers_windows"?: boolean,"per_bathroom_usd"?: number,"per_bedroom_usd"?: number,"pet_surcharge_usd"?: number,"rating"?: number,"review_count"?: number,"rush_pct"?: number,"rush_window_hours"?: number,"service_zips"?: (string)[],"slug"?: string,"walls_usd"?: number,"windows_usd"?: number,"works_weekdays"?: (number)[]
+                  }
+                  Relationships: [
+
+                  ]
                 },"connector_tokens": {
                   Row: {
                     "created_at": string,"id": string,"label": string,"last_used_at": string | null,"owner_id": string,"revoked_at": string | null,"token_hash": string,"token_hint": string
@@ -110,7 +123,7 @@ isOneToOne: false
                     "created_at"?: string,"id"?: string,"label"?: string,"last_used_at"?: string | null,"owner_id"?: string,"revoked_at"?: string | null,"token_hash"?: string,"token_hint"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"conversations": {
                   Row: {
@@ -133,13 +146,13 @@ isOneToOne: false
                   ]
                 },"documents": {
                   Row: {
-                    "byte_size": number,"id": string,"kind": string,"mime_type": string,"move_id": string,"original_name": string | null,"owner_id": string,"page_count": number | null,"sha256": string,"storage_path": string,"uploaded_at": string
+                    "byte_size": number,"id": string,"kind": string,"mime_type": string,"move_id": string,"original_name": string | null,"owner_id": string,"page_count": number | null,"sha256": string,"shared_with_household": boolean,"storage_path": string,"uploaded_at": string
                   }
                   Insert: {
-                    "byte_size": number,"id"?: string,"kind": string,"mime_type": string,"move_id": string,"original_name"?: string | null,"owner_id"?: string,"page_count"?: number | null,"sha256": string,"storage_path": string,"uploaded_at"?: string
+                    "byte_size": number,"id"?: string,"kind": string,"mime_type": string,"move_id": string,"original_name"?: string | null,"owner_id"?: string,"page_count"?: number | null,"sha256": string,"shared_with_household"?: boolean,"storage_path": string,"uploaded_at"?: string
                   }
                   Update: {
-                    "byte_size"?: number,"id"?: string,"kind"?: string,"mime_type"?: string,"move_id"?: string,"original_name"?: string | null,"owner_id"?: string,"page_count"?: number | null,"sha256"?: string,"storage_path"?: string,"uploaded_at"?: string
+                    "byte_size"?: number,"id"?: string,"kind"?: string,"mime_type"?: string,"move_id"?: string,"original_name"?: string | null,"owner_id"?: string,"page_count"?: number | null,"sha256"?: string,"shared_with_household"?: boolean,"storage_path"?: string,"uploaded_at"?: string
                   }
                   Relationships: [
                     {
@@ -149,6 +162,38 @@ isOneToOne: false
       referencedRelation: "moves"
       referencedColumns: ["id","owner_id"]
     }
+                  ]
+                },"household_members": {
+                  Row: {
+                    "accepted_at": string | null,"expires_at": string | null,"household_id": string,"id": string,"invite_token_hash": string | null,"invited_at": string,"invited_email": string,"role": string,"status": string,"user_id": string | null
+                  }
+                  Insert: {
+                    "accepted_at"?: string | null,"expires_at"?: string | null,"household_id": string,"id"?: string,"invite_token_hash"?: string | null,"invited_at"?: string,"invited_email": string,"role": string,"status": string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"expires_at"?: string | null,"household_id"?: string,"id"?: string,"invite_token_hash"?: string | null,"invited_at"?: string,"invited_email"?: string,"role"?: string,"status"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "household_members_household_id_fkey"
+      columns: ["household_id"]
+isOneToOne: false
+      referencedRelation: "households"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"households": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"owner_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"owner_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"owner_id"?: string
+                  }
+                  Relationships: [
+
                   ]
                 },"item_photos": {
                   Row: {
@@ -259,16 +304,22 @@ isOneToOne: false
                   ]
                 },"moves": {
                   Row: {
-                    "address_private": string | null,"area_label": string | null,"created_at": string,"deposit_cents": number | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"timezone": string,"title": string,"updated_at": string
+                    "address_private": string | null,"area_label": string | null,"created_at": string,"deposit_cents": number | null,"household_id": string | null,"id": string,"landlord_email": string | null,"landlord_name": string | null,"move_in_date": string | null,"move_out_date": string | null,"owner_id": string,"party_role": string,"timezone": string,"title": string,"updated_at": string
                   }
                   Insert: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
+                    "address_private"?: string | null,"area_label"?: string | null,"created_at"?: string,"deposit_cents"?: number | null,"household_id"?: string | null,"id"?: string,"landlord_email"?: string | null,"landlord_name"?: string | null,"move_in_date"?: string | null,"move_out_date"?: string | null,"owner_id"?: string,"party_role"?: string,"timezone"?: string,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "moves_household_id_owner_id_fkey"
+      columns: ["household_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "households"
+      referencedColumns: ["id","owner_id"]
+    }
                   ]
                 },"reservations": {
                   Row: {
@@ -297,16 +348,22 @@ isOneToOne: false
                   ]
                 },"tasks": {
                   Row: {
-                    "created_at": string,"detail": string | null,"due_date": string | null,"id": string,"lane": string,"move_id": string,"owner_id": string,"phase": string,"source": string | null,"source_kind": string,"status": string,"task_key": string,"title": string
+                    "created_at": string,"detail": string | null,"document_id": string | null,"due_date": string | null,"id": string,"lane": string,"move_id": string,"owner_id": string,"phase": string,"source": string | null,"source_kind": string,"status": string,"task_key": string,"title": string
                   }
                   Insert: {
-                    "created_at"?: string,"detail"?: string | null,"due_date"?: string | null,"id"?: string,"lane": string,"move_id": string,"owner_id"?: string,"phase"?: string,"source"?: string | null,"source_kind": string,"status"?: string,"task_key": string,"title": string
+                    "created_at"?: string,"detail"?: string | null,"document_id"?: string | null,"due_date"?: string | null,"id"?: string,"lane": string,"move_id": string,"owner_id"?: string,"phase"?: string,"source"?: string | null,"source_kind": string,"status"?: string,"task_key": string,"title": string
                   }
                   Update: {
-                    "created_at"?: string,"detail"?: string | null,"due_date"?: string | null,"id"?: string,"lane"?: string,"move_id"?: string,"owner_id"?: string,"phase"?: string,"source"?: string | null,"source_kind"?: string,"status"?: string,"task_key"?: string,"title"?: string
+                    "created_at"?: string,"detail"?: string | null,"document_id"?: string | null,"due_date"?: string | null,"id"?: string,"lane"?: string,"move_id"?: string,"owner_id"?: string,"phase"?: string,"source"?: string | null,"source_kind"?: string,"status"?: string,"task_key"?: string,"title"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "tasks_document_id_owner_id_fkey"
+      columns: ["document_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "documents"
+      referencedColumns: ["id","owner_id"]
+    },{
       foreignKeyName: "tasks_move_id_owner_id_fkey"
       columns: ["move_id","owner_id"]
 isOneToOne: false
@@ -325,6 +382,9 @@ isOneToOne: false
                            },
 "a2a_task_save":
 { Args: { "p_action_id": string,"p_id": string,"p_owner_id": string,"p_task": Json }; Returns: undefined
+                           },
+"accept_household_invite":
+{ Args: { "token_hash": string }; Returns: string
                            },
 "approve_action":
 { Args: { "p_action_id": string,"p_payload_hash": string }; Returns: {
@@ -419,6 +479,14 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "connected": boolean,"google_email": string,"scopes": (string)[]
             }[]
+                           },
+"household_moves":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "household_id": string,"id": string,"move_out_date": string,"owner_id": string,"title": string
+            }[]
+                           },
+"invite_household_member":
+{ Args: { "email": string,"h": string,"token_hash": string }; Returns: string
                            },
 "muse_buyer_message":
 { Args: { "p_body": string,"p_buyer_label": string,"p_listing_id": string,"p_owner_id": string,"p_thread_ref": string }; Returns: string
@@ -548,8 +616,14 @@ isOneToOne: false
 "resolve_connector_token":
 { Args: { "p_token_hash": string }; Returns: string
                            },
+"revoke_household_member":
+{ Args: { "member_id": string }; Returns: undefined
+                           },
 "save_google_credentials":
 { Args: { "p_access_token": string,"p_email": string,"p_expires_at": string,"p_owner_id": string,"p_refresh_token": string,"p_scopes": (string)[] }; Returns: undefined
+                           },
+"save_lease_result":
+{ Args: { "doc": string,"findings": Json,"plan": Json }; Returns: undefined
                            }
           }
           Enums: {
@@ -669,11 +743,11 @@ export type CompositeTypes<
 export const Constants = {
   "graphql_public": {
           Enums: {
-            
+
           }
         },"public": {
           Enums: {
-            
+
           }
         }
 } as const
