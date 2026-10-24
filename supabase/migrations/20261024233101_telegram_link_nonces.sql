@@ -1,7 +1,7 @@
 -- Short-lived linking credentials; only the server can create, bind or consume.
 create table public.telegram_link_nonces (
   owner_id uuid primary key references auth.users(id) on delete cascade,
-  nonce text not null unique default encode(gen_random_bytes(24), 'hex'),
+  nonce text not null unique default encode(extensions.gen_random_bytes(24), 'hex'),
   telegram_user_id text,
   expires_at timestamptz not null default (now() + interval '15 minutes')
 );
