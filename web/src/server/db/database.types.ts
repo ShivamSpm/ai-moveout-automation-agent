@@ -378,6 +378,25 @@ isOneToOne: false
       referencedColumns: ["id","owner_id"]
     }
                   ]
+                },"service_selections": {
+                  Row: {
+                    "confirmation_code": string | null,"id": string,"kind": string,"move_id": string,"owner_id": string,"provider_id": string,"provider_name": string,"selected_at": string,"simulated": boolean,"slot_start": string | null,"total_usd": number
+                  }
+                  Insert: {
+                    "confirmation_code"?: string | null,"id"?: string,"kind": string,"move_id": string,"owner_id"?: string,"provider_id": string,"provider_name": string,"selected_at"?: string,"simulated"?: boolean,"slot_start"?: string | null,"total_usd": number
+                  }
+                  Update: {
+                    "confirmation_code"?: string | null,"id"?: string,"kind"?: string,"move_id"?: string,"owner_id"?: string,"provider_id"?: string,"provider_name"?: string,"selected_at"?: string,"simulated"?: boolean,"slot_start"?: string | null,"total_usd"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "service_selections_move_id_owner_id_fkey"
+      columns: ["move_id","owner_id"]
+isOneToOne: false
+      referencedRelation: "moves"
+      referencedColumns: ["id","owner_id"]
+    }
+                  ]
                 },"tasks": {
                   Row: {
                     "created_at": string,"detail": string | null,"document_id": string | null,"due_date": string | null,"id": string,"lane": string,"move_id": string,"owner_id": string,"phase": string,"source": string | null,"source_kind": string,"status": string,"task_key": string,"title": string
