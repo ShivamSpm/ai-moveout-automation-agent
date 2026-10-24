@@ -21,6 +21,7 @@ Updated October 24, 2026 after whiteboard review. "Proposed" is not an approval.
 | D12 | One monorepository owns website, tools, Supabase migrations, Muse connector and development agents/skills. | User latest direction |
 | D13 | Build with the developer Muse SDK and current A2A standards. | User latest direction; official Muse Code SDK identified |
 | D14 | Prepare a clean Claude Code handoff and local PR-ready branch promptly. | User latest direction |
+| D16 | Hosted Supabase is a dedicated instance managed by Vincent. Local development uses this repo's own `supabase start` stack (project_id `ai-moveout-automation-agent`) for accounts, personal data, checklists, items, schedules and tool-call tracking; root `supabase/migrations` is the single history applied to both. | User reply, Oct 24 |
 | D15 | Integrate the teammate website at `web/` rather than a competing app. Proposed: keep path and npm for the hackathon. | User request to coordinate; path/manager pending team agreement |
 
 ## Proposed defaults, pending implementation agreement

@@ -58,7 +58,7 @@ payload-hash match, idempotency key, durable claim, provider call, reconcile),
 | --- | --- | --- |
 | GitHub | `jg-ctfbio` has write, not admin; PR #1 merged | Agree branch flow; repo is public |
 | Vercel | CLI 58.8 logged in as `jg-ctfbio` (CTFBio account) | Which team/account hosts this; GitHub app on `ShivamSpm` repo needs owner, or deploy via CLI |
-| Supabase | CLI 2.118; no project chosen | Dedicated project/org (not CTFBio); URL + keys into Vercel env |
+| Supabase | Local stack for this repo runs; hosted is Vincent's dedicated instance (D16) | Vincent applies `supabase/migrations`, shares URL + publishable key; secret key into Vercel env |
 | OpenRouter | No key in environment | Key with spend cap (Q23); confirm Claude model id available |
 | Google | No OAuth client | Dedicated GCP project, consent screen in testing, test users (Q04) |
 | Muse | `muse` CLI not installed; Facebook access untested | Run spike; Q01–Q03, Q25 |
