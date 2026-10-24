@@ -1,6 +1,7 @@
 # Credentials and machine-specific agent configuration
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 .mcp.json
