@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+/* Calm, trustworthy palette inspired by full-service movers: off-white, warm sand,
+   deep slate and teal, with coral as the one warm accent. Token names (tape, stamp,
+   leaf, sky, sun, lilac) are kept so components stay stable. */
+:root {
+  --paper: #f6f4ef;
+  --card: #ffffff;
+  --sand: #ebe4d8;
+  --slate: #1d2b31;
+  --ink: #1d2b31;
+  --muted: #5f6c71;
+  --line: rgba(29, 43, 49, 0.12);
+  --edge: rgba(29, 43, 49, 0.14);
+  --tape: #0b7a79; /* primary teal */
+  --tape-ink: #ffffff;
+  --stamp: #e2674b; /* coral accent */
+  --leaf: #2f8a5b;
+  --sky: #3c6fa6;
+  --sun: #f0b44c;
+  --lilac: #d9e9e6; /* soft teal tint */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #10181b;
+    --card: #172228;
+    --sand: #1c2a30;
+    --slate: #0b1214;
+    --ink: #eef2f0;
+    --muted: #9fb0b3;
+    --line: rgba(238, 242, 240, 0.12);
+    --edge: rgba(238, 242, 240, 0.16);
+    --tape: #3fb3ab;
+    --tape-ink: #061c1b;
+    --stamp: #ff8a6e;
+    --leaf: #5cc58f;
+    --sky: #7fa8d8;
+    --sun: #f5c56b;
+    --lilac: #1f3a3a;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-sand: var(--sand);
+  --color-slate: var(--slate);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-edge: var(--edge);
+  --color-tape: var(--tape);
+  --color-tape-ink: var(--tape-ink);
+  --color-stamp: var(--stamp);
+  --color-leaf: var(--leaf);
+  --color-sky: var(--sky);
+  --color-sun: var(--sun);
+  --color-lilac: var(--lilac);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+}
+
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+  }
+
+  .font-display {
+    font-weight: 450;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--tape);
+    color: var(--tape-ink);
+  }
+}
+
+@layer components {
+  /* Primary teal fill for buttons and highlights. */
+  .tape {
+    background: var(--tape);
+    color: var(--tape-ink);
+  }
+
+  /* Small outlined status pill. */
+  .stamp {
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Card: white surface, hairline border, soft lift. */
+  .box-label {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 1px 2px rgba(16, 24, 27, 0.04),
+      0 18px 40px -24px rgba(16, 24, 27, 0.25);
+  }
+
+  /* Interactive surface that lifts on hover. */
+  .pop {
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(16, 24, 27, 0.05);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .pop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -18px rgba(16, 24, 27, 0.35);
+  }
+
+  /* Accent word inside a serif headline. */
+  .marker {
+    color: var(--tape);
+    font-style: italic;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.live-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .live-dot,
+  .float {
+    animation: none;
+  }
+}
