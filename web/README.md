@@ -15,11 +15,31 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Login (Supabase + Google)
+
+Copy `.env.example` to `.env.local` (and set the same two variables in Vercel):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+Use the **publishable** (or legacy anon) key. Never put the secret / service_role key in a `NEXT_PUBLIC_` variable: it bypasses row-level security and would ship to every browser. Only the agent container needs the secret key.
+
+Without these variables the site runs as a demo with no login. With them, `/dashboard` and `/start` require sign-in; item pages stay public for buyers.
+
+To turn on Google sign-in:
+
+1. Google Cloud Console → APIs & Services → Credentials → OAuth client ID (Web application). Authorized redirect URI: `https://<project-ref>.supabase.co/auth/v1/callback`.
+2. Supabase → Authentication → Sign In / Providers → Google: paste the client ID and secret, enable.
+3. Supabase → Authentication → URL Configuration: Site URL = the Vercel production URL; add redirect URLs `https://<your-domain>/auth/callback` and `http://localhost:3000/auth/callback`.
+
 ## Pages
 
 | Route | What it shows |
 |---|---|
 | `/` | Landing page and the workflow (you → email → landlord → checklist → movers, cleaning, selling) |
+| `/login` | Continue with Google (Supabase Auth) |
 | `/start` | Setup form: address, move-out date, deposit, landlord email, lease upload |
 | `/dashboard` | Countdown, deposit meter, the dated plan with lease clauses, approvals, agent activity |
 | `/items` | Everything for sale or giveaway |
