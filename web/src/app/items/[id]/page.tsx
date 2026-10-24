@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/items/[id]">): Pr
 export default function ItemPage({ params }: PageProps<"/items/[id]">) {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <Link href="/items" className="font-mono text-xs uppercase tracking-[0.2em] text-muted hover:text-ink">
+      <Link href="/items" className="-my-2 inline-block py-3 font-mono text-xs uppercase tracking-[0.2em] text-muted hover:text-ink">
         ← All items
       </Link>
       <Suspense fallback={<ItemSkeleton />}>

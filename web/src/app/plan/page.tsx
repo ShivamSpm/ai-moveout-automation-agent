@@ -33,5 +33,5 @@ async function Plan() {
   </section>)}{!moves.data.length && <p>Start a move or accept a household invitation to see a plan.</p>}</div>;
 }
 export default function PlanPage() {
-  return <main className="mx-auto max-w-4xl px-6 py-10"><nav className="flex gap-4 mb-8"><Link href="/account">Account</Link><Link href="/account/documents">Documents</Link></nav><h1 className="font-display text-5xl mb-8">Your move-out checklist</h1><Suspense fallback={<p>Loading plan…</p>}><Plan /></Suspense></main>;
+  return <main className="mx-auto max-w-4xl px-6 py-10"><nav className="mb-6 flex flex-wrap gap-x-4 [&>a]:py-3"><Link href="/account">Account</Link><Link href="/account/documents">Documents</Link></nav><h1 className="font-display text-5xl mb-8">Your move-out checklist</h1><Suspense fallback={<p>Loading plan…</p>}><Plan /></Suspense></main>;
 }

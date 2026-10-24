@@ -107,7 +107,7 @@ export function MuseConsole({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
       <div className="grid content-start gap-6">
         {error && <p className="rounded-xl bg-stamp/10 px-4 py-3 text-sm text-stamp">{error}</p>}
 

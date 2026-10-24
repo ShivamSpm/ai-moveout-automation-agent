@@ -63,10 +63,26 @@
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     background: var(--paper);
     color: var(--ink);
     font-family: var(--font-geist-sans), system-ui, sans-serif;
+    /* Long emails, URLs and lease quotes wrap instead of widening the page. */
+    overflow-wrap: break-word;
+  }
+
+  /* iOS Safari zooms into any field with text under 16px; keep phones at 16px. */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"], [type="radio"], [type="range"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 
   .font-display {
