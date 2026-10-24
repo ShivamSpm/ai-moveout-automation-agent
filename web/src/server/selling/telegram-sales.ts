@@ -9,6 +9,7 @@ import { assertInScope } from "@/server/domain/scope";
 import { isConfigured as openRouterConfigured } from "@/server/integrations/openrouter";
 import {
   editCaption,
+  groupLinkCommand,
   groupLinkUrl,
   parsePostRef,
   postRef,
@@ -244,9 +245,12 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
 
   const event = toBuyerEvent(update);
   if (event.kind === "ignored") return { handled: "ignored" };
+  // Each linking step answers in Telegram, so the seller can see whether it worked.
+  const expired = "This Vacate link has expired or was already used. Open the Sell on Telegram page again for a fresh one.";
   if (event.kind === "link_identity") {
     const bound = await db.rpc("bind_telegram_link", { p_nonce: event.code, p_user_id: event.userId });
     if (bound.error) throw new Error(bound.error.message);
+    await sendMessage(config, event.userId, bound.data ? "Your Telegram account is connected. Go back to Vacate and tap \"Add the bot to a Telegram group\"." : expired);
     return { handled: bound.data ? "identity_linked" : "group_link_invalid" };
   }
   if (event.kind === "group_link") {
@@ -256,6 +260,13 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
       p_title: event.title ?? "Telegram group", p_username: event.username ?? "",
     });
     if (saved.error) throw new Error(saved.error.message);
+    await sendMessage(
+      config,
+      event.chatId,
+      saved.data
+        ? "Vacate is set up here. Approved listings will be posted in this group. Tap \"Message seller\" on a listing to chat privately about it."
+        : `${expired} It must be used by the Telegram account you connected on Vacate.`,
+    );
     return { handled: saved.data ? "group_linked" : "group_link_invalid" };
   }
   if (event.kind === "unsupported") {
@@ -584,6 +595,7 @@ export async function sellingState(ctx: ToolContext, now = new Date()) {
       // Null: listings go to the app's default sale channel.
       group: group.data ? { title: group.data.chat_title ?? "your Telegram group" } : null,
       addToGroupUrl: nonce?.telegram_user_id ? groupLinkUrl(readTelegramConfig(), nonce.nonce) : null,
+      linkCommand: nonce?.telegram_user_id ? groupLinkCommand(readTelegramConfig(), nonce.nonce) : null,
       connectIdentityUrl: nonce && !nonce.telegram_user_id ? startLink(readTelegramConfig(), `link_${nonce.nonce}`) : null,
     },
     listings: listings.data ?? [],
