@@ -65,3 +65,16 @@ If only manual activation works, call it a manual Muse handoff, not autonomous
 background integration. If posting works but messaging does not, primary B is
 partially complete. Ask the user to choose any scope reduction; keep the technical
 gap explicit in the plan and presentation.
+
+
+## October 24, 2:56–2:57 PM Pacific — consumer connector reached MCP
+
+The user selected “Always allow this site” in Muse. Production Vercel logs show
+POST requests to `/api/mcp` between 2:56:28 and 2:57:02 with HTTP 200/202 responses.
+Muse's screenshot reports an empty `muse_list_tasks` response; request logs do not
+independently expose its tool payload. This supersedes the earlier handoff claim
+that Muse never reached MCP. The renter's inventory/listings were empty in the
+subsequent database check. No Facebook post or buyer-message capability is verified.
+Next: create and review an actual listing in the saved account workflow, then ask
+Muse to list it before authorizing any external publication. No REST rewrite was
+needed to address the evidence observed here. Personal screenshots were not committed.

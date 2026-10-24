@@ -2,7 +2,9 @@
 
 ## Account workflow repair — October 24, 2026, Codex
 
-Prepared on `feat/continue-launch`; not deployed and no production records changed.
+PR #24 is open on `feat/continue-launch`; application release pending. Production
+schema migrations applied after PR opening under Jorge's explicit instruction; no
+existing renter records or personal files changed.
 Production read-only verification found the reported move/contact/deposit/date saved,
 but no renter name, structured ZIP, documents, tasks, listings or chat history.
 Do not copy personal details or screenshots into this repository.
@@ -21,7 +23,8 @@ Do not copy personal details or screenshots into this repository.
   Cleaning simulation endpoints now derive identity from the authenticated session.
 - Two additive migrations authored and applied locally: `20261024233001_property_management_company`
   and `20261024233002_structured_move_address`. Generated application DB types refreshed.
-  Production dry run also finds the already-merged `20261024233000_landlord_calls` pending.
+  Applied both to production along with the already-merged `20261024233000_landlord_calls`.
+  All 10 migration versions are recorded; public/private/storage schema diff is empty.
   The CLI-created files were resequenced after the future-dated teammate migration
   before publication; local history was reconciled without changing schema. Jorge
   authorized production migration application after PR opening (October 24).
@@ -32,8 +35,9 @@ Do not copy personal details or screenshots into this repository.
 - Authenticated local HTTP checks confirmed account dashboard data, form prefill,
   empty inventory, public demo separation and anonymous redirect. Browser click-through
   remains unverified because native Chrome actions were interrupted by active-window changes.
-  Real model calls, outgoing calls/messages/posts and hosted release verification not run.
-- Next: review PR, approve production schema/release, then reattach the user's original
+  Hosted preview `/start` and `/demo` returned 200 with the new form and labeled
+  examples. Real model calls and outgoing calls/messages/posts not run.
+- Next: finish PR checks and application release, then reattach the user's original
   lease and confirm newly collected fields through the application. Do not label extraction
   complete until the original and cited findings are visible in that account.
 
