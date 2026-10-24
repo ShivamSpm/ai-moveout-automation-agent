@@ -32,10 +32,19 @@ Open http://localhost:3000.
 - `src/components/offer-chat.tsx`: rule-based stand-in for the negotiating agent. Never goes below the seller's minimum; every deal waits for the seller's OK. `respond()` is where the real agent call goes.
 - `src/components/approval-queue.tsx`: approve or skip outgoing emails, bookings and deals. Not wired to the agent yet.
 - `public/art/`: illustrations and photos generated with Nano Banana (Gemini image models).
+- `src/server/agent/agent.ts`: the agent (system prompt; tools go here). Server-only.
+- `src/server/integrations/openrouter.ts`: server-side OpenRouter client.
+- `src/app/api/chat/route.ts`: `POST /api/chat` with `{ messages: [{ role, content }] }`, returns `{ reply }`. No page calls it yet.
+
+## Agent setup
+
+Copy `.env.example` to `.env.local` and set `OPENROUTER_API_KEY` (and optionally `OPENROUTER_MODEL`). On Vercel, set the same variables in the project settings. Without a key, `/api/chat` returns 503 and the rest of the site still works.
+
+`/api/chat` has no auth yet, so anyone with the URL can spend the key's credit. Put a credit limit on the OpenRouter key until Supabase Auth is in.
 
 ## Not wired up yet
 
-Nothing here talks to Supabase, Gmail, OpenRouter or Bland yet. The planned contract with the agent service:
+Nothing here talks to Supabase, Gmail or Bland yet, and no page calls `/api/chat`. The planned contract with the agent:
 
 - `POST /moves/:id/start`: read the lease, extract rules, draft the landlord email as an approval
 - `POST /approvals/:id/execute`: send the approved email or place the call
