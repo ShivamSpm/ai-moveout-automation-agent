@@ -19,12 +19,13 @@ Do not copy personal details or screenshots into this repository.
   Chat context excludes private move address/contact fields and treats source text as data.
 - Public examples moved to `/demo` and `/demo/items`; private item URLs require ownership.
   Cleaning simulation endpoints now derive identity from the authenticated session.
-- Two additive migrations authored and applied locally: `20261024221221_property_management_company`
-  and `20261024221829_structured_move_address`. Generated application DB types refreshed.
+- Two additive migrations authored and applied locally: `20261024233001_property_management_company`
+  and `20261024233002_structured_move_address`. Generated application DB types refreshed.
   Production dry run also finds the already-merged `20261024233000_landlord_calls` pending.
-  Use `--include-all` for the earlier CLI-generated timestamps, inspect the dry run, and
-  obtain Jorge's release approval before any production migration or merge.
-- Validation: npm ci (0 vulnerabilities), route typegen, TypeScript, lint, 269 tests,
+  The CLI-created files were resequenced after the future-dated teammate migration
+  before publication; local history was reconciled without changing schema. Jorge
+  authorized production migration application after PR opening (October 24).
+- Validation: npm ci (0 vulnerabilities), route typegen, TypeScript, lint, 271 tests,
   production build (37 routes), local database lint and diff whitespace checks passed.
   Root/plugin validation passed; plugin directory submission still flags missing license,
   icon and privacy-policy metadata (not changed here).
