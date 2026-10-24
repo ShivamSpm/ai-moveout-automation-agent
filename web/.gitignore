@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vision eval output (contains raw model responses and embedded sample photos)
+/vision-eval-results/
