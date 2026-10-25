@@ -257,7 +257,7 @@ export function buildMcpServer(caller: Caller) {
   );
   server.registerTool(
     "muse_relay_buyer_message",
-    { title: "Relay a buyer message", description: "Record a buyer's message about a listing. Do not reply until an approved reply appears in muse_list_tasks.", inputSchema: bridge.BuyerMessageInput.shape, annotations: DRAFT },
+    { title: "Relay a buyer message", description: "Record a buyer's message about a listing. Vacate's selling agent answers within the renter's limits and returns replyTaskId; send exactly that task from muse_list_tasks. Do not reply on your own.", inputSchema: bridge.BuyerMessageInput.shape, annotations: DRAFT },
     (input) => run(() => bridge.relayBuyerMessage(owner, input)),
   );
   server.registerTool(

@@ -205,9 +205,20 @@ export async function relayBuyerMessage({ ownerId }: BridgeOwner, input: z.infer
     p_thread_ref: input.threadRef,
   });
   if (error) throw new BridgeError(error.message, error.code === "P0002" ? 404 : 500);
+  // The selling agent answers within the renter's limits; a failure here only means no automatic reply.
+  let replyTaskId: string | null = null;
+  try {
+    const { negotiateFacebookMessage } = await import("@/server/selling/facebook-negotiation");
+    replyTaskId = (await negotiateFacebookMessage(ownerId, data, input.message)).replyTaskId;
+  } catch (e) {
+    console.error("facebook negotiation failed", e);
+  }
   return {
     conversationId: data,
-    next: "Recorded for the renter. Do not reply or promise anything yet; an approved reply will appear in list_tasks.",
+    replyTaskId,
+    next: replyTaskId
+      ? "The selling agent prepared a reply. Call list_tasks and send that exact message to this buyer, then report the result."
+      : "Recorded for the renter. Do not reply or promise anything yet; an approved reply will appear in list_tasks.",
   };
 }
 

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
-import { ActionPayloads, type ActionKind } from "@/contracts";
+import { ActionPayloads, PICKUP_ADDRESS_PENDING, type ActionKind } from "@/contracts";
 import type { ToolContext } from "./auth";
 import { disclosesAddress, draftListing } from "./domain/drafts";
 import { assertInScope } from "./domain/scope";
@@ -315,9 +315,13 @@ export const ApproveInput = z.object({ actionId: z.uuid(), payloadHash: z.string
 // Approves exactly the payload version identified by its hash. Any later edit
 // voids the approval in the database.
 export async function approveAction(ctx: ToolContext, input: z.infer<typeof ApproveInput>) {
-  const { data: action } = await ctx.db.from("actions").select("payload").eq("id", input.actionId).maybeSingle();
+  const { data: action } = await ctx.db.from("actions").select("kind, payload").eq("id", input.actionId).maybeSingle();
   if (!action) fail(null, 404);
   assertInScope(JSON.stringify(action.payload));
+  // An agent-proposed deal has no meetup address yet; it is approved on /sell, where the address is added.
+  if (action.kind === "pickup.confirm" && (action.payload as { message?: string }).message === PICKUP_ADDRESS_PENDING) {
+    throw new MarketplaceError("Approve this deal on the Sell page, where you add the meetup address", 409);
+  }
   const { data, error } = await ctx.db.rpc("approve_action", {
     p_action_id: input.actionId,
     p_payload_hash: input.payloadHash,

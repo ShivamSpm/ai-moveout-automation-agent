@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { PICKUP_ADDRESS_PENDING } from "@/contracts";
 import type { Database } from "@/server/db/database.types";
 
 type Row<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
@@ -328,11 +329,16 @@ function Conversations({
                     </div>
                     <p className="mt-1 whitespace-pre-line">{p.body ?? p.message}</p>
                     {p.disclosesExactAddress && <p className="mt-1 text-xs font-semibold text-stamp">Shares your exact address with this buyer.</p>}
-                    {a.status === "pending_review" && (
-                      <button disabled={busy} onClick={() => op({ op: "approve", actionId: a.id, payloadHash: a.payload_hash })} className={`${btn} mt-2`}>
-                        Approve this exact message
-                      </button>
-                    )}
+                    {a.status === "pending_review" &&
+                      (a.kind === "pickup.confirm" && p.message === PICKUP_ADDRESS_PENDING ? (
+                        <a href="/sell" className={`${btn} mt-2 inline-block`}>
+                          Approve on the Sell page with your meetup address
+                        </a>
+                      ) : (
+                        <button disabled={busy} onClick={() => op({ op: "approve", actionId: a.id, payloadHash: a.payload_hash })} className={`${btn} mt-2`}>
+                          Approve this exact message
+                        </button>
+                      ))}
                   </div>
                 );
               })}

@@ -85,7 +85,7 @@ export function agentCard(): AgentCard {
         id: "buyer-message-relay",
         name: "Relay buyer messages",
         description:
-          'Send {"op":"buyer_message","listingId","buyerName","message","threadRef"} when a buyer writes about a listing. The renter reviews any reply here first.',
+          'Send {"op":"buyer_message","listingId","buyerName","message","threadRef"} when a buyer writes about a listing. Vacate\'s selling agent answers within the renter\'s limits; send the reply it queues as a task. Deals still need the renter\'s approval.',
         tags: ["facebook-marketplace", "messages"],
         examples: ['{"op":"list_listings"}'],
         inputModes: ["application/json"],

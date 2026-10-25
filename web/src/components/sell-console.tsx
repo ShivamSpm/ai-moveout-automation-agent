@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { PICKUP_ADDRESS_PENDING } from "@/contracts";
 import type { Database } from "@/server/db/database.types";
 
 type Row<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
@@ -117,7 +118,10 @@ export function SellConsole({ initial }: { initial: SellState }) {
     });
   }
 
-  const deals = state.actions.filter((a) => a.kind === "pickup.confirm" && a.status === "pending_review");
+  // Deals the selling agent proposed (Telegram or Facebook); they get the meetup address here.
+  const deals = state.actions.filter(
+    (a) => a.kind === "pickup.confirm" && a.status === "pending_review" && (a.payload as { message?: string }).message === PICKUP_ADDRESS_PENDING,
+  );
   const publishAction = (listingId: string) =>
     state.actions.find((a) => a.kind === "listing.publish" && (a.payload as { listingId?: string }).listingId === listingId);
   const local = (iso: string) =>

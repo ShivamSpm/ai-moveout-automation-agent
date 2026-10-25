@@ -2,11 +2,10 @@ import "server-only";
 
 import { createHash, randomUUID } from "node:crypto";
 import { z } from "zod";
-import { ActionPayloads, type ActionPayload } from "@/contracts";
+import { ActionPayloads, PICKUP_ADDRESS_PENDING, type ActionPayload } from "@/contracts";
 import type { ToolContext } from "@/server/auth";
 import { disclosesAddress } from "@/server/domain/drafts";
 import { assertInScope } from "@/server/domain/scope";
-import { isConfigured as openRouterConfigured } from "@/server/integrations/openrouter";
 import {
   editCaption,
   groupLinkCommand,
@@ -25,22 +24,16 @@ import {
   type TelegramUpdate,
 } from "@/server/integrations/telegram";
 import { approveAction, currentMove, MarketplaceError } from "@/server/marketplace";
-import { slidingWindow } from "@/server/rate-limit";
 import { serviceClient } from "@/server/supabase";
 import { photoProblem } from "@/server/tools/identify-items";
-import { proposeTurn } from "./negotiator";
-import { checkTurn, pickupCutoff, scheduledPrice, usd } from "./policy";
+import { approveFacebookDeal } from "./facebook-negotiation";
+import { dealMessage, negotiateTurn, saleContext } from "./negotiate";
+import { pickupCutoff, scheduledPrice, usd } from "./policy";
 import { requiresTelegramReview } from "./claude-sales";
 
 // Telegram selling lane. The renter approves each listing and each final deal
 // in the web app; the agent handles buyer chats in between, within the
 // renter's minimum price and the day-before-move-out pickup cutoff.
-
-const PICKUP_MINUTES = 30;
-const perChat = slidingWindow(15, 10 * 60_000);
-
-const local = (date: Date, timeZone: string) =>
-  date.toLocaleString("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 function caption(listing: { title: string; body: string; price_cents: number; area_label: string | null }, cutoff: Date, timeZone: string, sold = false) {
   const lines = [
@@ -226,20 +219,7 @@ async function reply(db: Service, config: TelegramConfig, chatId: string, conv: 
   if (conv) await saveOutbound(db, conv, text, "agent");
 }
 
-async function listingContext(db: Service, listingId: string) {
-  const { data } = await db
-    .from("listings")
-    .select("*, items!inner(*, moves!inner(*))")
-    .eq("id", listingId)
-    .eq("channel", "telegram")
-    .maybeSingle();
-  if (!data) return null;
-  const { items, ...listing } = data as typeof data & {
-    items: { id: string; name: string; description: string | null; condition: string | null; ask_cents: number | null; floor_cents: number | null; status: string; moves: { id: string; move_out_date: string | null; timezone: string; address_private: string | null; area_label: string | null } };
-  };
-  const { moves: move, ...item } = items;
-  return { listing, item, move };
-}
+const listingContext = (db: Service, listingId: string) => saleContext(db, listingId, "telegram");
 
 /** Handles one Telegram update. Safe to call twice with the same update: the second is a no-op. */
 export async function handleTelegramUpdate(update: TelegramUpdate, now = new Date()) {
@@ -335,115 +315,17 @@ export async function handleTelegramUpdate(update: TelegramUpdate, now = new Dat
 
   if (await requiresTelegramReview(db, conv.listing_id)) return { handled: "awaiting_review", conversationId: conv.id };
 
-  const found = await listingContext(db, conv.listing_id);
-  if (!found) return { handled: "listing_gone" };
-  const { listing, item, move } = found;
-  if (conv.deal_status === "confirmed") {
-    await reply(db, config, event.chatId, conv, "You're all set for pickup. See the details above. See you then!");
-    return { handled: "confirmed" };
-  }
-  if (item.status !== "listed" || conv.deal_status === "closed") {
-    await reply(db, config, event.chatId, conv, "Sorry, this item has already been sold.");
-    return { handled: "sold" };
-  }
-  if (conv.deal_status === "awaiting_seller") {
-    await reply(db, config, event.chatId, conv, "I'm still confirming with the seller and will message you shortly.");
-    return { handled: "awaiting_seller" };
-  }
-  if (!perChat.check(event.chatId).allowed) return { handled: "rate_limited" };
-  if (!openRouterConfigured() || !move.move_out_date) {
-    await reply(db, config, event.chatId, conv, "Thanks for your message! The seller will get back to you soon.");
-    return { handled: "agent_unavailable" };
-  }
-
-  const cutoff = pickupCutoff(move.move_out_date, move.timezone);
+  const sale = await listingContext(db, conv.listing_id);
+  if (!sale) return { handled: "listing_gone" };
+  const { listing, item, move } = sale;
+  // Telegram posts step down toward the minimum, so buyers see the scheduled price.
   const ask = item.ask_cents ?? listing.price_cents;
-  const floor = item.floor_cents ?? ask;
-  const listed = scheduledPrice({ askCents: ask, floorCents: floor, publishedAt: new Date(listing.published_at ?? listing.created_at), cutoff, now });
-  const [{ data: history }, { data: others }] = await Promise.all([
-    db.from("messages").select("direction, body").eq("conversation_id", conv.id).order("created_at", { ascending: false }).limit(30),
-    db.from("conversations").select("id, deal_status, offer_cents").eq("listing_id", listing.id).neq("id", conv.id).neq("deal_status", "closed"),
-  ]);
-  const pending = (others ?? []).filter((o) => o.deal_status === "awaiting_seller");
-  const pendingDealCents = pending.length ? Math.max(...pending.map((o) => o.offer_cents ?? 0)) : null;
-
-  const proposed = await proposeTurn({
-    item: { title: listing.title, description: listing.body, condition: item.condition },
-    listedCents: listed,
-    floorCents: floor,
-    areaLabel: listing.area_label,
-    timeZone: move.timezone,
-    now,
-    cutoff,
-    buyerLabel: conv.buyer_label,
-    transcript: (history ?? []).reverse().map((m) => ({ from: m.direction === "inbound" ? "buyer" : "you", text: m.body })),
-    otherBuyers: (others ?? []).map((o) => ({ offerCents: o.offer_cents, status: o.deal_status === "awaiting_seller" ? "waiting for seller approval" : "negotiating" })),
-    dealPendingElsewhere: pendingDealCents !== null,
-  });
-  if (!proposed.ok) {
-    console.error("selling agent failed", proposed.message);
-    await reply(db, config, event.chatId, conv, `Thanks! It's ${usd(listed)}. What would you like to offer, and when could you pick it up?`);
-    return { handled: "agent_failed" };
-  }
-  const checked = checkTurn(
-    proposed.turn,
-    { floorCents: floor, listedCents: listed, cutoff, now, buyerText: event.text, addressPrivate: move.address_private, pendingDealCents },
-    (text) => disclosesAddress(text, move.address_private),
-  );
-  if (!checked.ok) {
-    console.warn("selling agent reply blocked:", checked.reason);
-    await reply(db, config, event.chatId, conv, checked.fallback);
-    return { handled: "blocked", reason: checked.reason };
-  }
-
-  if (proposed.turn.buyerOfferCents !== null) {
-    await db.from("conversations").update({ offer_cents: proposed.turn.buyerOfferCents }).eq("id", conv.id);
-  }
-  if (checked.deal) {
-    // A better offer replaces a lower one that is still waiting; that buyer hasn't been promised anything.
-    for (const other of pending) await reopenConversation(db, other.id);
-    const pickupStart = checked.deal.pickupStart;
-    const payload = ActionPayloads["pickup.confirm"].parse({
-      conversationId: conv.id,
-      itemId: item.id,
-      buyerLabel: conv.buyer_label,
-      priceCents: checked.deal.priceCents,
-      pickupStart: pickupStart.toISOString(),
-      pickupEnd: new Date(pickupStart.getTime() + PICKUP_MINUTES * 60_000).toISOString(),
-      message: "Sent when you approve, with the pickup address you enter.",
-      disclosesExactAddress: false,
-    });
-    const created = await db
-      .from("actions")
-      .insert({
-        move_id: move.id,
-        owner_id: conv.owner_id,
-        kind: "pickup.confirm",
-        title: `Sell ${listing.title} to ${conv.buyer_label} for ${usd(checked.deal.priceCents)}, pickup ${local(pickupStart, move.timezone)}`,
-        payload,
-      })
-      .select("id")
-      .single();
-    if (created.error) throw new Error(created.error.message);
-    await db.from("conversations").update({ deal_status: "awaiting_seller", offer_cents: checked.deal.priceCents }).eq("id", conv.id);
-  }
-  await reply(db, config, event.chatId, conv, checked.reply);
-  return { handled: checked.deal ? "deal_proposed" : "replied" };
-}
-
-/** Cancels a waiting deal that nobody was told about and puts the buyer back to negotiating. */
-async function reopenConversation(db: Service, conversationId: string) {
-  const { data: actions } = await db
-    .from("actions")
-    .select("id, owner_id")
-    .eq("kind", "pickup.confirm")
-    .eq("status", "pending_review")
-    .eq("payload->>conversationId", conversationId);
-  for (const a of actions ?? []) {
-    await db.from("actions").update({ status: "cancelled" }).eq("id", a.id).eq("status", "pending_review");
-    await db.from("action_events").insert({ action_id: a.id, owner_id: a.owner_id, event: "cancelled", detail: { by: "selling_agent", reason: "a higher offer replaced it" } });
-  }
-  await db.from("conversations").update({ deal_status: "negotiating" }).eq("id", conversationId);
+  const listedCents = move.move_out_date
+    ? scheduledPrice({ askCents: ask, floorCents: item.floor_cents ?? ask, publishedAt: new Date(listing.published_at ?? listing.created_at), cutoff: pickupCutoff(move.move_out_date, move.timezone), now })
+    : listing.price_cents;
+  const turn = await negotiateTurn(db, { conv, sale, buyerText: event.text, listedCents, channelLabel: "on Telegram", now });
+  if (turn.reply) await reply(db, config, event.chatId, conv, turn.reply);
+  return { handled: turn.handled };
 }
 
 // ---------------------------------------------------------------- deals
@@ -453,20 +335,26 @@ export const ConfirmDealInput = z.object({ actionId: z.uuid(), address: z.string
 /** The renter approves a deal: hold the item, send the buyer the confirmation and address, close the others. */
 export async function confirmDeal(ctx: ToolContext, input: z.infer<typeof ConfirmDealInput>) {
   input = ConfirmDealInput.parse(input);
-  const config = readTelegramConfig();
   const { data: action } = await ctx.db.from("actions").select("*").eq("id", input.actionId).eq("kind", "pickup.confirm").maybeSingle();
   if (!action) throw new MarketplaceError("Deal not found", 404);
   if ((action.payload as { telegram?: { reviewEachAction?: boolean } })?.telegram?.reviewEachAction) {
     throw new MarketplaceError("Review and execute this pickup through Claude's Telegram tools", 409);
   }
   if (action.status !== "pending_review") throw new MarketplaceError(`This deal is ${action.status}`, 409);
+  // Only agent-proposed deals are confirmed here; a pickup the renter drafted keeps its own wording.
+  if ((action.payload as { message?: string }).message !== PICKUP_ADDRESS_PENDING) {
+    throw new MarketplaceError("This pickup was drafted by hand; approve it where it was drafted", 409);
+  }
   const deal = ActionPayloads["pickup.confirm"].parse(action.payload);
   const { data: conv } = await ctx.db.from("conversations").select("*").eq("id", deal.conversationId).single();
   const { data: listing } = await ctx.db.from("listings").select("*").eq("id", conv!.listing_id).single();
   const move = await currentMove(ctx);
   if (new Date(deal.pickupStart).getTime() < Date.now()) throw new MarketplaceError("This pickup time has already passed; decline it", 409);
 
-  const message = `Good news: the seller confirmed! ${listing!.title} for ${usd(deal.priceCents)}. Pickup ${local(new Date(deal.pickupStart), move.timezone)} at ${input.address}. Please pay in person at pickup. See you then!`;
+  const message = dealMessage(listing!.title, deal.priceCents, deal.pickupStart, move.timezone, input.address);
+  // A Facebook deal is sent by Muse from the renter's account, not by the bot.
+  if (conv!.source === "muse") return approveFacebookDeal(ctx, { actionId: action.id, deal, conversationId: conv!.id, listingId: listing!.id, message });
+  const config = readTelegramConfig();
   // Editing the payload voids any earlier approval, so the renter approves exactly this message.
   const edited = await ctx.db
     .from("actions")

@@ -63,6 +63,10 @@ export const BuyerReplyPayload = z.object({
   disclosesExactAddress: z.boolean(),
 });
 
+// Message of a deal the selling agent proposed: replaced, with the meetup
+// address, when the renter approves it on /sell. Never sent as is.
+export const PICKUP_ADDRESS_PENDING = "Sent when you approve, with the pickup address you enter.";
+
 export const PickupConfirmPayload = z.object({
   conversationId: uuid,
   itemId: uuid,
