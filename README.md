@@ -6,16 +6,16 @@ Moving out means reading a lease, chasing a landlord, booking cleaners and mover
 
 
 **Home page:**
-<img width="1917" height="1025" alt="image" src="https://github.com/user-attachments/assets/56b2daa4-2aa6-4fd9-8f53-50b420eee51b" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/56b2daa4-2aa6-4fd9-8f53-50b420eee51b" />
 
 
 **Landlord calling automation page:**
-<img width="1911" height="946" alt="image" src="https://github.com/user-attachments/assets/5e5535ea-8721-4a1e-9335-d6fa1d17d599" />
+<img width="800" alt="image" src="https://github.com/user-attachments/assets/5e5535ea-8721-4a1e-9335-d6fa1d17d599" />
 
 **Agent negotiating with buyers:**
-<img width="1320" height="2661" alt="image" src="https://github.com/user-attachments/assets/a8f1bc35-1fda-47d0-8a97-a506cfcff1a1" />
+<img width="260" alt="image" src="https://github.com/user-attachments/assets/a8f1bc35-1fda-47d0-8a97-a506cfcff1a1" />
 
-<img width="1290" height="2796" alt="image" src="https://github.com/user-attachments/assets/8580799c-9e56-4ec7-b496-147774a46220" />
+<img width="260" alt="image" src="https://github.com/user-attachments/assets/8580799c-9e56-4ec7-b496-147774a46220" />
 
 
 
